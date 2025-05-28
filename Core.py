@@ -4,35 +4,6 @@ class Side(Enum):
     GREATER = 1
     LESSER = -1
 
-# class Outcome:
-#     def __init__(self):
-#         self.value = 0
-#         self.quantity = 0
-
-#     def __init__(self, value, quantity: int):
-#         self.value = value
-#         self.quantity = quantity
-    
-#     def __lt__(self, that):
-#         return self.value < that.value
-    
-#     def __le__(self, that):
-#         return self.value <= that.value
-    
-#     def __eq__(self, that):
-#         return self.value == that.value
-    
-#     def __add__(self, that):
-#         result = Outcome(self.value, self.quantity + that.quantity)
-#         return result
-    
-#     def __iadd__(self, that):
-#         self.quantity += that.quantity
-#         return self
-    
-#     def __str__(self):
-#         return f'({self.value}:{self.quantity})'
-
 class Distribution:
     def __init__(self):
         self.outcomes = dict()
@@ -57,7 +28,7 @@ class Distribution:
         for key in strKeys:
             intKeys.add(int(key))
         
-        return intKeys
+        return sorted(intKeys)
     
     def __imul__(self, mult):
         for key in self.keys():
@@ -68,7 +39,15 @@ class Distribution:
         return self.outcomes[str(index)]
         
     def __str__(self):
-        return str(self.outcomes)
+        output = ''
+        for key in self.keys():
+            output += str(key) + ' '
+            if key < 10:
+                output += ' '
+            for i in range(self[key]):
+                output += '|'
+            output += f' {self[key]}\n'
+        return output
     
     def __iter__(self):
         return iter(self.outcomes)
@@ -90,13 +69,23 @@ class Distribution:
         
         return self
     
-    def threshold(self, threshold: int, side: Side = Side.GREATER):
+    def rollThreshold(self, threshold: int, side: Side = Side.GREATER, passOn6: bool = False, failOn1: bool = False):
         numFailed = 0
-        # look at self.outcomes, fail (and purge?) any values on the wrong side of n (by default, >= n succeeds)
+        # roll 1d6 on self.outcomes, fail (and purge?) any values on the wrong side of n (by default, >= n succeeds)
         # if value * side < threshold * side: roll fails
 
-        # How to indicate failed rolls? (maybe use string keys in self.outcomes?)
+        newDist = {}
+        for prevRoll in self.keys():
+            for i in range(1, 7):
+                if (i * side.value < threshold * side.value or (failOn1 and i == 1)) and not (passOn6 and i == 6): # if roll fails, count failures
+                    numFailed += self[prevRoll]
+                else: # if roll succeeds add aoutcome to new distribution
+                    if str(i) in newDist.keys():
+                        newDist[str(i)] += self[prevRoll]
+                    else:
+                        newDist[str(i)] = self[prevRoll]
         
+        self.outcomes = newDist
         return numFailed
     
     def totalOutcomes(self):
