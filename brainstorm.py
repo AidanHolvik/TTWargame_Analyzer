@@ -1,30 +1,27 @@
 from Weapon import Weapon
 from Model import Model
-from Core import Outcome
-import scipy.stats as stats
+from Core import Distribution
 
 # Basic damage calculation
 wpn = Weapon(1,4,5,0,1)
 mdl = Model(3,4,1)
 
-def calcAttacks():
-    # Defaults to degenerate distribution, but may be different for weapons with variable attack counts
-    return stats.randint(1,2)
+def calcAttacks(wpn: Weapon, mdl: Model):
+    return wpn.attacks()
 
-def calcHits():
-    # Binomial Poisson Distribution?
+def calcHits(attacks: Distribution):
+    # For each outcome in atkDist, create outcome in hitDist for each possible roll
     return
 
-def calcWounds():
-    # Binomial Poisson Distribution?
+def calcWounds(hits: Distribution):
+    # For each outcome in hitDist, create outcome in wndDist for each possible roll
     return
 
-def calcSavesFailed():
-    # Binomial Poisson Distribution?
+def calcSavesFailed(wounds: Distribution):
+    # For each outcome in wndDist, create outcome in svDist for each possible roll
     return
 
-def calcDamage():
-    # probability mass function(s)?
+def calcDamage(failedSaves: Distribution):
+    # For each outcome in svDist, create outcome in dmgDist for each possible roll
     return
 
-print(calcAttacks().stats())

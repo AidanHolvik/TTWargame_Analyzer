@@ -4,7 +4,7 @@ class Model:
         self.save = 0
         self.health = 0
 
-    def __init__(self, toughness, save, health):
+    def __init__(self, toughness: int, save: int, health: int):
         self.toughness = toughness
         self.save = save
         self.health = health
