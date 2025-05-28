@@ -18,19 +18,10 @@ class Weapon:
         self.keywords = []
     
     def attacks(self):
-        # TODO: if self.attacks is int, add single outcome
-        # TODO: else if self.attacks is str, generate distribution
-        attackDist = Distribution()
-        attackDist.addOutcome(self.a, 1)
-        return attackDist
+        # TODO: if self.attacks is int, use 
+        # TODO: else if self.attacks is str, use scipy randint
+        return 
     
-    def hits(self, attacks: Distribution, modifier: int = 0):
-        failed = attacks.rollThreshold(self.sk + modifier, Side.GREATER, passOn6=True, failOn1=True)
+    def hits(self, attacks, modifier):
 
-        output = 'F  '
-        for i in range(failed):
-            output += '|'
-        output += f' {failed}'
-        print(output)
-
-        return attacks
+        return 
