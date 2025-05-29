@@ -1,4 +1,4 @@
-from Core import Distribution, Side
+from scipy import stats
 
 class Weapon:
     def __init__(self):
@@ -18,10 +18,16 @@ class Weapon:
         self.keywords = []
     
     def attacks(self):
-        # TODO: if self.attacks is int, use 
-        # TODO: else if self.attacks is str, use scipy randint
+        if type(self.a) == int: # constant attacks number
+            self.dist = stats.randint(self.a, self.a + 1)
+        else:
+            # Interpret string to get number of dice and number of faces on dice
+            return
+        # TODO: if self.attacks is int, use scipy randint with only one possible outcome
+        # TODO: else if self.attacks is str, use scipy randint with outcomes 1-6 or 1-3
         return 
     
     def hits(self, attacks, modifier):
-
+        # use scale parameter to shift distribution by modifier
         return 
+    
