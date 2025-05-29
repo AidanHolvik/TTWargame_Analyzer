@@ -1,3 +1,4 @@
+from math import factorial
 
 class intDict():
     def __init__(self):
@@ -32,6 +33,11 @@ class intDict():
     def __next__(self):
         return next(self.values)
     
+    def __add__(self, that):
+        for key in that.keys():
+            self[key] += that[key]
+
+    
     def visualize(self):
         output = ''
         for i in self.keys():
@@ -64,4 +70,23 @@ def rollSum(numDice: int, numSides: int):
         
         return pmf
 
+
+# Function for probability n rolls succeeding depending on amount of dice being rolled
+def rollBinom(diceDist: intDict, passChance: float):
+    # diceDist = probabilities for total number of incoming dice to roll
+
+    newDist = intDict()
+
+    # For each possible number of dice to roll:
+    for numDice in diceDist.keys():
+        # get probability distribution for number of successes (binomial pmf) rolling numDice dice with success chance passChance
+        for numSuccesses in range(numDice + 1):
+            prob = factorial(numDice) / factorial(numSuccesses)
+            prob /= factorial(numDice - numSuccesses)
+            prob *= passChance**numSuccesses
+            prob *= (1-passChance)**(numDice-numSuccesses)
+
+            newDist[numSuccesses] += prob * diceDist[numDice] # multiply pmf output by probabilities of number of dice, then add to new dist
+
+    return newDist #return probability distribution for total number of successes
 
