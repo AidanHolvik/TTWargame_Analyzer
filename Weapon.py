@@ -1,4 +1,4 @@
-from Core import intDict, rollSum
+from Core import intDict, rollSum, rollBinom
 
 class Weapon:
     def __init__(self):
@@ -24,10 +24,18 @@ class Weapon:
         elif type(self.a) == str: # roll for number of attacks
             dice = self.a.strip().split('d') # must be of the format xdy
             dist = rollSum(int(dice[0]), int(dice[1]))
-            
+
         return dist
     
-    def hits(self, attacks, modifier):
-        # use scale parameter to shift distribution by modifier
-        return 
+    def hits(self, attacks: intDict, rollMod: int = 0):
+
+        # Calculate chance of hit based on self.sk and rollMod
+        hitChance = (7 - self.sk) + rollMod
+        if hitChance > 5:
+            hitChance = 5
+        elif hitChance < 1:
+            hitChance = 1
+        hitChance /= 6
+
+        return rollBinom(attacks, hitChance) # Return probability distribution of number of successful hits
     
