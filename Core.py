@@ -10,7 +10,7 @@ class intDict():
         for key in strKeys:
             intKeys.add(int(key))
         
-        return sorted(intKeys)
+        return intKeys
     
     def __getitem__(self, index: int):
         if index in self.keys():
@@ -34,9 +34,37 @@ class intDict():
         return next(self.values)
     
     def __add__(self, that):
-        for key in that.keys():
-            self[key] += that[key]
+        newDict = intDict()
+        for key in that.keys().union(self.keys()):
+            newDict[key] = self[key] + that[key]
+        return newDict
 
+    def __iadd__(self, that):
+        for key in that.keys().union(self.keys()):
+            self[key] += that[key]
+        return self
+
+    def __mul__(self, that):
+        if type(that) == float or type(that) == int:
+            newDict = intDict()
+            for key in self.keys():
+                newDict[key] = self[key] * that
+        elif type(that) == self.__class__:
+            newDict = intDict()
+            for key in that.keys():
+                newDict[key] =  self[key] * that[key]
+        else:
+            newDict = None
+        return newDict
+
+    def __imul__(self, that):
+        if type(that) == float or type(that) == int:
+            for key in self.keys():
+                self[key] *= that
+        elif type(that) == self.__class__:
+            for key in that.keys():
+                self[key] *= that[key]
+        return self
     
     def visualize(self):
         output = ''
@@ -49,6 +77,19 @@ class intDict():
             output += f' {self[i]*100:.2f}%\n'
         
         return output
+    
+    def shift(self, translation: int):
+        newDist = intDict()
+        for key in self.keys():
+            newDist[key + translation] = self[key]
+        return newDist
+
+    def compound(self, that):
+        newDict = self.__class__()
+        for thisKey in self.keys():
+            for thatKey in that.keys():
+                newDict[thisKey + thatKey] = self[thisKey] * that[thatKey]
+        return newDict
 
 
 def rollSum(numDice: int, numSides: int):
@@ -70,9 +111,24 @@ def rollSum(numDice: int, numSides: int):
         
         return pmf
 
+def rollSumCompounding(numDice: int, numSides: int, numRolls: int):
+    newDist = intDict()
+    if numRolls < 1:
+        newDist[0] = 1.0
+    else:
+        currDist = rollSumCompounding(numDice, numSides, numRolls - 1)
+        singleRoll = rollSum(numDice, numSides)
+        
+        for currKey in currDist.keys():
+            for addKey in singleRoll.keys():
+                newDist[currKey + addKey] += currDist[currKey] * singleRoll[addKey]
+
+    return newDist
+
+
 
 # Function for probability n rolls succeeding depending on amount of dice being rolled
-def rollBinom(diceDist: intDict, passChance: float):
+def rollPass(diceDist: intDict, passChance: float):
     # diceDist = probabilities for total number of incoming dice to roll
 
     newDist = intDict()
@@ -89,4 +145,3 @@ def rollBinom(diceDist: intDict, passChance: float):
             newDist[numSuccesses] += prob * diceDist[numDice] # multiply pmf output by probabilities of number of dice, then add to new dist
 
     return newDist #return probability distribution for total number of successes
-
