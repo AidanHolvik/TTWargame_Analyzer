@@ -6,9 +6,6 @@ from Core import intDict, rollSum, rollPass
 wpn = Weapon('1d6+1',4,14,-3,3)
 mdl = Model(3,4,1)
 
-def calcAttacks(wpn: Weapon, mdl: Model):
-    return 
-
 attacks = wpn.attacks()
 print('attacks')
 print(attacks.visualize())
