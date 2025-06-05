@@ -7,13 +7,16 @@ from abc import ABC, abstractmethod
 
 class Weapon:
     def __init__(self):
+        self.name = 'New Weapon Profile'
         self.atk = constStat(0)
         self.skill = constStat(0)
         self.str = constStat(0)
         self.ap = constStat(0)
         self.dmg = constStat(0)
 
-    def __init__(self, attacks: int|str, skill: int, strength: int|str, ap: int, damage: int|str):
+    def __init__(self, attacks: int|str, skill: int, strength: int|str, ap: int, damage: int|str, name: str = 'New Weapon Profile'):
+        self.name = name
+
         if type(attacks) == int:
             self.atk = constStat(attacks)
         else:
@@ -32,7 +35,9 @@ class Weapon:
             self.dmg = constStat(damage)
         else:
             self.dmg = rollStat(damage)
-
+        
+    def __repr__(self):
+        return f'Weapon({str(self.atk)}, {str(self.skill)}, {str(self.str)}, {str(self.ap)}, {str(self.dmg)}, name = "{self.name}")'
     
     def attacks(self):
         dist = self.atk.getDist()

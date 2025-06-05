@@ -6,18 +6,18 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.pages = ttk.Notebook(self)
-        self.pages.pack()
+        self.pages.pack(fill='both', expand=True)
         
-        frame = unitManagerFrame(self.pages)
-        frame.pack()
+        frame = unitManagerFrame(self.pages, width=400, height=280)
+        frame.pack(fill='both', expand=True)
         self.pages.add(frame, text='Units')
 
-        frame = weaponManagerFrame(self.pages)
-        frame.pack()
+        frame = weaponManagerFrame(self.pages, width=400, height=280)
+        frame.pack(fill='both', expand=True)
         self.pages.add(frame, text='Weapons')
 
-        frame = analyzerFrame(self.pages)
-        frame.pack()
+        frame = analyzerFrame(self.pages, width=400, height=280)
+        frame.pack(fill='both', expand=True)
         self.pages.add(frame, text='Analyze')
 
 
@@ -30,7 +30,16 @@ class weaponManagerFrame(ttk.Frame):
     def __init__(self, master, **kw):
         super().__init__(master, **kw)
         testMsg = ttk.Label(self, text='TODO: Weapon Manager Frame')
+
+        # TODO: scrollable list of weapon profiles (treeview)
+        # TODO: 'new' button
+        # TODO: 'edit' button
+        # TODO: 'remove' button (with confirmation popup)
+        # TODO: toast messages for successfully adding/editing/removing items from the list
+
         testMsg.pack()
+
+# TODO: class for weapon profile editor
 
 # TODO: Class for unit list
 class unitManagerFrame(ttk.Frame):

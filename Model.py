@@ -2,12 +2,14 @@ from Core import intDict, rollPass
 
 class Model:
     def __init__(self):
+        self.name = 'MODEL_NAME_PLACEHOLDER'
         self.toughness = 0
         self.save = 0
         self.invuln = 7 # 7 = no invuln
         self.health = 0
 
-    def __init__(self, toughness: int, save: int, health: int, invuln: int = 7):
+    def __init__(self, toughness: int, save: int, health: int, invuln: int = 7, name: str = 'MODEL_NAME_PLACEHOLDER'):
+        self.name = name
         self.toughness = toughness
         self.save = save
         self.invuln = invuln # 7 = no invuln
