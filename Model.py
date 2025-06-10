@@ -1,4 +1,10 @@
 from Core import intDict, rollPass
+from Weapon import Weapon
+
+class weaponGroup():
+    def __init__(self, weapon: Weapon, quantity: int = 1, ):
+        self.wpn = weapon
+        self.qty = quantity
 
 class Model:
     def __init__(self):
@@ -7,6 +13,7 @@ class Model:
         self.save = 0
         self.invuln = 7 # 7 = no invuln
         self.health = 0
+        self.weapons = [] # list of weaponGroups
 
     def __init__(self, toughness: int, save: int, health: int, invuln: int = 7, name: str = 'MODEL_NAME_PLACEHOLDER'):
         self.name = name

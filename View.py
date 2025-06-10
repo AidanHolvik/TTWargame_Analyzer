@@ -36,16 +36,16 @@ class unitManagerFrame(ttk.Frame):
         list_items = tk.Variable(value=self.units) # TODO: populate list from saved units
         unitList = tk.Listbox(self, listvariable=list_items)
 
-        # TODO: button frame
+        # initialize elements
         btnFrame = ttk.Frame(self)
         btnAdd = ttk.Button(btnFrame, text='New Unit')
         btnEdit = ttk.Button(btnFrame, text='Edit Unit')
         btnRemove = ttk.Button(btnFrame, text='Remove Unit')
+        
         # TODO: disable edit/remove buttons when no unit is selected, enable when a unit is selected
         # TODO: add button functionality via event binding
 
-        testMsg = ttk.Label(self, text='TODO: Unit Manager Frame')
-        testMsg.pack(side=tk.TOP)
+        # pack elements
         unitList.pack(side=tk.LEFT, ipadx=20, ipady= 20) # Unit Selection List
         btnFrame.pack(side=tk.LEFT)
         btnAdd.pack()
