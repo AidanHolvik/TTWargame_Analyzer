@@ -5,19 +5,18 @@ from tkinter import ttk
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
+        self.geometry('400x400')
+        self.title('TTWG Analyzer')
+
         self.pages = ttk.Notebook(self)
         self.pages.pack(fill='both', expand=True)
         
         frame = unitManagerFrame(self.pages, width=400, height=280)
-        frame.pack(fill='both', expand=True)
+        frame.pack(expand=True)
         self.pages.add(frame, text='Units')
 
-        frame = weaponManagerFrame(self.pages, width=400, height=280)
-        frame.pack(fill='both', expand=True)
-        self.pages.add(frame, text='Weapons')
-
         frame = analyzerFrame(self.pages, width=400, height=280)
-        frame.pack(fill='both', expand=True)
+        frame.pack(expand=True)
         self.pages.add(frame, text='Analyze')
 
 
@@ -25,28 +24,33 @@ class App(tk.Tk):
 # TODO: Class for model editor
 # TODO: Class for unit editor
 
-# TODO: Class for weapon list
-class weaponManagerFrame(ttk.Frame):
-    def __init__(self, master, **kw):
-        super().__init__(master, **kw)
-        testMsg = ttk.Label(self, text='TODO: Weapon Manager Frame')
 
-        # TODO: scrollable list of weapon profiles (treeview)
-        # TODO: 'new' button
-        # TODO: 'edit' button
-        # TODO: 'remove' button (with confirmation popup)
-        # TODO: toast messages for successfully adding/editing/removing items from the list
-
-        testMsg.pack()
-
-# TODO: class for weapon profile editor
 
 # TODO: Class for unit list
 class unitManagerFrame(ttk.Frame):
     def __init__(self, master, **kw):
         super().__init__(master, **kw)
+
+        self.units = [] # list of unit names as strings
+
+        list_items = tk.Variable(value=self.units) # TODO: populate list from saved units
+        unitList = tk.Listbox(self, listvariable=list_items)
+
+        # TODO: button frame
+        btnFrame = ttk.Frame(self)
+        btnAdd = ttk.Button(btnFrame, text='New Unit')
+        btnEdit = ttk.Button(btnFrame, text='Edit Unit')
+        btnRemove = ttk.Button(btnFrame, text='Remove Unit')
+        # TODO: disable edit/remove buttons when no unit is selected, enable when a unit is selected
+        # TODO: add button functionality via event binding
+
         testMsg = ttk.Label(self, text='TODO: Unit Manager Frame')
-        testMsg.pack()
+        testMsg.pack(side=tk.TOP)
+        unitList.pack(side=tk.LEFT, ipadx=20, ipady= 20) # Unit Selection List
+        btnFrame.pack(side=tk.LEFT)
+        btnAdd.pack()
+        btnEdit.pack()
+        btnRemove.pack()
 
 
 # TODO: Class for generating analysis (selecting units, etc.)
