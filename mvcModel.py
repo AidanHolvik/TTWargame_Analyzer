@@ -131,66 +131,108 @@ class Database():
         self.con.close()
 
 class Unit():
-    def __init__(self, db: Database, name: str):
-        self.db = db
+    def __init__(self, name: str = "", cost: int = 0):
         self.name = name
+        self.cost = cost
 
-        # Check if unit already exists in the database
-        if not self.exists(self.name): # if row does not already exist, create the row
-            self.db.execute('INSERT INTO Units(name,points_cost) VALUES (?,?)', (self.name,0))
-            self.db.commit()
-    
-    def exists(self, name):
-        self.db.execute('SELECT name FROM Units WHERE name=?', (name,))
-        if not self.db.fetchone():
-            return False
-        else:
-            return True
+    """
+    Determines whether a record with the same primary key already exists in the table
+    """
+    @staticmethod
+    def exists(name: str, database: str):
+        try:
+            with sqlite3.connect(database) as conn:
+                cur = conn.cursor()
+                cur.execute('SELECT name FROM Units WHERE name=?', (name,))
+                if not cur.fetchone():
+                    return False
+                else:
+                    return True
+        except sqlite3.OperationalError as e:
+            print(f'Error verifying existence of unit "{name}" in {database}: ', str(e))
+            return None
+        
 
     @property
     def name(self):
         return self.name
     @name.setter
     def name(self, value: str):
-        # Check if unit already exists in the database
-        if not self.exists(value): # if new value doesn't already exist in the table, update the record
-            self.db.execute('UPDATE Units SET name=? WHERE name=?', (value,self.name))
-            self.db.commit()
+        if value != None:
             self.name = value
 
     @property
-    def points_cost(self):
-        self.db.execute('SELECT points_cost FROM Units WHERE name=?', (self.name,))
-        return self.db.fetchone()
-    @points_cost.setter
-    def points_cost(self, value: int):
+    def cost(self):
+        return self.cost
+    @cost.setter
+    def cost(self, value: int):
         if value >= 0:
-            self.db.execute('UPDATE Units SET points_cost=? WHERE name=?', (value,self.name))
-            self.db.commit()
+            self.cost = value
+    
 
+    @staticmethod
+    def load(name: str, database: str):
+        if Unit.exists(name, database):
+            try:
+                with sqlite3.connect(database) as conn:
+                    cur = conn.cursor()
+                    cur.execute('SELECT * FROM Units WHERE name=?', (name,))
+                    record = cur.fetchone()
 
-class Model():
-    def __init__(self, db: Database, name: str):
-        self.db = db
-        self.name = name
+                    return Unit(record[0], record[1])
+            except sqlite3.OperationalError as e:
+                return None
+        
 
-
-    def __init__(self, db: Database, name: str, toughness: int, save: int, health: int, invuln: int = None):
-        self.db = db
-        self.name = name
-
-        if not self.exists(name):
-            # TODO: validate inputs
-            self.db.execute('INSERT INTO Models(name,toughness,save,health,invuln) VALUES (?,?,?,?,?)', (self.name, toughness, save, health, invuln))
-            self.db.commit()
-
-
-    def exists(self, name):
-        self.db.execute('SELECT name FROM Models WHERE name=?', (name,))
-        if not self.db.fetchone():
-            return False
+    def saveNew(self, database: str):
+        exists = self.exists(database)
+        if exists is None: 
+            return (bool(False), f'Error saving new unit "{self.name}" to {database}: Failed to check if such a unit already exists')
+        elif not exists:
+            try:
+                with sqlite3.connect(database) as conn:
+                    cur = conn.cursor()
+                    cur.execute('INSERT INTO Units(name,points_cost) VALUES (?,?)', (self.name, self.cost))
+                    conn.commit()
+                    return (bool(True), f'New unit "{self.name}" added to {database}')
+            except sqlite3.OperationalError as e:
+                return (bool(False), f'Error saving new unit "{self.name}" to {database}: ' + str(e))
         else:
-            return True
+            return (bool(False), f'Error saving new unit "{self.name}" to {database}: A unit with this primary key already exists')
+
+    def saveUpdate(self, database: str):
+        exists = self.exists(database)
+        if exists is None:
+            return (bool(False), f'Error updating unit "{self.name}" in {database}: Failed to check if such a unit exists')
+        elif exists:
+            try:
+                with sqlite3.connect(database) as conn:
+                    cur = conn.cursor()
+                    cur.execute('UPDATE Units SET points_cost=? WHERE name=?', (self.cost, self.name))
+                    conn.commit()
+                    return (bool(True), f'Updated unit "{self.name}" in {database}')
+            except sqlite3.OperationalError as e:
+                print(f'Error updating unit "{self.name}" in {database}:', e)
+                return (bool(False), f'Error updating unit "{self.name}" in {database}: ' + str(e))
+        else:
+            return (bool(False), f'Error updating unit "{self.name}" in {database}: No such unit exists')
+    
+    @staticmethod
+    def delete(name: str, database: str):
+        if Unit.exists(name, database):
+            try:
+                with sqlite3.connect(database) as conn:
+                    cur = conn.cursor()
+                    cur.execute('DELETE FROM Units WHERE name=?', (name,))
+                    conn.commit()
+
+                    return True
+            except sqlite3.OperationalError as e:
+                return False
+        else:
+            return False
+
+
 
 
 

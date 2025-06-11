@@ -1,9 +1,7 @@
 # from Weapon import Weapon
-from mvcModel import Model
+import sqlite3
 
-db = Model()
 
-db.close()
 
 
 # app = gui.App()
