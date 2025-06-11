@@ -4,7 +4,7 @@ import re
 SQL_TABLES = [
     """CREATE TABLE IF NOT EXISTS Units(
         name TEXT PRIMARY KEY,
-        points_cost INTEGER DEFAULT 0 CHECK(points_cost >= 0)
+        points_cost INTEGER NOT NULL DEFAULT 0 CHECK(points_cost >= 0)
     );""",
 
     """CREATE TABLE IF NOT EXISTS Models(
@@ -51,7 +51,7 @@ SQL_TABLES = [
         FOREIGN KEY (model) REFERENCES Models(name)
     );""",
 
-    """CREATE TABLE IF NOT EXISTS AssignedKeywords(
+    """CREATE TABLE IF NOT EXISTS Assigned_Keywords(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         model TEXT NOT NULL,
         keyword TEXT NOT NULL,
@@ -84,25 +84,74 @@ SQL_TABLES = [
         ability TEXT NOT NULL,
         FOREIGN KEY (weapon) REFERENCES Weapons(name),
         FOREIGN KEY (ability) REFERENCES Weapon_Abilities(name)
-    );""",
-
+    );"""
 ]
 
-def regexp(x, y, search=re.search):
-    return 1 if search(x,y) else 0
 
-try:
-    with sqlite3.connect('TTWGAnalyzer.db') as conn:
-        conn = sqlite3.connect('TTWGAnalyzer.db')
-        print(f'Opened SQLite database with version {sqlite3.sqlite_version}.')
-        cursor = conn.cursor()
+class Database():
 
-        # Create tables
-        for table in SQL_TABLES:
-            print(table, '\n')
-            cursor.execute(table)
+    def regexp(self, y, x, search=re.search):
+        return True if search(x,y) else False
 
-        # TODO: main code
+    def __init__(self):
+        try:
+            self.con = sqlite3.connect('TTWGAnalyzer.db')
+            print(f'Opened SQLite database with version {sqlite3.sqlite_version}.')
+            self.con.create_function('REGEXP', 2, self.regexp)
+            self.cur = self.con.cursor()
+                
+            # Create tables
+            for table in SQL_TABLES:
+                self.cur.execute(table)
 
-except sqlite3.OperationalError as e:
-    print('Failed:', e)
+        except sqlite3.OperationalError as e:
+            print('Database Error:',e)
+
+    # Manage Units
+    def addUnit(self, name: str, pointsCost: int = 0):
+        self.cur.execute('INSERT INTO Units(name,points_cost) VALUES (?,?)', (name, pointsCost))
+        self.con.commit()
+    def getUnitByName(self, name: str):
+        self.cur.execute('SELECT * FROM Units WHERE name = ?',(name,))
+
+    
+    def close(self):
+        self.con.close()
+
+class Unit():
+    def __init__(self, db: Database, name: str):
+        self.con = db.con
+        self.cur = db.cur
+        self.name = name
+
+        # Check if unit already exists in the database
+        self.cur.execute('SELECT * FROM Units WHERE name = ?', (self.name,))
+        if not self.cur.fetchone(): # if row does not already exist, create the row
+            self.cur.execute('INSERT INTO Units(name,points_cost) VALUES (?,?)', (self.name,0))
+            self.con.commit()
+
+    
+    @property
+    def name(self):
+        return self.name
+    @name.setter
+    def name(self, value: str):
+        # Check if unit already exists in the database
+        self.cur.execute('SELECT * FROM Units WHERE name = ?', (value,))
+        if not self.cur.fetchone(): # if new value doesn't already exist in the table, update the record
+            self.cur.execute('UPDATE Units SET name=? WHERE name=?', (value,self.name))
+            self.con.commit()
+            self.name = value
+
+    @property
+    def points_cost(self):
+        self.cur.execute('SELECT points_cost FROM Units WHERE name=?', (self.name,))
+        return self.cur.fetchone()
+    @points_cost.setter
+    def points_cost(self, value: int):
+        if value >= 0:
+            self.cur.execute('UPDATE Units SET points_cost=? WHERE name=?', (value,self.name))
+            self.con.commit()
+
+
+        

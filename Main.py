@@ -1,13 +1,15 @@
-from Weapon import Weapon
-from Model import Model
-from Core import intDict, rollSum, rollPass
-import View as gui
+# from Weapon import Weapon
+from mvcModel import Model
+
+db = Model()
+
+db.close()
 
 
-app = gui.App()
+# app = gui.App()
 
-try:
-    from ctypes import windll
-    windll.shcore.SetProcessDpiAwareness(1)
-finally:
-    app.mainloop()
+# try:
+#     from ctypes import windll
+#     windll.shcore.SetProcessDpiAwareness(1)
+# finally:
+#     app.mainloop()

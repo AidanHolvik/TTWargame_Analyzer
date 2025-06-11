@@ -1,10 +1,10 @@
 from Core import intDict, rollPass
-from Weapon import Weapon
+# from Weapon import Weapon
 
-class weaponGroup():
-    def __init__(self, weapon: Weapon, quantity: int = 1, ):
-        self.wpn = weapon
-        self.qty = quantity
+# class weaponGroup():
+#     def __init__(self, weapon: Weapon, quantity: int = 1, ):
+#         self.wpn = weapon
+#         self.qty = quantity
 
 class Model:
     def __init__(self):
