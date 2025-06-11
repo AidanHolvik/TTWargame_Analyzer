@@ -107,12 +107,24 @@ class Database():
         except sqlite3.OperationalError as e:
             print('Database Error:',e)
 
-    # Manage Units
-    def addUnit(self, name: str, pointsCost: int = 0):
-        self.cur.execute('INSERT INTO Units(name,points_cost) VALUES (?,?)', (name, pointsCost))
+    def execute(self, sql: str, parameters):
+        return self.cur.execute(sql, parameters)
+    
+    def fetchone(self):
+        return self.cur.fetchone()
+
+    def fetchall(self):
+        return self.cur.fetchall()
+    
+    def commit(self):
         self.con.commit()
-    def getUnitByName(self, name: str):
-        self.cur.execute('SELECT * FROM Units WHERE name = ?',(name,))
+
+    # # Manage Units
+    # def addUnit(self, name: str, pointsCost: int = 0):
+    #     self.cur.execute('INSERT INTO Units(name,points_cost) VALUES (?,?)', (name, pointsCost))
+    #     self.con.commit()
+    # def getUnitByName(self, name: str):
+    #     self.cur.execute('SELECT * FROM Units WHERE name = ?',(name,))
 
     
     def close(self):
@@ -120,38 +132,66 @@ class Database():
 
 class Unit():
     def __init__(self, db: Database, name: str):
-        self.con = db.con
-        self.cur = db.cur
+        self.db = db
         self.name = name
 
         # Check if unit already exists in the database
-        self.cur.execute('SELECT * FROM Units WHERE name = ?', (self.name,))
-        if not self.cur.fetchone(): # if row does not already exist, create the row
-            self.cur.execute('INSERT INTO Units(name,points_cost) VALUES (?,?)', (self.name,0))
-            self.con.commit()
-
+        if not self.exists(self.name): # if row does not already exist, create the row
+            self.db.execute('INSERT INTO Units(name,points_cost) VALUES (?,?)', (self.name,0))
+            self.db.commit()
     
+    def exists(self, name):
+        self.db.execute('SELECT name FROM Units WHERE name=?', (name,))
+        if not self.db.fetchone():
+            return False
+        else:
+            return True
+
     @property
     def name(self):
         return self.name
     @name.setter
     def name(self, value: str):
         # Check if unit already exists in the database
-        self.cur.execute('SELECT * FROM Units WHERE name = ?', (value,))
-        if not self.cur.fetchone(): # if new value doesn't already exist in the table, update the record
-            self.cur.execute('UPDATE Units SET name=? WHERE name=?', (value,self.name))
-            self.con.commit()
+        if not self.exists(value): # if new value doesn't already exist in the table, update the record
+            self.db.execute('UPDATE Units SET name=? WHERE name=?', (value,self.name))
+            self.db.commit()
             self.name = value
 
     @property
     def points_cost(self):
-        self.cur.execute('SELECT points_cost FROM Units WHERE name=?', (self.name,))
-        return self.cur.fetchone()
+        self.db.execute('SELECT points_cost FROM Units WHERE name=?', (self.name,))
+        return self.db.fetchone()
     @points_cost.setter
     def points_cost(self, value: int):
         if value >= 0:
-            self.cur.execute('UPDATE Units SET points_cost=? WHERE name=?', (value,self.name))
-            self.con.commit()
+            self.db.execute('UPDATE Units SET points_cost=? WHERE name=?', (value,self.name))
+            self.db.commit()
+
+
+class Model():
+    def __init__(self, db: Database, name: str):
+        self.db = db
+        self.name = name
+
+
+    def __init__(self, db: Database, name: str, toughness: int, save: int, health: int, invuln: int = None):
+        self.db = db
+        self.name = name
+
+        if not self.exists(name):
+            # TODO: validate inputs
+            self.db.execute('INSERT INTO Models(name,toughness,save,health,invuln) VALUES (?,?,?,?,?)', (self.name, toughness, save, health, invuln))
+            self.db.commit()
+
+
+    def exists(self, name):
+        self.db.execute('SELECT name FROM Models WHERE name=?', (name,))
+        if not self.db.fetchone():
+            return False
+        else:
+            return True
+
 
 
         
