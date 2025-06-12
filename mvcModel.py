@@ -89,6 +89,8 @@ SQL_TABLES = [
 ]
 
 
+# TODO: add input validation for saving records
+
 class Database():
 
     def regexp(self, y, x, search=re.search):
