@@ -89,16 +89,17 @@ SQL_TABLES = [
 ]
 
 
-# TODO: add input validation for saving records
+# TODO: add input validation when saving records
 
 class Database():
 
     def regexp(self, y, x, search=re.search):
         return True if search(x,y) else False
 
-    def __init__(self):
+    def __init__(self, dbFile: str):
+        self.file = dbFile
         try:
-            self.con = sqlite3.connect('TTWGAnalyzer.db')
+            self.con = sqlite3.connect(self.file)
             print(f'Opened SQLite database with version {sqlite3.sqlite_version}.')
             self.con.create_function('REGEXP', 2, self.regexp)
             self.cur = self.con.cursor()
@@ -109,25 +110,45 @@ class Database():
 
         except sqlite3.OperationalError as e:
             print('Database Error:',e)
-
-    def execute(self, sql: str, parameters):
-        return self.cur.execute(sql, parameters)
     
-    def fetchone(self):
-        return self.cur.fetchone()
+    def save(self): # TODO: save to the db file
+        pass
 
-    def fetchall(self):
-        return self.cur.fetchall()
-    
-    def commit(self):
-        self.con.commit()
+    def getUnitList(self):
+        self.cur.execute('SELECT * FROM Units')
+        table = self.cur.fetchall()
 
-    # # Manage Units
-    # def addUnit(self, name: str, pointsCost: int = 0):
-    #     self.cur.execute('INSERT INTO Units(name,points_cost) VALUES (?,?)', (name, pointsCost))
-    #     self.con.commit()
-    # def getUnitByName(self, name: str):
-    #     self.cur.execute('SELECT * FROM Units WHERE name = ?',(name,))
+        units = {}
+        for record in table:
+            units[record[0]] = Unit(record[0], record[1])
+        return units
+
+    def getModelList(self):
+        self.cur.execute('SELECT * FROM Models')
+        table = self.cur.fetchall()
+
+        models = {}
+        for record in table:
+            models[record[0]] = Model(record[0], record[1], record[2], record[3], record[4])
+        return models
+
+    def getKeywordList(self):
+        self.cur.execute('SELECT * FROM Keywords')
+        table = self.cur.fetchall()
+
+        keywords = {}
+        for record in table:
+            keywords[record[0]] = Keyword(record[0])
+        return keywords
+
+    def getWeaponList(self):
+        self.cur.execute('SELECT * FROM Weapons')
+        table = self.cur.fetchall()
+
+        weapons = {}
+        for record in table:
+            weapons[record[0]] = Weapon(record[0], record[1], record[2], record[3], record[4])
+        return weapons
 
     
     def close(self):
@@ -135,6 +156,10 @@ class Database():
 
 
 class DBRecord(ABC):
+
+    @abstractmethod
+    def __eq__(self, that):
+        pass
 
     """
     Determines whether a record with the same primary key already exists in the table
@@ -176,6 +201,9 @@ class Unit(DBRecord):
     def __init__(self, name: str = "", cost: int = 0):
         self.name = name
         self.cost = cost
+    
+    def __eq__(self, that):
+        return self.name == that.name
     
     def exists(self, database: str):
         try:
@@ -248,7 +276,11 @@ class Unit(DBRecord):
                 return False
         else:
             return False
-        
+    
+    def getAssignedModels(self, database: str):
+        # TODO: SELECT * FROM Assigned_Models WHERE unit=self.name
+        # TODO: convert each to an AssignedModel object, return dict of objects
+        pass
         
     @property
     def name(self):
@@ -275,6 +307,9 @@ class Model(DBRecord):
         self.health = health
         self.invuln = invuln
     
+    def __eq__(self, that):
+        return self.name == that.name
+
     def exists(self, database: str):
         try:
             with sqlite3.connect(database) as conn:
@@ -347,6 +382,15 @@ class Model(DBRecord):
         else:
             return False
 
+    def getAssignedWeapons(self, database: str):
+        # TODO: SELECT * FROM Assigned_Weapons WHERE model=self.name
+        # TODO: convert each to an AssignedWeapon object, return dict of objects
+        pass
+
+    def getAssignedKeywords(self, database: str):
+        # TODO: SELECT * FROM Assigned_Keywords WHERE model=self.name
+        # TODO: convert each to an AssignedKeyword object, return dict of objects
+        pass
 
     @property
     def name(self):
@@ -391,10 +435,135 @@ class Model(DBRecord):
             self.invuln = value
 
 
+class AssignedModel(DBRecord):
+    def __init__(self, unit: str, model: str, quantity: int = 1, isLeader: bool = False, enabled: bool = True):
+        self.unit = unit
+        self.model = model
+        self.quantity = quantity
+        self.isLeader = isLeader
+        self.enabled = enabled
+
+    def __eq__(self, that):
+        return self.unit == that.unit and self.model == that.model
+
+    def exists(self, database: str):
+        try:
+            with sqlite3.connect(database) as conn:
+                cur = conn.cursor()
+                cur.execute('SELECT unit FROM Assigned_Models WHERE unit=? AND model=?', (self.unit,self.model))
+                if not cur.fetchone():
+                    return False
+                else:
+                    return True
+        except sqlite3.OperationalError as e:
+            # print(f'Error verifying existence of model "{name}" in {database}: ', str(e))
+            return None
+    
+    def load(self, database: str):
+        if self.exists(database):
+            try:
+                with sqlite3.connect(database) as conn:
+                    cur = conn.cursor()
+                    cur.execute('SELECT * FROM Assigned_Models WHERE unit=? AND model=?', (self.unit, self.model))
+                    record = cur.fetchone()
+
+                    return AssignedWeapon(record[0], record[1], record[2], record[3], record[4])
+            except sqlite3.OperationalError as e:
+                return None
+    
+    def saveNew(self, database: str):
+        exists = self.exists(database)
+        if exists is None: 
+            return (bool(False), f'Error saving new model assignment "({self.unit}, {self.model})" to {database}: Failed to check if such an assignment already exists')
+        elif not exists:
+            try:
+                with sqlite3.connect(database) as conn:
+                    cur = conn.cursor()
+                    cur.execute('INSERT INTO Assigned_Models(unit,model,quantity,leader,enabled) VALUES (?,?,?,?,?)', (self.unit, self.model, self.quantity, str(self.isLeader), str(self.enabled)))
+                    conn.commit()
+                    return (bool(True), f'New model assignment "({self.unit}, {self.model})" added to {database}')
+            except sqlite3.OperationalError as e:
+                return (bool(False), f'Error saving new model assignment "({self.unit}, {self.model})" to {database}: ' + str(e))
+        else:
+            return (bool(False), f'Error saving new model assignment "({self.unit}, {self.model})" to {database}: This model is already assigned to this unit')
+
+    def saveUpdate(self, database: str):
+        exists = self.exists(database)
+        if exists is None:
+            return (bool(False), f'Error updating model assignment "({self.unit}, {self.model})" in {database}: Failed to check if such an assignment exists')
+        elif exists:
+            try:
+                with sqlite3.connect(database) as conn:
+                    cur = conn.cursor()
+                    cur.execute('UPDATE Assigned_Models SET quantity=?, leader=?, enabled=? WHERE unit=? AND model=?', (self.quantity, str(self.isLeader), str(self.enabled), self.unit, self.model))
+                    conn.commit()
+                    return (bool(True), f'Updated model assignment "({self.unit}, {self.model})" in {database}')
+            except sqlite3.OperationalError as e:
+                print(f'Error updating model assignment "({self.unit}, {self.model})" in {database}:', e)
+                return (bool(False), f'Error updating model assignment "({self.unit}, {self.model})" in {database}: ' + str(e))
+        else:
+            return (bool(False), f'Error updating model assignment "({self.unit}, {self.model})" in {database}: No such assignment exists')
+    
+    def delete(self, database: str):
+        if self.exists(database):
+            try:
+                with sqlite3.connect(database) as conn:
+                    cur = conn.cursor()
+                    cur.execute('DELETE FROM Assigned_Models WHERE unit=? AND model=?', (self.unit, self.model))
+                    conn.commit()
+
+                    return True
+            except sqlite3.OperationalError as e:
+                return False
+        else:
+            return False
+    
+    @property
+    def unit(self):
+        return self.unit
+    @unit.setter
+    def unit(self, value: str):
+        if value is not None:
+            self.unit = value
+    
+    @property
+    def model(self):
+        return self.model
+    @model.setter
+    def model(self, value: str):
+        if value is not None:
+            self.model = value
+    
+    @property
+    def quantity(self):
+        return self.quantity
+    @quantity.setter
+    def quantity(self, value: int):
+        if value > 0:
+            self.quantity = value
+    
+    @property
+    def isLeader(self):
+        return self.isLeader
+    @isLeader.setter
+    def isLeader(self, value: bool):
+        self.isLeader = value
+    
+    @property
+    def enabled(self):
+        return self.enabled
+    @enabled.setter
+    def enabled(self, value: bool):
+        self.enabled = value
+    
+
 class Keyword(DBRecord):
     def __init__(self, keyword: str = ''):
         self.keyword = keyword
     
+    def __eq__(self, that):
+        return self.keyword == that.keyword
+
     def exists(self, database: str):
         try:
             with sqlite3.connect(database) as conn:
@@ -461,10 +630,14 @@ class Keyword(DBRecord):
         if keyword is not None:
             self.keyword = keyword
 
+
 class AssignedKeyword(DBRecord):
     def __init__(self, model: str, keyword: str):
         self.model = model
         self.keyword = keyword
+
+    def __eq__(self, that):
+        return self.model == that.model and self.keyword == that.keyword
 
     def exists(self, database: str):
         try:
@@ -549,6 +722,9 @@ class Weapon(DBRecord):
         self.ap = ap
         self.damage = str(damage)
     
+    def __eq__(self, that):
+        return self.name == that.name
+
     def exists(self, database: str):
         try:
             with sqlite3.connect(database) as conn:
@@ -667,6 +843,7 @@ class Weapon(DBRecord):
         elif re.search('[1-9][0-9]*([dD][1-9][0-9]*)?([+][1-9][0-9]*)?', value):
             self.damage = value.lower()
 
+
 class AssignedWeapon(DBRecord):
     # TODO: validate format of parameter 'enabled'
     def __init__(self, model: str, weapon: str, skill: int = 6, quantity: int = 1, enabled: bool = True):
@@ -675,6 +852,9 @@ class AssignedWeapon(DBRecord):
         self.skill = skill
         self.quantity = quantity
         self.enabled = enabled
+
+    def __eq__(self, that):
+        return self.model == that.model and self.weapon == that.weapon
 
     def exists(self, database: str):
         try:
