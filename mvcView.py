@@ -19,13 +19,12 @@ class App(tk.Tk):
         frame.pack(expand=True)
         self.pages.add(frame, text='Units')
 
-        frame = weaponFrame(self.pages, self.controller, width=400, height=280)
+        frame = weaponEditor(self.pages, self.controller, width=400, height=280)
         frame.pack(expand=True, fill=tk.BOTH)
         self.pages.add(frame, text='Weapons')
 
 
 
-# TODO: Class for weapon editor
 # TODO: Class for model editor
 # TODO: Class for unit editor
 
@@ -58,7 +57,7 @@ class unitManagerFrame(ttk.Frame):
         btnEdit.pack()
         btnRemove.pack()
 
-class weaponFrame(ttk.Frame):
+class weaponEditor(ttk.Frame):
     def __init__(self, master, controller: Controller, **kw):
         super().__init__(master, **kw)
         self.controller = controller

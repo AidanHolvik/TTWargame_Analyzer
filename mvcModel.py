@@ -97,105 +97,190 @@ class Database():
         return True if search(x,y) else False
 
     def __init__(self, dbFile: str):
-        self.file = dbFile
+        self.dbFile = dbFile
 
                         # TODO: only open db when saving or loading
 
         try:
-            self.con = sqlite3.connect(self.file)
-            print(f'Opened SQLite database with version {sqlite3.sqlite_version}.')
-            self.con.create_function('REGEXP', 2, self.regexp)
-            self.cur = self.con.cursor()
-                
-            # Create tables
-            for table in SQL_TABLES:
-                self.cur.execute(table)
+            with sqlite3.connect(self.file) as conn:
+                print(f'Opened SQLite database with version {sqlite3.sqlite_version}.')
+                conn.create_function('REGEXP', 2, self.regexp)
+                cur = conn.cursor()
+                    
+                # Create tables
+                for table in SQL_TABLES:
+                    cur.execute(table)
 
-            self.units = {}
-            self.models = {}
-            self.weapons = {}
-            self.keywords = {}
-            self.load(self.file)
+                self.units = {}
+                self.models = {}
+                self.weapons = {}
+                self.keywords = {}
+                self.load()
 
         except sqlite3.OperationalError as e:
-            print('Database Error:',e)
+            print('Error Initializing Database Model: ',e)
 
-    def load(self, dbFile: str): # Set Database object to represent the data in the db file
+    @property
+    def file(self) -> str:
+        return self.dbFile
+    @file.setter
+    def file(self, value: str):
+        self.dbFile = value
+
+    def load(self): # Set Database object to represent the data in the db file
         
         self.weapons = self.getWeaponList()
         self.keywords = self.getKeywordList()
         self.models = self.getModelList()
         self.units = self.getUnitList()
 
-        for model in self.models:
-            # assign keywords to models
-            self.cur.execute('SELECT * FROM Assigned_Keywords WHERE model=?', (model.name,))
-            table = self.cur.fetchall()
-            for assn in table:
-                model.keywords.add(assn[1])
+        try:
+            with sqlite3.connect(self.file) as conn:
+                cur = conn.cursor()
 
-            # assign weapons to models
-            self.cur.execute('SELECT * FROM Assigned_Weapons WHERE model=?', (model.name,))
-            table = self.cur.fetchall()
-            for assn in table:
-                model.weapons[assn[1]] = AssignedWeapon(assn[0], assn[1], assn[2], assn[3], assn[4])   
+                for model in self.models:
+                    # assign keywords to models
+                    cur.execute('SELECT * FROM Assigned_Keywords WHERE model=?', (model.name,))
+                    table = cur.fetchall()
+                    for assn in table:
+                        model.keywords[assn[1]] = AssignedKeyword(assn[0], assn[1])
 
-        # assign models to units
-        for unit in self.units:
-            self.cur.execute('SELECT * FROM Assigned_Models WHERE unit=?', (unit.name,))
-            table = self.cur.fetchall()
-            for assn in table:
-                unit.models[assn[1]] = AssignedModel(assn[0], assn[1], assn[2], assn[3], assn[4])
+                    # assign weapons to models
+                    cur.execute('SELECT * FROM Assigned_Weapons WHERE model=?', (model.name,))
+                    table = cur.fetchall()
+                    for assn in table:
+                        model.weapons[assn[1]] = AssignedWeapon(assn[0], assn[1], assn[2], assn[3], assn[4])   
+
+                # assign models to units
+                for unit in self.units:
+                    cur.execute('SELECT * FROM Assigned_Models WHERE unit=?', (unit.name,))
+                    table = cur.fetchall()
+                    for assn in table:
+                        unit.models[assn[1]] = AssignedModel(assn[0], assn[1], assn[2], assn[3], assn[4])
+
+        except sqlite3.OperationalError as e:
+            print('Error loading from database: ',e)
 
     
-    def save(self, dbFile: str): # TODO: save to the db file
-        pass
+    def save(self, dbFile: str) -> bool:
+
+        try:
+            with sqlite3.connect(self.file) as conn:
+                cur = conn.cursor()
+
+                # Clear DB
+                cur.execute('DELETE FROM Assigned_Weapons')
+                cur.execute('DELETE FROM Assigned_Keywords')
+                cur.execute('DELETE FROM Assigned_Models')
+                cur.execute('DELETE FROM Weapons')
+                cur.execute('DELETE FROM Models')
+                cur.execute('DELETE FROM Units')
+                cur.execute('DELETE FROM Keywords')
+
+                # Populate Tables from Database object
+                for weapon in self.weapons:
+                    cur.execute('INSERT INTO Weapons(name,attacks,strength,ap,damage) VALUES (?,?,?,?,?)', weapon.record())
+                for keyword in self.keywords:
+                    cur.execute('INSERT INTO Keywords(model,keyword) VALUES (?,?)', keyword.record())
+                for model in self.models:
+                    cur.execute('INSERT INTO Models(name,toughness,save,health,invuln) VALUES (?,?,?,?,?)', model.record())
+                    for assn in model.weapons:
+                        cur.execute('INSERT INTO Assigned_Weapons(model,weapon,skill,quantity,enabled) VALUES (?,?,?,?,?)', assn.record())
+                    for assn in model.keywords.keys():
+                        cur.execute('INSERT INTO Assigned_Keywords(model,keyword) VALUES (?,?)', (model.name, assn))
+                for unit in self.units:
+                    cur.execute('INSERT INTO Units(name,points_cost) VALUES (?,?)', unit.record())
+                    for assn in unit.models:
+                        cur.execute('INSERT INTO Assigned_Models VALUES (?,?,?,?,?)', assn.record())
+
+                conn.commit()
+
+                return True
+        except sqlite3.OperationalError as e:
+            print('Error saving to database: ',e)
 
     def getUnitList(self):
-        self.cur.execute('SELECT * FROM Units')
-        table = self.cur.fetchall()
+        try:
+            with sqlite3.connect(self.file) as conn:
+                cur = conn.cursor()
 
-        units = {}
-        for record in table:
-            units[record[0]] = Unit(record[0], record[1])
-        return units
+                cur.execute('SELECT * FROM Units')
+                table = cur.fetchall()
 
+                units = {}
+                for record in table:
+                    units[record[0]] = Unit(record[0], record[1])
+                return units
+
+        except sqlite3.OperationalError as e:
+            print('Error : ',e)
+            
     def getModelList(self):
-        self.cur.execute('SELECT * FROM Models')
-        table = self.cur.fetchall()
 
-        models = {}
-        for record in table:
-            models[record[0]] = Model(record[0], record[1], record[2], record[3], record[4])
-        return models
+        try:
+            with sqlite3.connect(self.file) as conn:
+                cur = conn.cursor()
+
+                cur.execute('SELECT * FROM Models')
+                table = cur.fetchall()
+
+                models = {}
+                for record in table:
+                    models[record[0]] = Model(record[0], record[1], record[2], record[3], record[4])
+                return models
+
+        except sqlite3.OperationalError as e:
+            print('Error : ',e)
 
     def getKeywordList(self):
-        self.cur.execute('SELECT * FROM Keywords')
-        table = self.cur.fetchall()
 
-        keywords = {}
-        for record in table:
-            keywords[record[0]] = Keyword(record[0])
-        return keywords
+        try:
+            with sqlite3.connect(self.file) as conn:
+                cur = conn.cursor()
+
+                cur.execute('SELECT * FROM Keywords')
+                table = cur.fetchall()
+
+                keywords = {}
+                for record in table:
+                    keywords[record[0]] = Keyword(record[0])
+                return keywords
+
+        except sqlite3.OperationalError as e:
+            print('Error : ',e)    
 
     def getWeaponList(self):
-        self.cur.execute('SELECT * FROM Weapons')
-        table = self.cur.fetchall()
 
-        weapons = {}
-        for record in table:
-            weapons[record[0]] = Weapon(record[0], record[1], record[2], record[3], record[4])
-        return weapons
+        try:
+            with sqlite3.connect(self.file) as conn:
+                cur = conn.cursor()
 
-    
-    def close(self):
-        self.con.close()
+                cur.execute('SELECT * FROM Weapons')
+                table = cur.fetchall()
+
+                weapons = {}
+                for record in table:
+                    weapons[record[0]] = Weapon(record[0], record[1], record[2], record[3], record[4])
+                return weapons
+
+        except sqlite3.OperationalError as e:
+            print('Error : ',e)
+
+        
+
 
 
 class DBRecord(ABC):
 
     @abstractmethod
     def __eq__(self, that):
+        pass
+
+    """
+    Generates a tuple which can be used to generate a record matching the DBRecord object
+    """
+    @abstractmethod
+    def record(self):
         pass
 
     """
@@ -243,6 +328,9 @@ class Unit(DBRecord):
     
     def __eq__(self, that):
         return self.name == that.name
+    
+    def record(self):
+        return (self.name, self.cost)
     
     def exists(self, database: str):
         try:
@@ -347,10 +435,13 @@ class Model(DBRecord):
         self.health = health
         self.invuln = invuln
         self.weapons = {} # dict: key is weapon name, value is AssignedWeapon object
-        self.keywords = set() # set of assigned keywords
+        self.keywords = set() # the set of keywords (as strings) assigned to the model object
     
     def __eq__(self, that):
         return self.name == that.name
+
+    def record(self):
+        return (self.name, self.toughness, self.save, self.health, self.invuln)
 
     def exists(self, database: str):
         try:
@@ -488,6 +579,9 @@ class AssignedModel(DBRecord):
     def __eq__(self, that):
         return self.unit == that.unit and self.model == that.model
 
+    def record(self):
+        return (self.unit, self.model, self.quantity, str(self.isLeader), str(self.enabled))
+
     def exists(self, database: str):
         try:
             with sqlite3.connect(database) as conn:
@@ -606,6 +700,9 @@ class Keyword(DBRecord):
     def __eq__(self, that):
         return self.keyword == that.keyword
 
+    def record(self):
+        return (self.keyword,)
+
     def exists(self, database: str):
         try:
             with sqlite3.connect(database) as conn:
@@ -680,6 +777,9 @@ class AssignedKeyword(DBRecord):
 
     def __eq__(self, that):
         return self.model == that.model and self.keyword == that.keyword
+
+    def record(self):
+        return (self.model, self.keyword)
 
     def exists(self, database: str):
         try:
@@ -766,6 +866,9 @@ class Weapon(DBRecord):
     
     def __eq__(self, that):
         return self.name == that.name
+
+    def record(self):
+        return (self.name, str(self.attacks), self.strength, self.ap, str(self.damage))
 
     def exists(self, database: str):
         try:
@@ -898,6 +1001,9 @@ class AssignedWeapon(DBRecord):
     def __eq__(self, that):
         return self.model == that.model and self.weapon == that.weapon
 
+    def record(self):
+        return (self.model, self.weapon, self.skill, self.quantity, str(self.enabled))
+                
     def exists(self, database: str):
         try:
             with sqlite3.connect(database) as conn:
