@@ -98,6 +98,9 @@ class Database():
 
     def __init__(self, dbFile: str):
         self.file = dbFile
+
+                        # TODO: only open db when saving or loading
+
         try:
             self.con = sqlite3.connect(self.file)
             print(f'Opened SQLite database with version {sqlite3.sqlite_version}.')
@@ -108,10 +111,44 @@ class Database():
             for table in SQL_TABLES:
                 self.cur.execute(table)
 
+            self.units = {}
+            self.models = {}
+            self.weapons = {}
+            self.keywords = {}
+            self.load(self.file)
+
         except sqlite3.OperationalError as e:
             print('Database Error:',e)
+
+    def load(self, dbFile: str): # Set Database object to represent the data in the db file
+        
+        self.weapons = self.getWeaponList()
+        self.keywords = self.getKeywordList()
+        self.models = self.getModelList()
+        self.units = self.getUnitList()
+
+        for model in self.models:
+            # assign keywords to models
+            self.cur.execute('SELECT * FROM Assigned_Keywords WHERE model=?', (model.name,))
+            table = self.cur.fetchall()
+            for assn in table:
+                model.keywords.add(assn[1])
+
+            # assign weapons to models
+            self.cur.execute('SELECT * FROM Assigned_Weapons WHERE model=?', (model.name,))
+            table = self.cur.fetchall()
+            for assn in table:
+                model.weapons[assn[1]] = AssignedWeapon(assn[0], assn[1], assn[2], assn[3], assn[4])   
+
+        # assign models to units
+        for unit in self.units:
+            self.cur.execute('SELECT * FROM Assigned_Models WHERE unit=?', (unit.name,))
+            table = self.cur.fetchall()
+            for assn in table:
+                unit.models[assn[1]] = AssignedModel(assn[0], assn[1], assn[2], assn[3], assn[4])
+
     
-    def save(self): # TODO: save to the db file
+    def save(self, dbFile: str): # TODO: save to the db file
         pass
 
     def getUnitList(self):
@@ -196,11 +233,13 @@ class DBRecord(ABC):
     def delete(self, database: str) -> bool:
         pass
 
+# TODO: property method for assigned modelss
 
 class Unit(DBRecord):
     def __init__(self, name: str = "", cost: int = 0):
         self.name = name
         self.cost = cost
+        self.models = {} # dict: key is model name, value is AssignedModel object
     
     def __eq__(self, that):
         return self.name == that.name
@@ -298,6 +337,7 @@ class Unit(DBRecord):
         if value >= 0:
             self.cost = value
 
+# TODO: property method for assigned weapons / keywords
 
 class Model(DBRecord):
     def __init__(self, name: str = '', toughness: int = 1, save: int = 6, health: int = 1, invuln: int = None):
@@ -306,6 +346,8 @@ class Model(DBRecord):
         self.save = save
         self.health = health
         self.invuln = invuln
+        self.weapons = {} # dict: key is weapon name, value is AssignedWeapon object
+        self.keywords = set() # set of assigned keywords
     
     def __eq__(self, that):
         return self.name == that.name
