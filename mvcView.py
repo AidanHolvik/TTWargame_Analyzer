@@ -116,9 +116,22 @@ class weaponEditor(ttk.Frame):
         btnFrame.pack()
         
     
-    # TODO: method for populating fields from loaded record
+    # method for populating fields from loaded record
     def load(self, weapon: str):
-        pass
+        wpn = self.controller.weapons[weapon]
+
+        self.wpnName.set(wpn.name)
+        self.wpnAttacks.set(wpn.attacks)
+        self.wpnStrength.set(wpn.strength)
+        self.wpnAp.set(wpn.ap)
+        self.wpnDamage.set(wpn.damage)
+    
+    def clear(self):
+        self.wpnName.set('')
+        self.wpnAttacks.set('1')
+        self.wpnStrength.set(1)
+        self.wpnAp.set(0)
+        self.wpnDamage.set('1')
 
 
 # TODO: Class for generating analysis (selecting units, etc.)
