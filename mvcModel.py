@@ -322,9 +322,9 @@ class DBRecord(ABC):
 
 class Unit(DBRecord):
     def __init__(self, name: str = "", cost: int = 0):
-        self.name = name
-        self.cost = cost
-        self.models = {} # dict: key is model name, value is AssignedModel object
+        self._name = name
+        self._cost = cost
+        self._models = {} # dict: key is model name, value is AssignedModel object
     
     def __eq__(self, that):
         return self.name == that.name
@@ -411,31 +411,31 @@ class Unit(DBRecord):
         
     @property
     def name(self):
-        return self.name
+        return self._name
     @name.setter
     def name(self, value: str):
         if value is not None:
-            self.name = value
+            self._name = value
 
     @property
     def cost(self):
-        return self.cost
+        return self._cost
     @cost.setter
     def cost(self, value: int):
         if value >= 0:
-            self.cost = value
+            self._cost = value
 
 # TODO: property method for assigned weapons / keywords
 
 class Model(DBRecord):
     def __init__(self, name: str = '', toughness: int = 1, save: int = 6, health: int = 1, invuln: int = None):
-        self.name = name
-        self.toughness = toughness
-        self.save = save
-        self.health = health
-        self.invuln = invuln
-        self.weapons = {} # dict: key is weapon name, value is AssignedWeapon object
-        self.keywords = set() # the set of keywords (as strings) assigned to the model object
+        self._name = name
+        self._toughness = toughness
+        self._save = save
+        self._health = health
+        self._invuln = invuln
+        self._weapons = {} # dict: key is weapon name, value is AssignedWeapon object
+        self._keywords = set() # the set of keywords (as strings) assigned to the model object
     
     def __eq__(self, that):
         return self.name == that.name
@@ -527,54 +527,54 @@ class Model(DBRecord):
 
     @property
     def name(self):
-        return self.name
+        return self._name
     @name.setter
     def name(self, value: str):
         if value is not None:
-            self.name = value
+            self._name = value
 
     @property
     def toughness(self):
-        return self.toughness
+        return self._toughness
     @toughness.setter
     def toughness(self, value: int):
         if value > 0:
-            self.toughness = value
+            self._toughness = value
     
     @property
     def save(self):
-        return self.save
+        return self._save
     @save.setter
     def save(self, value: int):
         if value > 1 and value <= 7:
-            self.save = value
+            self._save = value
     
     @property
     def health(self):
-        return self.health
+        return self._health
     @health.setter
     def health(self, value: int):
         if value > 0:
-            self.health = value
+            self._health = value
     
     @property
     def invuln(self):
-        return self.invuln
+        return self._invuln
     @invuln.setter
     def invuln(self, value: int):
         if value is None:
-            self.invuln = value
+            self._invuln = value
         elif value > 1 and value <= 6:
-            self.invuln = value
+            self._invuln = value
 
 
 class AssignedModel(DBRecord):
     def __init__(self, unit: str, model: str, quantity: int = 1, isLeader: bool = False, enabled: bool = True):
-        self.unit = unit
-        self.model = model
-        self.quantity = quantity
-        self.isLeader = isLeader
-        self.enabled = enabled
+        self._unit = unit
+        self._model = model
+        self._quantity = quantity
+        self._isLeader = isLeader
+        self._enabled = enabled
 
     def __eq__(self, that):
         return self.unit == that.unit and self.model == that.model
@@ -656,46 +656,46 @@ class AssignedModel(DBRecord):
     
     @property
     def unit(self):
-        return self.unit
+        return self._unit
     @unit.setter
     def unit(self, value: str):
         if value is not None:
-            self.unit = value
+            self._unit = value
     
     @property
     def model(self):
-        return self.model
+        return self._model
     @model.setter
     def model(self, value: str):
         if value is not None:
-            self.model = value
+            self._model = value
     
     @property
     def quantity(self):
-        return self.quantity
+        return self._quantity
     @quantity.setter
     def quantity(self, value: int):
         if value > 0:
-            self.quantity = value
+            self._quantity = value
     
     @property
     def isLeader(self):
-        return self.isLeader
+        return self._isLeader
     @isLeader.setter
     def isLeader(self, value: bool):
-        self.isLeader = value
+        self._isLeader = value
     
     @property
     def enabled(self):
-        return self.enabled
+        return self._enabled
     @enabled.setter
     def enabled(self, value: bool):
-        self.enabled = value
+        self._enabled = value
     
 
 class Keyword(DBRecord):
     def __init__(self, keyword: str = ''):
-        self.keyword = keyword
+        self._keyword = keyword
     
     def __eq__(self, that):
         return self.keyword == that.keyword
@@ -763,17 +763,17 @@ class Keyword(DBRecord):
     
     @property
     def keyword(self):
-        return self.keyword
+        return self._keyword
     @keyword.setter
     def keyword(self, keyword: str):
         if keyword is not None:
-            self.keyword = keyword
+            self._keyword = keyword
 
 
 class AssignedKeyword(DBRecord):
     def __init__(self, model: str, keyword: str):
-        self.model = model
-        self.keyword = keyword
+        self._model = model
+        self._keyword = keyword
 
     def __eq__(self, that):
         return self.model == that.model and self.keyword == that.keyword
@@ -841,28 +841,28 @@ class AssignedKeyword(DBRecord):
 
     @property
     def model(self):
-        return self.model
+        return self._model
     @model.setter
     def model(self, value: str):
         if value is not None:
-            self.model = value
+            self._model = value
     
     @property
     def keyword(self):
-        return self.keyword
+        return self._keyword
     @keyword.setter
     def keyword(self, value: str):
         if value is not None:
-            self.keyword = value
+            self._keyword = value
 
 
 class Weapon(DBRecord):
     def __init__(self, name: str = "", attacks: int|str = 1, strength: int = 1, ap: int = 0, damage: int|str = 1):
-        self.name = name
-        self.attacks = str(attacks)
-        self.strength = strength
-        self.ap = ap
-        self.damage = str(damage)
+        self._name = name
+        self._attacks = str(attacks)
+        self._strength = strength
+        self._ap = ap
+        self._damage = str(damage)
     
     def __eq__(self, that):
         return self.name == that.name
@@ -947,56 +947,56 @@ class Weapon(DBRecord):
 
     @property
     def name(self):
-        return self.name
+        return self._name
     @name.setter
     def name(self, value: str):
-        self.name = value
+        self._name = value
     
     @property
     def attacks(self):
-        return str(self.attacks)
+        return str(self._attacks)
     @attacks.setter
     def attacks(self, value: int|str):
         if type(value) == int and value > 0:
-            self.attacks = str(value)
+            self._attacks = str(value)
         elif re.search('[1-9][0-9]*([dD][1-9][0-9]*)?([+][1-9][0-9]*)?', value):
-            self.attacks = value.lower()
+            self._attacks = value.lower()
     
     @property
     def strength(self):
-        return self.strength
+        return self._strength
     @strength.setter
     def strength(self, value: str):
         if value > 0:
-            self.strength = value
+            self._strength = value
     
     @property
     def ap(self):
-        return self.ap
+        return self._ap
     @ap.setter
     def ap(self, value: str):
         if value >= 0:
-            self.ap = value
+            self._ap = value
     
     @property
     def damage(self):
-        return str(self.damage)
+        return str(self._damage)
     @damage.setter
     def damage(self, value: int|str):
         if type(value) == int and value > 0:
-            self.damage = str(value)
+            self._damage = str(value)
         elif re.search('[1-9][0-9]*([dD][1-9][0-9]*)?([+][1-9][0-9]*)?', value):
-            self.damage = value.lower()
+            self._damage = value.lower()
 
 
 class AssignedWeapon(DBRecord):
     # TODO: validate format of parameter 'enabled'
     def __init__(self, model: str, weapon: str, skill: int = 6, quantity: int = 1, enabled: bool = True):
-        self.model = model
-        self.weapon = weapon
-        self.skill = skill
-        self.quantity = quantity
-        self.enabled = enabled
+        self._model = model
+        self._weapon = weapon
+        self._skill = skill
+        self._quantity = quantity
+        self._enabled = enabled
 
     def __eq__(self, that):
         return self.model == that.model and self.weapon == that.weapon
@@ -1078,39 +1078,39 @@ class AssignedWeapon(DBRecord):
     
     @property
     def model(self):
-        return self.model
+        return self._model
     @model.setter
     def model(self, value: str):
         if value is not None:
-            self.model = value
+            self._model = value
     
     @property
     def weapon(self):
-        return self.weapon
+        return self._weapon
     @weapon.setter
     def weapon(self, value: str):
         if value is not None:
-            self.weapon = value
+            self._weapon = value
     
     @property
     def skill(self):
-        return self.skill
+        return self._skill
     @skill.setter
     def skill(self, value: int):
         if value > 1 and value <= 6:
-            self.skill = value
+            self._skill = value
     
     @property
     def quantity(self):
-        return self.quantity
+        return self._quantity
     @quantity.setter
     def quantity(self, value: int):
         if value > 0:
-            self.quantity = value
+            self._quantity = value
     
     @property
     def enabled(self):
-        return self.enabled
+        return self._enabled
     @enabled.setter
     def enabled(self, value: bool):
-        self.enabled = value
+        self._enabled = value

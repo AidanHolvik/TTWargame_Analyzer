@@ -1,4 +1,4 @@
-from Model import Model
+from _Model import Model
 
 class ModelGroup():
     def __init__(self, mdl: Model, quantity: int = 1, isLeader: bool = False):

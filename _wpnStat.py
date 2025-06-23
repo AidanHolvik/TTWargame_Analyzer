@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from Core import intDict, rollSum
+from _Core import intDict, rollSum
 
 # Interface
 class wpnStat(ABC):

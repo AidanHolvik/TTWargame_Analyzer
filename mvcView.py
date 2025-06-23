@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from mvcController import Controller
+import mvcModel as Model
 
 # Define root app class
 class App(tk.Tk):
@@ -19,7 +20,7 @@ class App(tk.Tk):
         frame.pack(expand=True)
         self.pages.add(frame, text='Units')
 
-        frame = weaponEditor(self.pages, self.controller, width=400, height=280)
+        frame = weaponEditor('test', self.controller, self.pages, width=400, height=280)
         frame.pack(expand=True, fill=tk.BOTH)
         self.pages.add(frame, text='Weapons')
 
@@ -28,6 +29,8 @@ class App(tk.Tk):
 # TODO: Class for model editor
 # TODO: Class for unit editor
 
+
+# TODO: custom tkinter variable classes for bound vars
 
 
 # TODO: Class for unit list
@@ -57,16 +60,20 @@ class unitManagerFrame(ttk.Frame):
         btnEdit.pack()
         btnRemove.pack()
 
+# TODO: pass weapon object to weaponEditor to bind its member variables to tk variables?
 class weaponEditor(ttk.Frame):
-    def __init__(self, master, controller: Controller, **kw):
+    def __init__(self, weapon: str, controller: Controller, master, **kw):
         super().__init__(master, **kw)
         self.controller = controller
 
-        self.wpnName = tk.StringVar()
-        self.wpnAttacks = tk.StringVar()
-        self.wpnStrength = tk.IntVar()
-        self.wpnAp = tk.IntVar()
-        self.wpnDamage = tk.IntVar()
+        self.wpnName = tk.StringVar(self, name = 'weapon name')
+        self.wpnAttacks = tk.StringVar(self, name = 'weapon attacks')
+        self.wpnStrength = tk.IntVar(self, name = 'weapon strength')
+        self.wpnAp = tk.IntVar(self, name = 'weapon ap')
+        self.wpnDamage = tk.IntVar(self, name = 'weapon damage')
+
+        self.loadWeapon(weapon)
+
 
         # Name input
         nameFrame = ttk.Frame(self)
@@ -105,15 +112,37 @@ class weaponEditor(ttk.Frame):
 
         # Buttons
         btnFrame = ttk.Frame(self)
-        btnSave = ttk.Button(btnFrame, text='Save')
-        btnCancel = ttk.Button(btnFrame, text='Cancel')
-        btnSave.pack(side=tk.LEFT)
+        btnApply = ttk.Button(btnFrame, text='Done', command=self.doSave)
+        btnCancel = ttk.Button(btnFrame, text='Cancel', command=self.doCancel)
+        btnApply.pack(side=tk.LEFT)
         btnCancel.pack(side=tk.RIGHT)
 
 
         nameFrame.pack()
         statFrame.pack(pady=20)
         btnFrame.pack()
+    
+    def loadWeapon(self, weapon: str):
+        self.wpn = self.controller.weapons[weapon]
+
+        self.wpnName.set(self.wpn.name)
+        self.wpnAttacks.set(self.wpn.attacks)
+        self.wpnStrength.set(self.wpn.strength)
+        self.wpnAp.set(self.wpn.ap)
+        self.wpnDamage.set(self.wpn.damage)
+
+
+    def doCancel(self):
+        # TODO: revert changes?
+        # TODO: close popup frame (self)
+        self.destroy()
+        pass
+
+    def doSave(self):
+        # TODO: if self.wpn.name == self.wpnName: update weapon object
+        # TODO: elif self.wpnName not in database: add new weapon (self.wpnName), delete old weapon (self.weapon.name) (renaming weapon and optionally updating stats)
+        # TODO: else fail to save, warn user, do not close window 
+        pass
         
     
     # method for populating fields from loaded record
@@ -144,6 +173,8 @@ class analyzerFrame(ttk.Frame):
 
 if __name__ == '__main__':
     controller = Controller('TTWGAnalyzer.db')
+    # testWeapon = Model.Weapon('test', 2, 3, 4, 5)
+    # testWeapon.saveNew('TTWGAnalyzer.db')
     app = App(controller)
     try:
         from ctypes import windll

@@ -1,7 +1,7 @@
-from Core import intDict, rollSum, rollPass
-from Core import rollSumCompounding as compound
-from Model import Model
-from wpnStat import *
+from _Core import intDict, rollSum, rollPass
+from _Core import rollSumCompounding as compound
+from _Model import Model
+from _wpnStat import *
 
 from abc import ABC, abstractmethod
 

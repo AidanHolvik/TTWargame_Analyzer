@@ -1,4 +1,4 @@
-from Core import intDict, rollPass
+from _Core import intDict, rollPass
 # from Weapon import Weapon
 
 # class weaponGroup():
