@@ -2,6 +2,14 @@ import sqlite3
 from abc import ABC, abstractmethod
 import re
 
+"""
+The model is responsible for:
+    - Managing data: CRUD (Create, Read, Update, Delete) operations
+    - Enforcing business rules
+    - Notifying the View and Controller of state changes
+"""
+
+
 SQL_TABLES = [
     """CREATE TABLE IF NOT EXISTS units(
         name            TEXT        PRIMARY KEY,
@@ -41,6 +49,8 @@ SQL_TABLES = [
     );""",
 ]
 
+# TODO: class representing the database as a whole, (bound to specific db file, allows easy interaction with DB)
+
 class DBRecord(ABC):
 
     @abstractmethod
@@ -51,7 +61,7 @@ class DBRecord(ABC):
     Generates a tuple which can be used to generate a record matching the DBRecord object
     """
     @abstractmethod
-    def record(self):
+    def asTuple(self):
         pass
 
     """
@@ -61,25 +71,26 @@ class DBRecord(ABC):
     def exists(self, database: str) -> bool:
         pass
 
-    """
-    Instantiates a new DBRecord object by retrieving the record with the specified primary key from the database
-    """
-    @abstractmethod
-    def load(self, database: str):
-        pass
-
+    
+    # CRUD operations
     """
     Saves the DBRecord in the database as a new record
     """
     @abstractmethod
-    def saveNew(self, database: str) -> tuple[bool, str]:
+    def create(self, database: str) -> tuple[bool, str]:
         pass
 
+    """
+    Instantiates a new DBRecord object by retrieving the record with the specified primary key from the database
+    """
+    @abstractmethod
+    def read(self, database: str):
+        pass
     """
     Updates the corresponding record in the database to match the DBRecord object
     """
     @abstractmethod
-    def saveUpdate(self, database: str) -> tuple[bool, str]:
+    def update(self, database: str) -> tuple[bool, str]:
         pass
 
     """
@@ -88,3 +99,7 @@ class DBRecord(ABC):
     @abstractmethod
     def delete(self, database: str) -> bool:
         pass
+
+class Unit(DBRecord):
+
+
