@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
-from mvcController import Controller
-import mvcModel as Model
+from __mvcController import Controller
+import __mvcModel as Model
 
 # Define root app class
 class App(tk.Tk):
@@ -62,7 +62,7 @@ class unitManagerFrame(ttk.Frame):
 
 # TODO: pass weapon object to weaponEditor to bind its member variables to tk variables?
 class weaponEditor(ttk.Frame):
-    def __init__(self, weapon: str, controller: Controller, master, **kw):
+    def __init__(self, master, controller: Controller, weapon: str = None, **kw):
         super().__init__(master, **kw)
         self.controller = controller
 
@@ -70,7 +70,8 @@ class weaponEditor(ttk.Frame):
         self.wpnAttacks = tk.StringVar(self, name = 'weapon attacks')
         self.wpnStrength = tk.IntVar(self, name = 'weapon strength')
         self.wpnAp = tk.IntVar(self, name = 'weapon ap')
-        self.wpnDamage = tk.IntVar(self, name = 'weapon damage')
+        self.wpnDamage = tk.StringVar(self, name = 'weapon damage')
+
 
         self.loadWeapon(weapon)
 
@@ -122,24 +123,42 @@ class weaponEditor(ttk.Frame):
         statFrame.pack(pady=20)
         btnFrame.pack()
     
-    def loadWeapon(self, weapon: str):
-        self.wpn = self.controller.weapons[weapon]
+    def loadWeapon(self, weapon: str = None):
+        if weapon == None:
+            self.wpn = None
 
-        self.wpnName.set(self.wpn.name)
-        self.wpnAttacks.set(self.wpn.attacks)
-        self.wpnStrength.set(self.wpn.strength)
-        self.wpnAp.set(self.wpn.ap)
-        self.wpnDamage.set(self.wpn.damage)
+            self.wpnName.set('New Weapon')
+            self.wpnAttacks.set('1')
+            self.wpnStrength.set(1)
+            self.wpnAp.set(0)
+            self.wpnDamage.set('1')
+        else:
+            self.wpn = self.controller.weapons[weapon]
+
+            self.wpnName.set(self.wpn.name)
+            self.wpnAttacks.set(self.wpn.attacks)
+            self.wpnStrength.set(self.wpn.strength)
+            self.wpnAp.set(self.wpn.ap)
+            self.wpnDamage.set(self.wpn.damage)
 
 
     def doCancel(self):
         # TODO: revert changes?
-        # TODO: close popup frame (self)
         self.destroy()
         pass
 
     def doSave(self):
         # TODO: if self.wpn.name == self.wpnName: update weapon object
+        if self.wpn.name == self.wpnName:
+            # TODO: update weapon object
+            pass
+        elif self.wpnName not in controller.weapons.keys():
+            if self.wpn != None: # Delete old weapon if applicable
+                del self.controller.weapons[self.wpn.name]
+                del self.wpn
+            # TODO: create new weapon
+            self.wpn = Weapon()
+            pass
         # TODO: elif self.wpnName not in database: add new weapon (self.wpnName), delete old weapon (self.weapon.name) (renaming weapon and optionally updating stats)
         # TODO: else fail to save, warn user, do not close window 
         pass

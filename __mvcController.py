@@ -1,4 +1,4 @@
-from mvcModel import *
+from __mvcModel import *
 
 class Controller():
     def __init__(self, db: str):
@@ -16,6 +16,14 @@ class Controller():
     @property
     def keywords(self):
         return self.db.keywords
+    
+    def addWeapon(self, name: str):
+        pass
+        
+    def removeWeapon(self, name: str):
+        if name in self.weapons.keys():
+            del self.weapons[name]
+    
     
     
     
