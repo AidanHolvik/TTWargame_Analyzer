@@ -7,33 +7,10 @@ The controller is responsible for:
     - Selecting and displaying the appropriate View
 """
 
-db = Database('test')
-
-# temp = Unit('testName_1')
-# temp = Unit('testName_2', 10)
-# db.createUnit(temp)
-
-# temp = db.readUnit('testName_1')
-# print(temp.asTuple())
-# temp = db.readUnit('testName_2')
-# print(temp.asTuple())
-
-# temp.name = 'testName_2b'
-# temp.cost = 67
-# print(db.updateUnit('testName_2b', temp))
-
-temp = db.listUnits()
-for i in temp:
-    print(i)
-print('')
-
-# db.deleteUnit('testName_2b')
-
-temp = db.listUnits()
-for i in temp:
-    print(i)
-print('')
-
+class Controller:
+    def __init__(self, model, view):
+        self.model = model
+        self.view = view
 
 
 

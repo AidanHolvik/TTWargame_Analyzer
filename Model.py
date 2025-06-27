@@ -280,7 +280,7 @@ class Database():
         try:
             with sqlite3.connect(self.db) as conn:
                 cur = conn.cursor()
-                cur.execute('SELECT * FROM units')
+                cur.execute('SELECT * FROM units ORDER BY name')
                 queryResult = cur.fetchall()
 
                 units = []
@@ -345,7 +345,7 @@ class Database():
         try:
             with sqlite3.connect(self.db) as conn:
                 cur = conn.cursor()
-                cur.execute('SELECT * FROM models')
+                cur.execute('SELECT * FROM models ORDER BY unit, name')
                 queryResult = cur.fetchall()
 
                 models = []

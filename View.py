@@ -1,4 +1,6 @@
-
+import tkinter as tk
+from tkinter import ttk
+from Controller import Controller
 
 
 """
@@ -7,3 +9,16 @@ The view is responsible for:
     - Displaying the user interface elements
     - Updating the display when the Model changes
 """
+
+# TODO: unit list (with buttons)
+
+# TODO: unit editor (with buttons)
+
+# Main frame
+class View(ttk.Frame):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.controller = None
+
+        # TODO: add notebook component for navigation
+    
