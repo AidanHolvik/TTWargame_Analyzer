@@ -35,7 +35,7 @@ SQL_TABLES = [
         invuln      INT     CHECK(invuln > 1 AND invuln < 7),
         isLeader    TEXT    NOT NULL
                             DEFAULT 'False'
-                            CHECK(leader IN ('True','False')),
+                            CHECK(isLeader IN ('True','False')),
         enabled     TEXT    NOT NULL
                             DEFAULT 'True'
                             CHECK(enabled in ('True','False')),
@@ -60,9 +60,24 @@ class DBRecord(ABC):
     @abstractmethod
     def __eq__(self, that):
         pass
+    @abstractmethod
+    def __lt__(self,that):
+        pass
+    @abstractmethod
+    def __str__(self):
+        pass
+
 
     """
-    Generates a tuple which can be used to generate a record matching the DBRecord object
+    Returns a new DBRecord created using the values from row. row is expected to have the same format
+    as the output of asTuple.
+    """
+    @abstractmethod
+    def fromTuple(row: tuple):
+        pass
+
+    """
+    Generates a tuple which represents a record matching the DBRecord object
     """
     @abstractmethod
     def asTuple(self):
@@ -76,17 +91,25 @@ class Unit(DBRecord):
 
         self.name = name
         self.cost = cost
-
-    def __init__(self, row: tuple[str, int]):
-        self._name = row[0]
-        self._cost = row[1]
     
-    def __eq__(self, that):
-        return self.name == that.name
+    def __str__(self):
+        return str(self.asTuple())
+    
+    @staticmethod
+    def fromTuple(row: tuple[str,int]):
+        return Unit(row[0],row[1])
     
     def asTuple(self):
         return (self.name, self.cost)
+    
+
+    def __eq__(self, that):
+        return self.name == that.name
+    
+    def __lt__(self, that):
+        return self.name < that.name
         
+    
     @property
     def name(self):
         return self._name
@@ -104,7 +127,7 @@ class Unit(DBRecord):
             self._cost = value
 
 class Model(DBRecord):
-    def __init__(self, unit: int, name: str = '', quantity: int = 1, toughness: int = 1, save: int = 6, health: int = 1, invuln: int = None, isLeader: bool = False, enabled: bool = True):
+    def __init__(self, unit: int, name: str = '', quantity: int = 1, toughness: int = 1, save: int = 6, health: int = 1, invuln: int = None, isLeader: bool|str = False, enabled: bool|str = True):
         self.unit = unit
         self.name = name
         self.quantity = quantity
@@ -115,25 +138,27 @@ class Model(DBRecord):
         self.isLeader = isLeader
         self.enabled = enabled
 
-    # Expects a tuple matching the asTuple output
-    def __init__(self, row: tuple[int,str,int,int,int,int,int,str|bool,str|bool]):
-        self.unit = row[0]
-        self.currName = row[1] # NOTE: this will cause update() to update the last record loaded if you're not careful
-        self.name = row[1]
-        self.quantity = row[2]
-        self.toughness = row[3]
-        self.save = row[4]
-        self.health = row[5]
-        self.invuln = row[6]
-        self.isLeader = row[7]
-        self.enabled = row[8]
+    def __str__(self):
+        return str(self.asTuple())
     
-    def __eq__(self, that):
-        return self.unit == that.unit and self.name == that.name
-
+    @staticmethod
+    def fromTuple(row: tuple[int,str,int,int,int,int,int,str|bool,str|bool]):
+        return Model(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8])
+    
     def asTuple(self):
         return (self.unit, self.name, self.quantity, self.toughness, self.save, self.health, self.invuln, str(self.isLeader), str(self.enabled))
 
+
+    def __eq__(self, that):
+        return self.unit == that.unit and self.name == that.name
+    
+    def __lt__(self, that):
+        if self.unit == that.unit:
+            return self.name < that.name
+        else:
+            return self.unit < that.unit
+
+    
     def exists(self, database: str):
         try:
             with sqlite3.connect(database) as conn:
@@ -147,68 +172,6 @@ class Model(DBRecord):
             # print(f'Error verifying existence of model "{name}" in {database}: ', str(e))
             return None
     
-    
-    
-    def create(self, database: str):
-        exists = self.exists(database)
-        if exists is None: 
-            return (bool(False), f'Error saving new model "{self.name}" to {database}: Failed to check if such a model already exists')
-        elif not exists:
-            try:
-                with sqlite3.connect(database) as conn:
-                    cur = conn.cursor()
-                    cur.execute('INSERT INTO Models(unit,name,quantity,toughness,save,health,invuln,isLeader,enabled) VALUES (?,?,?,?,?,?,?,?,?)', self.asTuple())
-                    conn.commit()
-                    return (bool(True), f'New model "{self.name}" added to {database}')
-            except sqlite3.OperationalError as e:
-                return (bool(False), f'Error saving new model "{self.name}" to {database}: ' + str(e))
-        else:
-            return (bool(False), f'Error saving new model "{self.name}" to {database}: A model with this primary key already exists')
-        
-    def read(self, database: str):
-        if self.exists(database):
-            try:
-                with sqlite3.connect(database) as conn:
-                    cur = conn.cursor()
-                    cur.execute('SELECT * FROM Models WHERE name=? AND unit=?', (self.name, self.unit))
-                    record = cur.fetchone()
-
-                    return Model(record)
-            except sqlite3.OperationalError as e:
-                return None
-
-    def update(self, database: str):
-        exists = self.exists(database)
-        if exists is None:
-            return (bool(False), f'Error updating model "{self.currName}" in {database}: Failed to check if such a model exists')
-        elif exists:
-            try:
-                with sqlite3.connect(database) as conn:
-                    cur = conn.cursor()
-                    cur.execute('UPDATE Models SET name=?, quantity=?, toughness=?, save=?, health=?, invuln=?, isLeader=?, enabled=?  WHERE unit=? AND name=?', (self.name, self.quantity, self.toughness, self.save, self.health, self.invuln, str(self.isLeader), str(self.enabled), self.unit, self.currName))
-                    conn.commit()
-                    tempName = self.currName
-                    self.currName = self.name
-                    return (bool(True), f'Updated model "{tempName}" in {database}')
-            except sqlite3.OperationalError as e:
-                print(f'Error updating model "{self.currName}" in {database}:', e)
-                return (bool(False), f'Error updating model "{self.currName}" in {database}: ' + str(e))
-        else:
-            return (bool(False), f'Error updating model "{self.currName}" in {database}: No such model exists')
-    
-    def delete(self, database: str):
-        if self.exists(database):
-            try:
-                with sqlite3.connect(database) as conn:
-                    cur = conn.cursor()
-                    cur.execute('DELETE FROM Models WHERE name=?', (self.name,))
-                    conn.commit()
-
-                    return True
-            except sqlite3.OperationalError as e:
-                return False
-        else:
-            return False
 
     @property
     def unit(self):
@@ -300,19 +263,33 @@ class Model(DBRecord):
 
 class Database():
     def __init__(self, fileName: str):
-        self.db = fileName
+        self.db = f'{fileName}.db'
+
+        # Initialize database
+        try:
+            with sqlite3.connect(self.db) as conn:
+                cur = conn.cursor()
+                for table in SQL_TABLES:
+                    cur.execute(table)
+                conn.commit()
+        except sqlite3.OperationalError as e:
+            print('Error initializing database: ', e)
     
     # Unit CRUD
     def listUnits(self):
         try:
             with sqlite3.connect(self.db) as conn:
                 cur = conn.cursor()
-                cur.execute('SELECT name FROM units')
-                unitNames = cur.fetchall()
+                cur.execute('SELECT * FROM units')
+                queryResult = cur.fetchall()
 
-                return unitNames
+                units = []
+                for row in queryResult:
+                    units.append(Unit.fromTuple(row))
+
+                return units
         except sqlite3.OperationalError as e:
-            print('Error reading unit')
+            print('Error listing units: ', e)
             return None
 
     def createUnit(self, unit: Unit):
@@ -324,7 +301,7 @@ class Database():
                 conn.commit()
                 return True
         except sqlite3.OperationalError as e:
-            print('Error creating unit')
+            print('Error creating unit: ', e)
             return False
     
     def readUnit(self, name: str):
@@ -333,22 +310,22 @@ class Database():
                 cur = conn.cursor()
                 cur.execute('SELECT * FROM units WHERE name=?', (name,))
                 record = cur.fetchone()
-                unit = Unit(record)
+                unit = Unit.fromTuple(record)
 
                 return unit
         except sqlite3.OperationalError as e:
-            print('Error reading unit')
+            print('Error reading unit: ', e)
             return None
     
     def updateUnit(self, name: str, new: Unit):
         try:
             with sqlite3.connect(self.db) as conn:
                 cur = conn.cursor()
-                cur.execute(f'UPDATE units SET name=?, points_cost=? WHERE name={name}', new.asTuple())
+                cur.execute(f'UPDATE units SET name=?, points_cost=? WHERE name="{name}"', new.asTuple())
                 conn.commit()
                 return True
         except sqlite3.OperationalError as e:
-            print('Error updating unit')
+            print('Error updating unit: ', e)
             return False
     
     def deleteUnit(self, name: str):
@@ -360,6 +337,7 @@ class Database():
 
                 return True
         except sqlite3.OperationalError as e:
+            print('Error deleting unit: ', e)
             return False
         
     # Model CRUD
@@ -367,12 +345,16 @@ class Database():
         try:
             with sqlite3.connect(self.db) as conn:
                 cur = conn.cursor()
-                cur.execute('SELECT unit, name FROM models')
-                models = cur.fetchall()
+                cur.execute('SELECT * FROM models')
+                queryResult = cur.fetchall()
+
+                models = []
+                for row in queryResult:
+                    models.append(Model.fromTuple(row))
 
                 return models
         except sqlite3.OperationalError as e:
-            print('Error reading unit')
+            print('Error listing models: ', e)
             return None
     
     def createModel(self, model: Model):
@@ -383,7 +365,7 @@ class Database():
                 conn.commit()
                 return True
         except sqlite3.OperationalError as e:
-            print('Error creating model')
+            print('Error creating model: ', e)
             return False
     
     def readModel(self, unitName: str, modelName: str):
@@ -392,22 +374,22 @@ class Database():
                 cur = conn.cursor()
                 cur.execute('SELECT * FROM models WHERE unit=? AND name=?', (unitName, modelName))
                 record = cur.fetchone()
-                model = Model(record)
+                model = Model.fromTuple(record)
 
                 return model
         except sqlite3.OperationalError as e:
-            print('Error reading Model')
+            print('Error reading Model: ', e)
             return None
         
     def updateModel(self, unitName: str, modelName: str, new: Model):
         try:
             with sqlite3.connect(self.db) as conn:
                 cur = conn.cursor()
-                cur.execute(f'UPDATE models SET unit=?, name=?, quantity=?, toughness=?, save=?, health=?, invuln=?, isLeader=?, enabled=? WHERE unit={unitName} AND name={modelName}', new.asTuple())
+                cur.execute(f'UPDATE models SET unit=?, name=?, quantity=?, toughness=?, save=?, health=?, invuln=?, isLeader=?, enabled=? WHERE unit="{unitName}" AND name="{modelName}"', new.asTuple())
                 conn.commit()
                 return True
         except sqlite3.OperationalError as e:
-            print('Error updating model')
+            print('Error updating model: ', e)
             return False
         
     def deleteModel(self, unitName: str, modelName: str):
@@ -419,6 +401,7 @@ class Database():
 
                 return True
         except sqlite3.OperationalError as e:
+            print('Error deleting model: ', e)
             return False
         
     
