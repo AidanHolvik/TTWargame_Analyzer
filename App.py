@@ -1,7 +1,7 @@
 import tkinter as tk
 from Model import Database
-import Controller
-import View
+from Controller import Controller
+from View import View
 
 # Contains root tkinter window, and has an instance of model, view, and controller.
 class App(tk.Tk):
@@ -11,14 +11,17 @@ class App(tk.Tk):
         self.title('Tabletop Wargame Analyzer')
 
         # Create model
-        self.model = Database('test')
+        model = Database('test')
 
         # Create view, place it on main window
         view = View(self)
+        view.pack()
 
         # Create controller
+        controller = Controller(model, view)
 
         # Bind the controller to the view
+        view.controller = controller
 
 # Main application loop
 if __name__ == '__main__':

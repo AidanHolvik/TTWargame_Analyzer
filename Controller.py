@@ -11,6 +11,13 @@ class Controller:
     def __init__(self, model, view):
         self.model = model
         self.view = view
+    
+    def units(self):
+        unitList = {}
+        for row in self.model.listUnits():
+            unitList[row[0]] = row
+        
+        return unitList
 
 
 
