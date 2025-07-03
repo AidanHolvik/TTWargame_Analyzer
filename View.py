@@ -14,9 +14,12 @@ The view is responsible for:
 class UnitList(ttk.Frame):
     def __init__(self, master):
         super().__init__(master)
+        self.controller = None
 
-        unitList = self.controller.listUnits()
-        listVar = tk.Variable(self, unitList.keys(), 'unitNames')
+        unitList = {}
+        if self.controller is not None:
+            unitList = self.controller.listUnits()
+        listVar = tk.Variable(self, list(unitList.keys()), 'unitNames')
 
         # Listbox on left
         listFrame = ttk.Frame(self)
@@ -28,15 +31,26 @@ class UnitList(ttk.Frame):
         scrollbar.pack(side=tk.LEFT)
 
         # buttons frame on right
-            # New
-            # Edit
-            # Delete
+        buttonFrame = ttk.Frame(self)
+        btnNew = ttk.Button(buttonFrame, text='New')
+        btnEdit = ttk.Button(buttonFrame, text='Edit')
+        btnDelete = ttk.Button(buttonFrame, text='Delete')
+
+        btnNew.pack()
+        btnEdit.pack()
+        btnDelete.pack()
         
-        listFrame.pack()
+        listFrame.pack(side=tk.LEFT)
+        buttonFrame.pack(side=tk.LEFT)
     
     @property
     def controller(self) -> Controller:
-        return self.master.controller
+        return self._controller
+    @controller.setter
+    def controller(self, value: Controller):
+        self._controller = value
+        # TODO: refresh this widget
+    
     
 
 
@@ -48,10 +62,22 @@ class UnitList(ttk.Frame):
 class View(ttk.Frame):
     def __init__(self, master, controller: Controller = None):
         super().__init__(master)
-        self.controller = None
+        self._controller = None
 
-        unitList = UnitList(self) # Testing
+        self.unitList = UnitList(self) # Testing
+        self.unitList.pack()
 
         # TODO: add notebook component for navigation
+    
+    @property
+    def controller(self) -> Controller:
+        return self._controller
+    @controller.setter
+    def controller(self, value: Controller):
+        self._controller = value
+        self.unitList.controller = self.controller
+    
+
+
     
     
