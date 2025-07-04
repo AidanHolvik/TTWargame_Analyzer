@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from Controller import Controller
+from Model import Database, Model, Unit
 
 
 """
@@ -12,20 +12,16 @@ The view is responsible for:
 
 # TODO: unit list (with buttons)
 class UnitList(ttk.Frame):
-    def __init__(self, master, controller: Controller = None, **kw):
+    def __init__(self, master, model: Database = None, **kw):
         super().__init__(master, **kw)
-        self.controller = controller
+        self.model = model
 
-        # TODO: this code block (below) is handling behaviour which should be handled by the controller
-        unitList = {}
-        if self.controller is not None:
-            unitList = self.controller.listUnits()
-        listVar = tk.Variable(self, list(unitList.keys()), 'unitNames')
-        # TODO: this code block (above) is handling behaviour which should be handled by the controller
+        self.unitList = tk.Variable(self, [], 'unitNames')
+        self.refreshUnitList()
 
         # Listbox on left
         listFrame = ttk.Frame(self)
-        listBox = tk.Listbox(listFrame, listvariable=listVar)
+        listBox = tk.Listbox(listFrame, listvariable=self.unitList)
         scrollbar = ttk.Scrollbar(listFrame, orient=tk.VERTICAL, command=listBox.yview)
         listBox['yscrollcommand'] = scrollbar.set
 
@@ -45,10 +41,23 @@ class UnitList(ttk.Frame):
         listFrame.pack(side=tk.LEFT)
         buttonFrame.pack(side=tk.LEFT)
     
+    def refreshUnitList(self):
+        unitNames = []
+        if self.model is not None:
+            for unit in self.model.listUnits():
+                unitNames.append(unit.name)
+        self.unitList.set(unitNames)
+    
+    # TODO: button addUnit
+    # TODO: button editUnit
+    # TODO: button deleteUnit
+
+
+    
 class UnitEditor(ttk.Frame):
-    def __init__(self, master, controller: Controller = None, **kw):
+    def __init__(self, master, model: Database = None, **kw):
         super().__init__(master, **kw)
-        self.controller = controller
+        self.model = model
         self.prevName = None
     
         self.name = tk.StringVar(self, name='unitName')
@@ -70,35 +79,59 @@ class UnitEditor(ttk.Frame):
 
         # TODO: unit models
 
-        # TODO: buttons
+        # Buttons
         buttonFrame = ttk.Frame(self)
-        self.cancelButton = ttk.Button(buttonFrame, text='Cancel')
-        self.saveButton = ttk.Button(buttonFrame, text='Save')
-        self.cancelButton.pack(side=tk.LEFT)
-        self.saveButton.pack(side=tk.RIGHT)
+        cancelButton = ttk.Button(buttonFrame, text='Cancel')
+        saveButton = ttk.Button(buttonFrame, text='Save', command=self.saveUnit)
+        cancelButton.pack(side=tk.LEFT)
+        saveButton.pack(side=tk.RIGHT)
+
+        # TODO: add button behaviour
 
         # Pack top-level frames
         nameFrame.pack()
         costFrame.pack()
         buttonFrame.pack()
+    
+    def populate(self, name: str = None):
+        self.prevName = name
+        if name is None: # new unit
+            self.name.set('')
+            self.cost.set(0)
+        else: # loading unit from DB
+            unit = self.model.readUnit(name) # TODO: handle error - failure to retrieve unit (readUnit returns None)
+            self.name.set(unit.name)
+            self.cost.set(unit.cost)
+    
+    def saveUnit(self):
+        unit = Unit(self.name.get(), self.cost.get())
+        if unit.name == None:
+            return
+
+        if unit not in self.model.listUnits():
+            if self.prevName is None:
+                self.model.createUnit(unit)
+            else:
+                self.model.updateUnit(self.prevName, unit)
+        elif unit.name == self.prevName:
+            self.model.updateUnit(self.prevName, unit)
+        
+
+
 
     
 
-
-    
-
-# TODO: unit editor (with buttons)
 
 # Main frame
 class View(ttk.Frame):
-    def __init__(self, master, controller: Controller = None, **kw):
+    def __init__(self, master, model: Database = None, **kw):
         super().__init__(master, **kw)
-        self.controller = controller
+        self.model = model
 
-        self.unitList = UnitList(self, controller) # Testing
-        self.unitEditor = UnitEditor(self, controller)
+        unitList = UnitList(self, model) # Testing
+        unitEditor = UnitEditor(self, model)
 
-        self.unitEditor.pack()
+        unitList.pack()
 
         # TODO: add notebook component for navigation
     

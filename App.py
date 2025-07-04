@@ -14,14 +14,9 @@ class App(tk.Tk):
         model = Database('test')
 
         # Create view, place it on main window
-        view = View(self)
+        view = View(self, model)
         view.pack()
 
-        # Create controller
-        controller = Controller(model, view)
-
-        # Bind the controller to the view
-        view.controller = controller
 
 # Main application loop
 if __name__ == '__main__':
