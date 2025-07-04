@@ -30,7 +30,7 @@ class UnitList(ttk.Frame):
 
         # buttons frame on right
         buttonFrame = ttk.Frame(self)
-        self.btnNew = ttk.Button(buttonFrame, text='New')
+        self.btnNew = ttk.Button(buttonFrame, text='New', command=self.btnCmdNew)
         self.btnEdit = ttk.Button(buttonFrame, text='Edit')
         self.btnDelete = ttk.Button(buttonFrame, text='Delete')
 
@@ -48,7 +48,12 @@ class UnitList(ttk.Frame):
                 unitNames.append(unit.name)
         self.unitList.set(unitNames)
     
-    # TODO: button addUnit
+
+    def btnCmdNew(self):
+        # hide all current frames
+        # populate unit editor
+        # pack UnitEditor frame
+        pass
     # TODO: button editUnit
     # TODO: button deleteUnit
 
@@ -77,7 +82,7 @@ class UnitEditor(ttk.Frame):
         costLabel.pack(side=tk.LEFT)
         costField.pack(side=tk.LEFT)
 
-        # TODO: unit models
+        # TODO: models frame
 
         # Buttons
         buttonFrame = ttk.Frame(self)
@@ -86,11 +91,10 @@ class UnitEditor(ttk.Frame):
         cancelButton.pack(side=tk.LEFT)
         saveButton.pack(side=tk.RIGHT)
 
-        # TODO: add button behaviour
-
         # Pack top-level frames
         nameFrame.pack()
         costFrame.pack()
+        # TODO: pack models frame
         buttonFrame.pack()
     
     def populate(self, name: str = None):
@@ -111,10 +115,20 @@ class UnitEditor(ttk.Frame):
         if unit not in self.model.listUnits():
             if self.prevName is None:
                 self.model.createUnit(unit)
+                # TODO: assign models to the unit
             else:
                 self.model.updateUnit(self.prevName, unit)
+                # TODO: assign/unassign models to the unit
         elif unit.name == self.prevName:
             self.model.updateUnit(self.prevName, unit)
+            # TODO: assign/unassign models to the unit
+    
+    def hide(self):
+        # TODO: pack_forget() self
+        pass
+
+    def show(self):
+        pass
         
 
 
