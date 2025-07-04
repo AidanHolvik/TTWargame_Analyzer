@@ -12,14 +12,16 @@ The view is responsible for:
 
 # TODO: unit list (with buttons)
 class UnitList(ttk.Frame):
-    def __init__(self, master):
-        super().__init__(master)
-        self.controller = None
+    def __init__(self, master, controller: Controller = None, **kw):
+        super().__init__(master, **kw)
+        self.controller = controller
 
+        # TODO: this code block (below) is handling behaviour which should be handled by the controller
         unitList = {}
         if self.controller is not None:
             unitList = self.controller.listUnits()
         listVar = tk.Variable(self, list(unitList.keys()), 'unitNames')
+        # TODO: this code block (above) is handling behaviour which should be handled by the controller
 
         # Listbox on left
         listFrame = ttk.Frame(self)
@@ -32,25 +34,54 @@ class UnitList(ttk.Frame):
 
         # buttons frame on right
         buttonFrame = ttk.Frame(self)
-        btnNew = ttk.Button(buttonFrame, text='New')
-        btnEdit = ttk.Button(buttonFrame, text='Edit')
-        btnDelete = ttk.Button(buttonFrame, text='Delete')
+        self.btnNew = ttk.Button(buttonFrame, text='New')
+        self.btnEdit = ttk.Button(buttonFrame, text='Edit')
+        self.btnDelete = ttk.Button(buttonFrame, text='Delete')
 
-        btnNew.pack()
-        btnEdit.pack()
-        btnDelete.pack()
+        self.btnNew.pack()
+        self.btnEdit.pack()
+        self.btnDelete.pack()
         
         listFrame.pack(side=tk.LEFT)
         buttonFrame.pack(side=tk.LEFT)
     
-    @property
-    def controller(self) -> Controller:
-        return self._controller
-    @controller.setter
-    def controller(self, value: Controller):
-        self._controller = value
-        # TODO: refresh this widget
+class UnitEditor(ttk.Frame):
+    def __init__(self, master, controller: Controller = None, **kw):
+        super().__init__(master, **kw)
+        self.controller = controller
+        self.prevName = None
     
+        self.name = tk.StringVar(self, name='unitName')
+        self.cost = tk.IntVar(self, name='unitCost')
+
+        # Unit Name
+        nameFrame = ttk.Frame(self)
+        nameLabel = ttk.Label(nameFrame, text='Name')
+        nameField = ttk.Entry(nameFrame, textvariable=self.name)
+        nameLabel.pack(side=tk.LEFT)
+        nameField.pack(side=tk.LEFT)
+
+        # Unit Cost
+        costFrame = ttk.Frame(self)
+        costLabel = ttk.Label(costFrame, text='Points Cost')
+        costField = ttk.Spinbox(costFrame, from_=0, to=9999, textvariable=self.cost)
+        costLabel.pack(side=tk.LEFT)
+        costField.pack(side=tk.LEFT)
+
+        # TODO: unit models
+
+        # TODO: buttons
+        buttonFrame = ttk.Frame(self)
+        self.cancelButton = ttk.Button(buttonFrame, text='Cancel')
+        self.saveButton = ttk.Button(buttonFrame, text='Save')
+        self.cancelButton.pack(side=tk.LEFT)
+        self.saveButton.pack(side=tk.RIGHT)
+
+        # Pack top-level frames
+        nameFrame.pack()
+        costFrame.pack()
+        buttonFrame.pack()
+
     
 
 
@@ -60,22 +91,16 @@ class UnitList(ttk.Frame):
 
 # Main frame
 class View(ttk.Frame):
-    def __init__(self, master, controller: Controller = None):
-        super().__init__(master)
-        self._controller = None
+    def __init__(self, master, controller: Controller = None, **kw):
+        super().__init__(master, **kw)
+        self.controller = controller
 
-        self.unitList = UnitList(self) # Testing
-        self.unitList.pack()
+        self.unitList = UnitList(self, controller) # Testing
+        self.unitEditor = UnitEditor(self, controller)
+
+        self.unitEditor.pack()
 
         # TODO: add notebook component for navigation
-    
-    @property
-    def controller(self) -> Controller:
-        return self._controller
-    @controller.setter
-    def controller(self, value: Controller):
-        self._controller = value
-        self.unitList.controller = self.controller
     
 
 

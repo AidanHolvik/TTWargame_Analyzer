@@ -86,8 +86,6 @@ class DBRecord(ABC):
 
 class Unit(DBRecord):
     def __init__(self, name: str = "", cost: int = 0):
-        self._name = None
-        self._cost = None
 
         self.name = name
         self.cost = cost
