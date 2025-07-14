@@ -121,8 +121,12 @@ class Unit(DBRecord):
         return self._cost
     @cost.setter
     def cost(self, value: int):
-        if value >= 0:
+        if value is None:
+            self._cost = 0
+        elif value >= 0:
             self._cost = value
+        else:
+            self._cost = 0
 
 class Model(DBRecord):
     def __init__(self, unit: int, name: str = '', quantity: int = 1, toughness: int = 1, save: int = 6, health: int = 1, invuln: int = None, isLeader: bool|str = False, enabled: bool|str = True):

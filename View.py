@@ -10,11 +10,23 @@ The view is responsible for:
     - Updating the display when the Model changes
 """
 
-# TODO: unit list (with buttons)
-class UnitList(ttk.Frame):
-    def __init__(self, master, model: Database = None, **kw):
+class CustomPage(ttk.Frame):
+    def __init__(self, master: ttk.Frame, parentPage, model: Database, **kw):
         super().__init__(master, **kw)
+        self.parent = parentPage
         self.model = model
+
+    def show(self):
+        self.grid(column=0, row=0)
+    
+    def hide(self):
+        self.grid_forget()
+
+
+# TODO: unit list (with buttons)
+class UnitList(CustomPage):
+    def __init__(self, master: ttk.Frame, parentPage: CustomPage, model: Database, **kw):
+        super().__init__(master, parentPage, **kw)
 
         self.unitNames = []
         self.unitList = tk.Variable(self, [], 'unitNames')
@@ -59,8 +71,6 @@ class UnitList(ttk.Frame):
             for unit in self.model.listUnits():
                 self.unitNames.append(unit.name)
         self.unitList.set(self.unitNames)
-    
-    
 
     def btnCmdNew(self):
         # populate unit editor
@@ -83,10 +93,9 @@ class UnitList(ttk.Frame):
 
 
     
-class UnitEditor(ttk.Frame):
-    def __init__(self, master: UnitList, model: Database = None, **kw):
-        super().__init__(master, **kw)
-        self.model = model
+class UnitEditor(CustomPage):
+    def __init__(self, master: UnitList, parentPage: CustomPage, model: Database, **kw):
+        super().__init__(master, parentPage, model, **kw)
         self.prevName = None
     
         self.name = tk.StringVar(self, name='unitName')
@@ -107,6 +116,7 @@ class UnitEditor(ttk.Frame):
         costField.pack(side=tk.LEFT)
 
         # TODO: models frame
+        modelList = ModelList()
 
         # Buttons
         buttonFrame = ttk.Frame(self)
@@ -121,6 +131,11 @@ class UnitEditor(ttk.Frame):
         # TODO: pack models frame
         buttonFrame.pack()
 
+    def show(self):
+        self.grid(column=0, row=0)
+    
+    def hide(self):
+        self.grid_forget()
     
     def populate(self, name: str = None):
         self.prevName = name
@@ -131,6 +146,10 @@ class UnitEditor(ttk.Frame):
             unit = self.model.readUnit(name) # TODO: handle error - failure to retrieve unit (readUnit returns None)
             self.name.set(unit.name)
             self.cost.set(unit.cost)
+    
+    def close(self):
+        self.grid_forget()
+        self.parentWindow.show()
     
     def btnCmdSave(self):
         unit = Unit(self.name.get(), self.cost.get())
@@ -149,13 +168,22 @@ class UnitEditor(ttk.Frame):
             self.model.updateUnit(self.prevName, unit)
             # TODO: assign/unassign models to the unit
         
+        # TODO: if saving fails, display popup message instead of closing the window
+
         self.master.refreshUnitList()
+        self.close()
     
     def btnCmdCancel(self):
-        self.grid_forget()
-        self.master.rootFrame.grid(column=0, row=0)
+        self.close()
         
-
+    
+class ModelList(ttk.Frame):
+    def __init__(self, master, parentPage: CustomPage, model: Database, **kw):
+        super().__init__(self, master, **kw)
+        self.model = model
+        
+        # on left: list of models for the specified unit
+        # on right: buttons for managing models for the specified unit
 
 
     
