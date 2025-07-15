@@ -12,18 +12,17 @@ The view is responsible for:
 
 class CustomWindow(ttk.Frame):
     def __init__(self, master: ttk.Frame, parentWindow, model: Database, **kw):
-        super().__init__(master, padding=0)
+        super().__init__(master)
         self.parent = parentWindow
         self.model = model
 
         self.root = ttk.Frame(self, **kw)
 
     def show(self):
-        self.root.pack()
-        self.width = self['width']
+        self.root.grid(column=0, row=0)
     
     def hide(self):
-        self.root.pack_forget()
+        self.root.grid_forget()
     
     def close(self):
         self.hide()
@@ -69,11 +68,9 @@ class UnitList(CustomWindow):
         
         listFrame.pack(side=tk.LEFT)
         buttonFrame.pack(side=tk.LEFT)
-        self.unitEditor.pack()
+        self.unitEditor.grid()
         
 
-        
-    
     def refreshUnitList(self):
         self.unitNames = []
         if self.model is not None:
@@ -87,9 +84,6 @@ class UnitList(CustomWindow):
         # Bring unit editor frame to front
         self.hide()
         self.unitEditor.show()
-
-        # self.rootFrame.grid_forget()
-        # self.unitEditor.grid(column=0, row=0)
     
     def btnCmdEdit(self):
         # populate unit editor
