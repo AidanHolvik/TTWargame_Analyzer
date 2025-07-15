@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from Model import Database, Model, Unit
+from abc import ABC, abstractmethod
 
 
 """
@@ -10,32 +11,54 @@ The view is responsible for:
     - Updating the display when the Model changes
 """
 
-class CustomWindow(ttk.Frame):
-    def __init__(self, master: ttk.Frame, parentWindow, model: Database, **kw):
-        super().__init__(master)
+class Window(ttk.Frame, ABC):
+    def __init__(self, master: ttk.Frame, parentWindow: str, model: Database, **kw):
+        super().__init__(master, **kw)
+        self.master = master
         self.parent = parentWindow
         self.model = model
-
-        self.root = ttk.Frame(self, **kw)
-
-    def show(self):
-        self.root.grid(column=0, row=0)
+        self.kw = kw
     
+    @property
+    @abstractmethod
+    def type(self):
+        pass
+
+    def open(self):
+        self.grid(column=0, row=0)
+
     def hide(self):
-        self.root.grid_forget()
+        self.grid_forget()
+
+    def goTo(self, destination):
+        self.hide()
+        destination.open()
+        self.destroy
     
     def close(self):
-        self.hide()
-        if self.parent is not None:
-            self.parent.show()
+        self.goTo(eval(self.parent))
+
+    def __repr__(self):
+        repr = f'{self.type}(self.master, \'{self.parent}\', self.master.model'
+        if self.kw is not None:
+            for key in self.kw.keys():
+                repr += f', {key}='
+                if type(self.kw[key]) == str:
+                    repr += f'"{self.kw[key]}"'
+                else:
+                    repr += f'{self.kw[key]}'
+        
+        repr += ')'
+        return repr
+    
 
 
     
 
 
 # TODO: unit list (with buttons)
-class UnitList(CustomWindow):
-    def __init__(self, master: ttk.Frame, parentWindow: CustomWindow, model: Database, **kw):
+class UnitList(Window):
+    def __init__(self, master: ttk.Frame, parentWindow: str, model: Database, **kw):
         super().__init__(master, parentWindow, model, **kw)
 
         self.unitNames = []
@@ -43,11 +66,8 @@ class UnitList(CustomWindow):
         self.refreshUnitList()
         self.selectedUnit = ''
 
-        # self.rootFrame = ttk.Frame(self)
-        self.unitEditor = UnitEditor(self, self, model)
-
         # Listbox on left
-        listFrame = ttk.Frame(self.root)
+        listFrame = ttk.Frame(self)
         self.listBox = tk.Listbox(listFrame, listvariable=self.unitList)
         scrollbar = ttk.Scrollbar(listFrame, orient=tk.VERTICAL, command=self.listBox.yview)
         self.listBox['yscrollcommand'] = scrollbar.set
@@ -56,7 +76,7 @@ class UnitList(CustomWindow):
         scrollbar.pack(side=tk.LEFT)
 
         # buttons frame on right
-        buttonFrame = ttk.Frame(self.root)
+        buttonFrame = ttk.Frame(self)
         self.btnNew = ttk.Button(buttonFrame, text='New', command=self.btnCmdNew)
         self.btnEdit = ttk.Button(buttonFrame, text='Edit', command=self.btnCmdEdit)
         self.btnDelete = ttk.Button(buttonFrame, text='Delete', command=self.btnCmdDelete)
@@ -68,8 +88,10 @@ class UnitList(CustomWindow):
         
         listFrame.pack(side=tk.LEFT)
         buttonFrame.pack(side=tk.LEFT)
-        self.unitEditor.grid()
         
+    @property
+    def type(self):
+        return 'UnitList'
 
     def refreshUnitList(self):
         self.unitNames = []
@@ -79,18 +101,14 @@ class UnitList(CustomWindow):
         self.unitList.set(self.unitNames)
 
     def btnCmdNew(self):
-        # populate unit editor
-        self.unitEditor.populate()
-        # Bring unit editor frame to front
-        self.hide()
-        self.unitEditor.show()
+        editor = UnitEditor(self.master, self.__repr__(), self.model)
+        editor.populate()
+        self.goTo(editor)
     
     def btnCmdEdit(self):
-        # populate unit editor
-        self.unitEditor.populate(self.unitNames[self.listBox.curselection()[0]])
-        # Bring unit editor frame to front
-        self.hide()
-        self.unitEditor.show()
+        editor = UnitEditor(self.master, self.__repr__(), self.model)
+        editor.populate(self.unitNames[self.listBox.curselection()[0]])
+        self.goTo(editor)
     
     def btnCmdDelete(self):
         # TODO: delete assigned models
@@ -99,8 +117,8 @@ class UnitList(CustomWindow):
 
 
     
-class UnitEditor(CustomWindow):
-    def __init__(self, master: UnitList, parentWindow: CustomWindow, model: Database, **kw):
+class UnitEditor(Window):
+    def __init__(self, master: UnitList, parentWindow: str, model: Database, **kw):
         super().__init__(master, parentWindow, model, **kw)
         self.prevName = None
     
@@ -108,23 +126,23 @@ class UnitEditor(CustomWindow):
         self.cost = tk.IntVar(self, name='unitCost')
 
         # Unit Name
-        nameFrame = ttk.Frame(self.root)
+        nameFrame = ttk.Frame(self)
         nameLabel = ttk.Label(nameFrame, text='Name')
         nameField = ttk.Entry(nameFrame, textvariable=self.name)
         nameLabel.pack(side=tk.LEFT)
         nameField.pack(side=tk.LEFT)
 
         # Unit Cost
-        costFrame = ttk.Frame(self.root)
+        costFrame = ttk.Frame(self)
         costLabel = ttk.Label(costFrame, text='Points Cost')
         costField = ttk.Spinbox(costFrame, from_=0, to=9999, textvariable=self.cost)
         costLabel.pack(side=tk.LEFT)
         costField.pack(side=tk.LEFT)
 
-        modelList = ModelList(self.root, self, self.model)
+        modelList = ModelList(self, self, self.model)
 
         # Buttons
-        buttonFrame = ttk.Frame(self.root)
+        buttonFrame = ttk.Frame(self)
         cancelButton = ttk.Button(buttonFrame, text='Cancel', command=self.btnCmdCancel)
         saveButton = ttk.Button(buttonFrame, text='Save', command=self.btnCmdSave)
         cancelButton.pack(side=tk.LEFT)
@@ -135,6 +153,10 @@ class UnitEditor(CustomWindow):
         costFrame.pack()
         modelList.pack()
         buttonFrame.pack()
+    
+    @property
+    def type(self):
+        return 'UnitEditor'
     
     def populate(self, name: str = None):
         self.prevName = name
@@ -164,8 +186,6 @@ class UnitEditor(CustomWindow):
             # TODO: assign/unassign models to the unit
         
         # TODO: if saving fails, display popup message instead of closing the window
-
-        self.master.refreshUnitList()
         self.close()
     
     def btnCmdCancel(self):
@@ -173,7 +193,7 @@ class UnitEditor(CustomWindow):
         
     
 class ModelList(ttk.Frame):
-    def __init__(self, master, parentWindow: CustomWindow, model: Database, **kw):
+    def __init__(self, master, parentWindow: Window, model: Database, **kw):
         super().__init__(master, **kw)
         self.parent = parentWindow
         self.model = model
@@ -189,10 +209,10 @@ class ModelList(ttk.Frame):
 class View(ttk.Frame):
     def __init__(self, master, model: Database = None, **kw):
         super().__init__(master, **kw)
+        self.model = model
 
         unitList = UnitList(self, None, model)
-        unitList.pack()
-        unitList.show()
+        unitList.open()
 
         # TODO: add notebook component for navigation
     
