@@ -193,9 +193,9 @@ class UnitEditor(Window):
         
     
 class ModelList(ttk.Frame):
-    def __init__(self, master, parentWindow: Window, model: Database, **kw):
+    def __init__(self, master, model: Database, **kw):
         super().__init__(master, **kw)
-        self.parent = parentWindow
+        self.master = master # master should be a unit editor
         self.model = model
         
         # on left: list of models for the specified unit
