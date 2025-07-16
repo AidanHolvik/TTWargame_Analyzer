@@ -109,7 +109,7 @@ class Unit(DBRecord):
         
     
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
     @name.setter
     def name(self, value: str):
@@ -117,7 +117,7 @@ class Unit(DBRecord):
             self._name = value
 
     @property
-    def cost(self):
+    def cost(self) -> int:
         return self._cost
     @cost.setter
     def cost(self, value: int):
@@ -129,7 +129,7 @@ class Unit(DBRecord):
             self._cost = 0
 
 class Model(DBRecord):
-    def __init__(self, unit: int, name: str = '', quantity: int = 1, toughness: int = 1, save: int = 6, health: int = 1, invuln: int = None, isLeader: bool|str = False, enabled: bool|str = True):
+    def __init__(self, unit: str, name: str = '', quantity: int = 1, toughness: int = 1, save: int = 6, health: int = 1, invuln: int = None, isLeader: bool|str = False, enabled: bool|str = True):
         self.unit = unit
         self.name = name
         self.quantity = quantity
@@ -176,16 +176,16 @@ class Model(DBRecord):
     
 
     @property
-    def unit(self):
+    def unit(self) -> str:
         return self._unit
     @unit.setter
-    def unit(self, value: int):
+    def unit(self, value: str):
         # TODO: verify that the unit exists
         if value is not None:
             self._unit = value
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
     @name.setter
     def name(self, value: str):
@@ -193,7 +193,7 @@ class Model(DBRecord):
             self._name = value
     
     @property
-    def quantity(self):
+    def quantity(self) -> str:
         return self._quantity
     @quantity.setter
     def quantity(self, value: int):
@@ -201,7 +201,7 @@ class Model(DBRecord):
             self._quantity = value
 
     @property
-    def toughness(self):
+    def toughness(self) -> int:
         return self._toughness
     @toughness.setter
     def toughness(self, value: int):
@@ -209,7 +209,7 @@ class Model(DBRecord):
             self._toughness = value
     
     @property
-    def save(self):
+    def save(self) -> int:
         return self._save
     @save.setter
     def save(self, value: int):
@@ -217,7 +217,7 @@ class Model(DBRecord):
             self._save = value
     
     @property
-    def health(self):
+    def health(self) -> int:
         return self._health
     @health.setter
     def health(self, value: int):
@@ -225,7 +225,7 @@ class Model(DBRecord):
             self._health = value
     
     @property
-    def invuln(self):
+    def invuln(self) -> int:
         return self._invuln
     @invuln.setter
     def invuln(self, value: int):
@@ -235,7 +235,7 @@ class Model(DBRecord):
             self._invuln = value
     
     @property
-    def isLeader(self):
+    def isLeader(self) -> bool:
         return self._isLeader
     @isLeader.setter
     def isLeader(self, value: bool | str):
@@ -248,7 +248,7 @@ class Model(DBRecord):
                 self._isLeader = True
     
     @property
-    def enabled(self):
+    def enabled(self) -> bool:
         return self._enabled
     @enabled.setter
     def enabled(self, value: bool | str):
@@ -335,6 +335,7 @@ class Database():
             with sqlite3.connect(self.db) as conn:
                 cur = conn.cursor()
                 cur.execute('DELETE FROM units WHERE name=?', (name,))
+                # TODO: delete assigned models
                 conn.commit()
 
                 return True
@@ -343,11 +344,14 @@ class Database():
             return False
         
     # Model CRUD
-    def listModels(self):
+    def listModels(self, unit: str = None):
         try:
             with sqlite3.connect(self.db) as conn:
                 cur = conn.cursor()
-                cur.execute('SELECT * FROM models ORDER BY unit, name')
+                if unit is None:
+                    cur.execute('SELECT * FROM models ORDER BY unit, name')
+                else:
+                    cur.execute('SELECT * FROM models WHERE unit=? ORDER BY name', (unit,))
                 queryResult = cur.fetchall()
 
                 models = []
@@ -399,6 +403,7 @@ class Database():
             with sqlite3.connect(self.db) as conn:
                 cur = conn.cursor()
                 cur.execute('DELETE FROM models WHERE unit=? AND name=?', (unitName, modelName))
+                # TODO: delete assigned weapons
                 conn.commit()
 
                 return True
