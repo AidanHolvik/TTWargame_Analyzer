@@ -9,3 +9,7 @@ A tool for visualizing and analyzing distributions of outcomes for tabletop warg
 - Think of the system as an assembly line, creating distributions to match user specifications
 
 - Use PyQt6 for GUI (due to licensing)
+
+## Dependencies
+    └ Flask (pip install Flask) <br>
+        └ dotenv (pip install python dotenv)

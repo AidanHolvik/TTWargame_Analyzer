@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from Model import Database, Model, Unit
+from archive.Model import Database, Model, Unit
 from abc import ABC, abstractmethod
 
 

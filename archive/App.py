@@ -1,5 +1,5 @@
 import tkinter as tk
-from Model import Database
+from archive.Model import Database
 from Controller import Controller
 from View import View
 

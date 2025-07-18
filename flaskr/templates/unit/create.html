@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <h1>{% block title %}"New Unit"{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+    <form method="post">
+        <label for="name">Name</label>
+        <input name="unit_name" id="name" required>
+        <br>
+        <label for="cost">Points Cost</label>
+        <input type="number" min="0" max="9999" value="0" name="unit_cost" id="cost" required>
+        <br>
+        <input type="submit" value="Save">
+    </form>
+{% endblock %}
