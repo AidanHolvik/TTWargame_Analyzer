@@ -28,17 +28,14 @@ def create_app(test_config = None):
     except OSError:
         pass
 
-    # TODO: change the code below to provide my app
-    # a simple page that says hello
-    @app.route('/hello')
-    def hello():
-        return 'Hello, World!'
     
-    # Initialize the db for this app
+    # Initialize the database and register blueprints
     from . import db
-    db.init_app(app)
-
     from . import unit
+
+    db.init_app(app)
     app.register_blueprint(unit.bp)
+
+    # app.add_url_rule('/', '/units') # TODO: remove this when adding comparisons/calculations
 
     return app

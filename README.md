@@ -10,6 +10,22 @@ A tool for visualizing and analyzing distributions of outcomes for tabletop warg
 
 - Use PyQt6 for GUI (due to licensing)
 
+## Endpoints
+- /
+- /create
+- /<int:id>/update
+- /<ind:id>/delete
+
+## Running the app
+Standard:
+    ``` flask --app flaskr run ```
+
+Debug Mode:
+    ``` flask --app flaskr run --debug ```
+
+Hosted on <http://127.0.0.1:5000/>
+
+
 ## Dependencies
     └ Flask (pip install Flask) <br>
         └ dotenv (pip install python dotenv)

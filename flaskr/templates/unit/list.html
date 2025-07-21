@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <h1>{% block title %}Units{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+    <!-- list units -->
+    <ol id="unit_listbox" tabindex="0" role="listbox" aria-labelledby="unit_listbox" aria-required="true" class>
+        {% for unit in units %}
+            <li id="{{ unit['id'] }}" role="option">
+                <span class="checkmark" aria-hidden="true"></span>
+                " {{ unit['name'] }} "
+            </li>
+            <!-- TODO: replace span with styling to indicate option selection (change li to div?)-->
+            <!-- TODO: change styling for selection when listbox unfocused (as suggested in https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/listbox_role#best_practices) -->
+        {% endfor %}
+    </ol>
+
+    <!-- TODO: disable edit/delete buttons until a unit is selected -->
+    <button id="btn_createUnit" type="button">New Unit</button>
+    <button id="btn_editUnit">Edit Unit</button>
+    <button id="btn_deleteUnit" onclick="fetchUnits()">Delete Unit</button>
+
+
+
+    
+
+
+{% endblock %}
+
+{% block script %}
+    <script>
+        // TODO: function for creating new unit? (navigating to page)
+        // TODO: function for navigating to unit edit page?
+        // TODO: function for deleting unit
+        // TODO: function for refreshing listbox
+
+        // TODO: refresh listbox
+        function refreshListBox() {
+            list = fetchUnits()
+            print(list)
+            // TODO: calculate list length
+            
+            // newContent = ''
+            // For each unit in list (based on list length):
+                // add element to unit_listbox innerHTML representing the unit
+
+            // document.getElementById('unit_listbox').innerHTML // add text to end
+        }
+
+        // send http request for unit list JSON object
+        function fetchUnits() {
+            unitList = fetch({{ url_for('units.fetch')|tojson }});
+            unitList = unitList.json();
+
+            return unitList
+        }
+
+
+    </script>
+{% endblock %}

@@ -2,6 +2,9 @@
 <title>{% block title %}{% endblock %} - Flaskr</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
+
+{% block script %}{% endblock %}
+
 <section class="content">
     <header>
         {% block header %}{% endblock %}
