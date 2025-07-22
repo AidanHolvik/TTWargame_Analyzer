@@ -28,4 +28,4 @@ Hosted on <http://127.0.0.1:5000/>
 
 ## Dependencies
     └ Flask (pip install Flask) <br>
-        └ dotenv (pip install python dotenv)
+        └ dotenv (pip install python-dotenv)
