@@ -4,6 +4,8 @@
     <h1>{% block title %}Units{% endblock %}</h1>
 {% endblock %}
 
+
+
 {% block content %}
     <!-- list units -->
     <ol id="unit_listbox" tabindex="0" role="listbox" aria-labelledby="unit_listbox" aria-required="true" class>
@@ -18,9 +20,11 @@
     </ol>
 
     <!-- TODO: disable edit/delete buttons until a unit is selected -->
-    <button id="btn_createUnit" type="button">New Unit</button>
-    <button id="btn_editUnit">Edit Unit</button>
-    <button id="btn_deleteUnit" onclick="fetchUnits()">Delete Unit</button>
+    <!-- TODO: add classes for styling these links/buttons -->
+    <!-- TODO: convert to button elements and use javascript? (editing and deleting units requires dynamically collecting unit id?) -->
+    <a id="link_createUnit" href="{{ url_for('units.create') }}">New Unit</a>
+    <a id="link_editUnit">Edit Unit</a>
+    <a id="link_deleteUnit" >Delete Unit</a>
 
 
 
@@ -36,6 +40,7 @@
         // TODO: function for deleting unit
         // TODO: function for refreshing listbox
 
+        
         // TODO: refresh listbox
         function refreshListBox() {
             list = fetchUnits()
@@ -57,6 +62,12 @@
             return unitList
         }
 
+        function btnCmd_createUnit() {
+            // TODO: navigate to unit editor (units.create)
+            window.location = {{ url_for('units.create') }}
+        }
+
+        document.getElementById('btn_createUnit').addEventListener('click', btnCmd_createUnit)
 
     </script>
 {% endblock %}

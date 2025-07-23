@@ -36,6 +36,4 @@ def create_app(test_config = None):
     db.init_app(app)
     app.register_blueprint(unit.bp)
 
-    # app.add_url_rule('/', '/units') # TODO: remove this when adding comparisons/calculations
-
     return app

@@ -3,7 +3,6 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
 
-{% block script %}{% endblock %}
 
 <section class="content">
     <header>
@@ -14,3 +13,6 @@
     {% endfor %}
     {% block content %}{% endblock %}
 </section>
+
+
+{% block script %}{% endblock %}
