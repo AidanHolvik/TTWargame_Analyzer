@@ -7,11 +7,18 @@
 {% block content %}
     <form method="post">
         <label for="name">Name</label>
-        <input name="unit_name" id="name" required>
+        <input name="name" id="name" required>
         <br>
         <label for="cost">Points Cost</label>
-        <input type="number" min="0" max="9999" value="0" name="unit_cost" id="cost" required>
+        <input type="number" min="0" max="9999" value="0" name="cost" id="cost" required>
         <br>
         <input type="submit" value="Save">
+        <a id="link_cancelCreateUnit" href="{{ url_for('units.list_units') }}" >Cancel</a>
     </form>
+{% endblock %}
+
+{% block script %}
+
+    <!-- TODO: navigate to units/update for the new unit after clicking the submit button -->
+
 {% endblock %}

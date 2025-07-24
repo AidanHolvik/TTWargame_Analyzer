@@ -5,6 +5,8 @@ bp = Blueprint('units', __name__, url_prefix='/units')
 
 @bp.route('/')
 def list_units():
+
+
     return render_template('unit/list.html')
 
 @bp.route('/fetch')
@@ -17,12 +19,41 @@ def fetch():
         'ORDER BY name ASC'
         ).fetchall()
     
-    return jsonify(units)
+    unitList = []
+    for row in units:
+        newRow = {}
+        newRow['id'] = row['id']
+        newRow['name'] = row['name']
+        unitList.append(newRow)
+
+    
+    return jsonify(unitList)
+
+
 
 @bp.route('/create', methods=['GET', 'POST'])
 def create():
     # GET: display unit editor for new unit
     # POST: create new unit the record(s) using data from the editor
+    if request.method == 'POST':
+        name = request.form['name']
+        cost = request.form['cost']
+        db = get_db()
+        error = None
+
+        if not name:
+            error = 'Unit name is required.'
+        
+        if error is None:
+            try:
+                db.execute('INSERT INTO unit (name, cost) VALUES (?,?)', (name, cost))
+                db.commit()
+            except db.IntegrityError:
+                error = f'Unit "{name}" already exists.'
+            else:
+                return redirect(url_for('units.list_units'))
+        
+        flash(error, 'error')
 
     return render_template('unit/create.html')
 

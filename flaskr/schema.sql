@@ -1,26 +1,26 @@
 CREATE TABLE IF NOT EXISTS unit (
-    id      INT     PRIMARY KEY,
+    id      INTEGER PRIMARY KEY,
     name    TEXT    UNIQUE
                     NOT NULL,
-    cost    INT     NOT NULL
+    cost    INTEGER NOT NULL
                     DEFAULT 0
                     CHECK(cost >= 0)
 );
 
 CREATE TABLE IF NOT EXISTS model(
-    id          INT     PRIMARY KEY,
-    unit        INT     NOT NULL,
+    id          INTEGER PRIMARY KEY,
+    unit        INTEGER NOT NULL,
     name        TEXT    NOT NULL,
-    quantity    INT     NOT NULL 
+    quantity    INTEGER NOT NULL 
                         DEFAULT 1 
                         CHECK(quantity > 0),
-    toughness   INT     NOT NULL
+    toughness   INTEGER NOT NULL
                         CHECK(toughness > 0),
-    save        INT     NOT NULL
+    save        INTEGER NOT NULL
                         CHECK(save > 1 AND save <= 7),
-    health      INT     NOT NULL
+    health      INTEGER NOT NULL
                         CHECK(health > 0),
-    invuln      INT     CHECK(invuln > 1 AND invuln <= 7),
+    invuln      INTEGER CHECK(invuln > 1 AND invuln <= 7),
     isLeader    TEXT    NOT NULL
                         DEFAULT 'False'
                         CHECK(isLeader IN ('True','False')),
@@ -30,3 +30,4 @@ CREATE TABLE IF NOT EXISTS model(
                 FOREIGN KEY (unit) REFERENCES unit(id),
                 CONSTRAINT fingerprint UNIQUE (unit, name)
 );
+

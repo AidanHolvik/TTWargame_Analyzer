@@ -44,30 +44,35 @@
         // TODO: refresh listbox
         function refreshListBox() {
             list = fetchUnits()
-            print(list)
-            // TODO: calculate list length
-            
-            // newContent = ''
-            // For each unit in list (based on list length):
-                // add element to unit_listbox innerHTML representing the unit
-
-            // document.getElementById('unit_listbox').innerHTML // add text to end
+            .then(list => {
+                for (let i = 0; i < list.length; i++) {
+                    // TODO: append unit to list element
+                    newItem = `
+                        <li id=${list[i].id} role="option">
+                            <span class="checkmark" aria-hidden="true"></span>
+                            ${list[i].name}
+                        </li>`
+                    
+                    document.getElementById('unit_listbox').innerHTML += newItem
+                }
+            })
         }
 
         // send http request for unit list JSON object
         function fetchUnits() {
-            unitList = fetch({{ url_for('units.fetch')|tojson }});
-            unitList = unitList.json();
+            unitList = fetch({{ url_for('units.fetch')|tojson }})
+                .then(response => response.json())
+                .then(data => {return data})
 
-            return unitList
+            return unitList;
         }
 
         function btnCmd_createUnit() {
             // TODO: navigate to unit editor (units.create)
-            window.location = {{ url_for('units.create') }}
+            window.location = "{{ url_for('units.create') }}"
         }
 
-        document.getElementById('btn_createUnit').addEventListener('click', btnCmd_createUnit)
+        refreshListBox()
 
     </script>
 {% endblock %}

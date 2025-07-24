@@ -17,6 +17,9 @@ A tool for visualizing and analyzing distributions of outcomes for tabletop warg
 - /<ind:id>/delete
 
 ## Running the app
+Initializing the Database:
+    ``` flask --app flaskr init-db ```
+
 Standard:
     ``` flask --app flaskr run ```
 

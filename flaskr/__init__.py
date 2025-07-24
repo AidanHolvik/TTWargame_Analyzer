@@ -5,7 +5,7 @@ Two Roles:
 """
 
 import os
-from flask import Flask
+from flask import Flask, g
 
 def create_app(test_config = None):
     # Create and configure the app
@@ -31,9 +31,10 @@ def create_app(test_config = None):
     
     # Initialize the database and register blueprints
     from . import db
-    from . import unit
-
     db.init_app(app)
+
+    # g.root_url = 'http://127.0.0.1:5000'
+    from . import unit
     app.register_blueprint(unit.bp)
 
     return app
