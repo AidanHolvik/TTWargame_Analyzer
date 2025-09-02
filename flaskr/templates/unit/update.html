@@ -1,17 +1,24 @@
 {% extends 'base.html' %}
 
 {% block header %}
-    <h1>{% block title %}{{ unit['name'] }}{% endblock %}</h1>
+    <h1>{% block title %} {{ unit['name'] }} {% endblock %}</h1>
 {% endblock %}
 
 {% block content %}
     <form method="post">
         <label for="name">Name</label>
-        <input name="unit_name" id="name" value="{{ unit['name'] }}" required>
+        <input name="name" id="name" value="{{ unit['name'] }}" required>
         <br>
         <label for="cost">Points Cost</label>
-        <input type="number" min="0" max="9999" value="{{ unit['cost'] }}" name="unit_cost" id="cost" required>
+        <input type="number" min="0" max="9999" value="{{ unit['cost'] }}" name="cost" id="cost" required>
         <br>
         <input type="submit" value="Save">
+        <a id="link_cancelUpdateUnit" href="{{ url_for('units.list') }}" >Cancel</a>
     </form>
+{% endblock %}
+
+{% block script %}
+    <script>
+
+    </script>
 {% endblock %}

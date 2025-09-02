@@ -2,7 +2,7 @@
 A tool for visualizing and analyzing distributions of outcomes for tabletop wargames.
 
 
-## IDEAS
+## Ideas
 - Use strategy patterns to represent abilities, weapon keywords, etc.
 - Use factory patterns to instantiate weapons, models, units, etc from user inputs.
 
@@ -10,11 +10,14 @@ A tool for visualizing and analyzing distributions of outcomes for tabletop warg
 
 - Use PyQt6 for GUI (due to licensing)
 
+## TODOs
+- Add scrollbar to lists when too many items are added
+
 ## Endpoints
 - /
 - /create
-- /<int:id>/update
-- /<ind:id>/delete
+- /<int:id>
+- /delete/<int:id>
 
 ## Running the app
 Initializing the Database:

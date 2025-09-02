@@ -19,7 +19,7 @@
     <!-- TODO: add classes for styling these links/buttons -->
     <!-- TODO: convert to button elements and use javascript? (editing and deleting units requires dynamically collecting unit id?) -->
     <a id="link_createUnit" href="{{ url_for('units.create') }}">New Unit</a>
-    <a id="link_editUnit">Edit Unit</a>
+    <div id="link_editUnit" onclick="btnCmd_updateUnit()">Edit Unit</div>
     <a id="link_deleteUnit" >Delete Unit</a>
 {% endblock %}
 
@@ -69,9 +69,14 @@
             window.location = "{{ url_for('units.create') }}"
         }
 
-        // Requires that units in the list are selectable
         function btnCmd_updateUnit() {
-            // TODO: navigate to unit editor for selected unit
+            // TODO: retrieve id for selected unit
+            unit = document.querySelector(".selected")
+            if (unit == null) {return}
+
+            id = unit.id
+            window.location = {{ url_for('units.list') }} + "/" + id;
+            // TODO: open unit update page for the retrieved id
         }
 
         refreshListBox()

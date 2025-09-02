@@ -4,7 +4,7 @@ from flaskr.db import get_db
 bp = Blueprint('units', __name__, url_prefix='/units')
 
 @bp.route('/')
-def list_units():
+def list():
 
 
     return render_template('unit/list.html')
@@ -52,20 +52,60 @@ def create():
             except db.IntegrityError:
                 error = f'Unit "{name}" already exists.'
             else:
-                return redirect(url_for('units.list_units'))
+                return redirect(url_for('units.list'))
         
         flash(error, 'error')
 
     return render_template('unit/create.html')
 
-@bp.route('/<int:id>/update', methods=['GET', 'POST'])
+@bp.route('/<int:id>', methods=['GET', 'POST'])
 def update(id: int):
-    # GET: populate and display unit editor
+    # GET: populate and display unit editor from DB
     # POST: update the record(s) for the specified unit using data from the editor
+    if request.method == 'POST':
+        name = request.form['name']
+        cost = request.form['cost']
+        db = get_db()
+        error = None
 
-    return render_template('unit/update.html')
+        if not name:
+            error = 'Unit name is required'
 
-@bp.route('/<int:id>/delete', methods=['POST'])
+        if error is None:
+            try:
+                db.execute('UPDATE unit SET name=?, cost=? WHERE id=?', (name, cost, id))
+                db.commit()
+            except db.IntegrityError:
+                error = f'Unit "{name}" already exists.'
+            else:
+                return redirect(url_for('units.list'))
+        
+        flash(error, 'error')
+    
+    elif request.method == 'GET':
+        db = get_db()
+        error = None
+
+        if error is None:
+            try:
+                record = db.execute(
+                    'SELECT id, name, cost ' \
+                    'FROM unit ' \
+                    f'WHERE id={id}'
+                    ).fetchone()
+                # unit = {'id':record['id'], record['name'], record['cost']}
+            except db.DatabaseError:
+                error = f'Error accessing unit with id "{id}"'
+            else:
+                print(record)
+                print(record['id'])
+                print(record['name'])
+                print(record['cost'])
+                return render_template(f'unit/update.html', unit=record)
+
+        flash(error, 'error')
+
+@bp.route('/delete/<int:id>', methods=['POST'])
 def delete(id: int):
     # POST: Delete the specified unit's record(s)
     pass
