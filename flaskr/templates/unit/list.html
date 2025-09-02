@@ -8,16 +8,12 @@
 
 {% block content %}
     <!-- list units -->
-    <ol id="unit_listbox" tabindex="0" role="listbox" aria-labelledby="unit_listbox" aria-required="true" class>
+    <div id="unit_listbox" tabindex="0" role="listbox" aria-labelledby="unit_listbox" aria-required="true" class>
         {% for unit in units %}
-            <li id="{{ unit['id'] }}" role="option">
-                <span class="checkmark" aria-hidden="true"></span>
-                " {{ unit['name'] }} "
-            </li>
             <!-- TODO: replace span with styling to indicate option selection (change li to div?)-->
             <!-- TODO: change styling for selection when listbox unfocused (as suggested in https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/listbox_role#best_practices) -->
         {% endfor %}
-    </ol>
+    </div>
 
     <!-- TODO: disable edit/delete buttons until a unit is selected -->
     <!-- TODO: add classes for styling these links/buttons -->
@@ -25,12 +21,6 @@
     <a id="link_createUnit" href="{{ url_for('units.create') }}">New Unit</a>
     <a id="link_editUnit">Edit Unit</a>
     <a id="link_deleteUnit" >Delete Unit</a>
-
-
-
-    
-
-
 {% endblock %}
 
 {% block script %}
@@ -45,11 +35,16 @@
             list = fetchUnits()
             .then(list => {
                 for (let i = 0; i < list.length; i++) {
+                    // TODO: add onClick handler to the div, style differently when selected
                     newItem = `
-                        <li id=${list[i].id} role="option">
-                            <span class="checkmark" aria-hidden="true"></span>
-                            ${list[i].name}
-                        </li>`
+                        <div id=${list[i].id} role="option"> ${list[i].name} - ${list[i].cost} </div>
+                    `
+
+                    // newItem = `
+                    //     <li id=${list[i].id} role="option">
+                    //         <span class="checkmark" aria-hidden="true"></span>
+                    //         ${list[i].name}
+                    //     </li>`
                     
                     document.getElementById('unit_listbox').innerHTML += newItem
                 }
@@ -66,8 +61,12 @@
         }
 
         function btnCmd_createUnit() {
-            // TODO: navigate to unit editor (units.create)
             window.location = "{{ url_for('units.create') }}"
+        }
+
+        // Requires that units in the list are selectable
+        function btnCmd_updateUnit() {
+            // TODO: navigate to unit editor for selected unit
         }
 
         refreshListBox()

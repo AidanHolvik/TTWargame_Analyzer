@@ -14,7 +14,7 @@ def fetch():
     # TODO: return each unit's id and name
     db = get_db()
     units = db.execute(
-        'SELECT id, name ' \
+        'SELECT id, name, cost ' \
         'FROM unit ' \
         'ORDER BY name ASC'
         ).fetchall()
@@ -24,6 +24,7 @@ def fetch():
         newRow = {}
         newRow['id'] = row['id']
         newRow['name'] = row['name']
+        newRow['cost'] = row['cost']
         unitList.append(newRow)
 
     
