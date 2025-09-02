@@ -35,14 +35,24 @@
             list = fetchUnits()
             .then(list => {
                 for (let i = 0; i < list.length; i++) {
-                    // TODO: add onClick handler to the div, style differently when selected
-                    newItem = `
-                        <div id=${list[i].id} role="option"> ${list[i].name} - ${list[i].cost} </div>
-                    `
+                    // TODO: add onClick handler to the div, style differently when selected using css classes (and aria roles for accessibility?)
+                        // On click: deselect all other divs in the list, select clicked div
+                    newItem = `<div id=${list[i].id} role="option" onclick="selectUnit(${list[i].id})"> ${list[i].name} - ${list[i].cost} </div>`
                     
                     document.getElementById('unit_listbox').innerHTML += newItem
                 }
             })
+        }
+
+        function selectUnit(id) {
+            // Deselect other divs
+            currDivs = document.getElementsByClassName('selected')
+            for (let i = 0; i < currDivs.length; i++) {
+                currDivs[i].classList.remove('selected')
+            }
+
+            // Select clicked div
+            document.getElementById(id).classList.add('selected')
         }
 
         // send http request for unit list JSON object
