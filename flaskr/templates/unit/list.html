@@ -44,14 +44,15 @@
             })
         }
 
+        // Used as onclick event handler for units in the list
         function selectUnit(id) {
-            // Deselect other divs
+            // Deselect other units
             currDivs = document.getElementsByClassName('selected')
             for (let i = 0; i < currDivs.length; i++) {
                 currDivs[i].classList.remove('selected')
             }
 
-            // Select clicked div
+            // Select clicked unit
             document.getElementById(id).classList.add('selected')
         }
 
