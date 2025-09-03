@@ -12,6 +12,8 @@ A tool for visualizing and analyzing distributions of outcomes for tabletop warg
 
 ## TODOs
 - Add scrollbar to lists when too many items are added
+- Consolidate styles for unit list buttons (change style & cursor when hovered)
+
 
 ## Endpoints
 - /

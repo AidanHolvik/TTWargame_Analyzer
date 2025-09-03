@@ -20,7 +20,7 @@
     <!-- TODO: convert to button elements and use javascript? (editing and deleting units requires dynamically collecting unit id?) -->
     <a id="link_createUnit" href="{{ url_for('units.create') }}">New Unit</a>
     <div id="link_editUnit" onclick="btnCmd_updateUnit()">Edit Unit</div>
-    <a id="link_deleteUnit" >Delete Unit</a>
+    <div id="link_deleteUnit" onclick="btnCmd_deleteUnit()">Delete Unit</div>
 {% endblock %}
 
 {% block script %}
@@ -70,13 +70,19 @@
         }
 
         function btnCmd_updateUnit() {
-            // TODO: retrieve id for selected unit
             unit = document.querySelector(".selected")
             if (unit == null) {return}
-
             id = unit.id
+
             window.location = {{ url_for('units.list') }} + "/" + id;
-            // TODO: open unit update page for the retrieved id
+        }
+
+        function btnCmd_deleteUnit() {
+            unit = document.querySelector(".selected")
+            if (unit == null) {return}
+            id = unit.id
+
+            window.location = {{ url_for('units.list') }} + "delete/" + id;
         }
 
         refreshListBox()

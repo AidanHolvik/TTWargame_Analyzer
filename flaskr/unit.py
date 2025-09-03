@@ -95,19 +95,30 @@ def update(id: int):
                     ).fetchone()
                 # unit = {'id':record['id'], record['name'], record['cost']}
             except db.DatabaseError:
-                error = f'Error accessing unit with id "{id}"'
+                error = f'Error reading unit with id "{id}"'
             else:
-                print(record)
-                print(record['id'])
-                print(record['name'])
-                print(record['cost'])
                 return render_template(f'unit/update.html', unit=record)
 
         flash(error, 'error')
 
-@bp.route('/delete/<int:id>', methods=['POST'])
+@bp.route('/delete/<int:id>', methods=['GET'])
 def delete(id: int):
     # POST: Delete the specified unit's record(s)
-    pass
+    if request.method == 'GET':
+        db = get_db()
+        error = None
+
+        if error is None:
+            try:
+                db.execute(f'DELETE FROM unit WHERE id={id}')
+                db.commit()
+            except db.DatabaseError:
+                error = f'Error deleting unit with id "{id}"'
+            else:
+                return redirect(url_for('units.list'))
+    
+        flash(error, 'error')
+
+    
 
 
