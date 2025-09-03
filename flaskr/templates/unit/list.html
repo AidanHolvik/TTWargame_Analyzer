@@ -7,20 +7,24 @@
 
 
 {% block content %}
-    <!-- list units -->
-    <div id="unit_listbox" tabindex="0" role="listbox" aria-labelledby="unit_listbox" aria-required="true" class>
-        {% for unit in units %}
-            <!-- TODO: replace span with styling to indicate option selection (change li to div?)-->
-            <!-- TODO: change styling for selection when listbox unfocused (as suggested in https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/listbox_role#best_practices) -->
-        {% endfor %}
-    </div>
+    <div class="flex-container">
+        <!-- list units -->
+        <div id="unit_listbox" tabindex="0" role="listbox" aria-labelledby="unit_listbox" aria-required="true" class="flex-item">
+            {% for unit in units %}
+                <!-- TODO: replace span with styling to indicate option selection (change li to div?)-->
+                <!-- TODO: change styling for selection when listbox unfocused (as suggested in https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/listbox_role#best_practices) -->
+            {% endfor %}
+        </div>
 
-    <!-- TODO: disable edit/delete buttons until a unit is selected -->
-    <!-- TODO: add classes for styling these links/buttons -->
-    <!-- TODO: convert to button elements and use javascript? (editing and deleting units requires dynamically collecting unit id?) -->
-    <a id="link_createUnit" href="{{ url_for('units.create') }}">New Unit</a>
-    <div id="link_editUnit" onclick="btnCmd_updateUnit()">Edit Unit</div>
-    <div id="link_deleteUnit" onclick="btnCmd_deleteUnit()">Delete Unit</div>
+        <!-- TODO: disable edit/delete buttons until a unit is selected -->
+        <!-- TODO: add classes for styling these links/buttons -->
+        <!-- TODO: convert to button elements and use javascript? (editing and deleting units requires dynamically collecting unit id?) -->
+        <div class="flex-item">
+            <a id="link_createUnit" href="{{ url_for('units.create') }}">New Unit</a>
+            <div id="link_editUnit" onclick="btnCmd_updateUnit()">Edit Unit</div>
+            <div id="link_deleteUnit" onclick="btnCmd_deleteUnit()">Delete Unit</div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block script %}

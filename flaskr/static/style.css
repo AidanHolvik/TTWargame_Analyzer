@@ -26,3 +26,10 @@ input.danger { color: #cc2f2e; }
 input[type=submit] { align-self: start; min-width: 10em; }
 
 .selected {color:#cc2f2e}
+.flex-container {display: flex;}
+.flex-item {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
