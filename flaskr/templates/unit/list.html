@@ -11,8 +11,7 @@
         <!-- list units -->
         <div id="unit_listbox" tabindex="0" role="listbox" aria-labelledby="unit_listbox" aria-required="true" class="flex-item">
             {% for unit in units %}
-                <!-- TODO: replace span with styling to indicate option selection (change li to div?)-->
-                <!-- TODO: change styling for selection when listbox unfocused (as suggested in https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/listbox_role#best_practices) -->
+                <!-- TODO: change styling for selection when list is unfocused (as suggested in https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/listbox_role#best_practices) -->
             {% endfor %}
         </div>
 
@@ -29,13 +28,9 @@
 
 {% block script %}
     <script>
-        // TODO: function for creating new unit? (navigating to page)
-        // TODO: function for navigating to unit edit page?
-        // TODO: function for deleting unit
-
         
-        // Refresh listbox
-        function refreshListBox() {
+        // Refresh list
+        function refreshUnitList() {
             list = fetchUnits()
             .then(list => {
                 for (let i = 0; i < list.length; i++) {
@@ -89,7 +84,7 @@
             window.location = {{ url_for('units.list') }} + "delete/" + id;
         }
 
-        refreshListBox()
+        refreshUnitList()
 
     </script>
 {% endblock %}

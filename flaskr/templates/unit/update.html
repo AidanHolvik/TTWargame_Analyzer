@@ -12,6 +12,17 @@
         <label for="cost">Points Cost</label>
         <input type="number" min="0" max="9999" value="{{ unit['cost'] }}" name="cost" id="cost" required>
         <br>
+        <!-- model list -->
+        <div class="flex-container">
+            <div id="model_listbox" tabindex="0" role="listbox" aria-labelledby="model_listbox" aria-required="true" class="flex-item">
+                <!-- TODO: change styling for selection when list is unfocused (as suggested in https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/listbox_role#best_practices) -->
+            </div>
+            <div class="flex-item">
+                <a id="link_createModel" href="{{ url_for('models.create', unitId=id) }}">New Model</a>
+                <div id="link_editModel" onclick="btnCmd_updateModel()">Edit Model</div>
+                <div id="link_deleteModel" onclick="btnCmd_deleteModel()">Delete Model</div>
+            </div>
+        </div>
         <input type="submit" value="Save">
         <a id="link_cancelUpdateUnit" href="{{ url_for('units.list') }}" >Cancel</a>
     </form>
@@ -19,6 +30,35 @@
 
 {% block script %}
     <script>
+
+        // refresh list
+        function refreshModelList() {
+
+        }
+
+        // Used as onclick event handler for models in the list
+        function selectModel(modelId) {
+
+        }
+
+        // send http request for model list JSON object
+        function fetchModels() {
+            
+        }
+
+        function btnCmd_createModel() {
+
+        }
+
+        function btnCmd_updateModel() {
+
+        }
+
+        function btnCmd_deleteModel() {
+
+        }
+
+        refreshModelList()
 
     </script>
 {% endblock %}

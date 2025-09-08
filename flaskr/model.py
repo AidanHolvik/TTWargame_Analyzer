@@ -3,10 +3,10 @@ from flaskr.db import get_db
 
 bp = Blueprint('models', __name__, url_prefix='/units/<int:unitId>/models')
 
-@bp.route('/')
-# TODO: generate HTML for visualizing a list of models + buttons in the unit editor?
-def list(unitId: int):
-    pass
+# @bp.route('/')
+# # TODO: generate HTML for a list of models + buttons in the unit editor?
+# def list(unitId: int):
+#     pass
 
 
 @bp.route('/fetch')
