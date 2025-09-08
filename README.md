@@ -14,6 +14,8 @@ A tool for visualizing and analyzing distributions of outcomes for tabletop warg
 - Add scrollbar to lists when too many items are added
 - Consolidate styles for unit list buttons (change style & cursor when hovered)
 - Navigate to units/update when initially saving a unit (in units/create)
+- Ensure units.update returns a valid http response in all cases
+- Avoid re-rendering template when updating or creating unit fails (don't erase current inputs)
 
 ## Endpoints
 - /
