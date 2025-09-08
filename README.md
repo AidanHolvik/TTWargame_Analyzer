@@ -17,6 +17,8 @@ A tool for visualizing and analyzing distributions of outcomes for tabletop warg
 - Ensure units.update returns a valid http response in all cases
 - Avoid re-rendering template when updating or creating unit fails (don't erase current inputs)
 
+- restrict 'create' pages to key data (e.g. name), then upon creation redirect to corresponding 'update' page
+
 ## Endpoints
 - /
 - /create

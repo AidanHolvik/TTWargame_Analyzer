@@ -27,7 +27,6 @@ def fetch():
         newRow['cost'] = row['cost']
         unitList.append(newRow)
 
-    
     return jsonify(unitList)
 
 
@@ -35,7 +34,7 @@ def fetch():
 @bp.route('/create', methods=['GET', 'POST'])
 def create():
     # GET: display unit editor for new unit
-    # POST: create new unit the record(s) using data from the editor
+    # POST: create new unit record using data from the editor
     if request.method == 'POST':
         name = request.form['name']
         cost = request.form['cost']
@@ -70,7 +69,6 @@ def update(id: int):
 
         if not name:
             error = 'Unit name is required'
-
         if error is None:
             try:
                 db.execute('UPDATE unit SET name=?, cost=? WHERE id=?', (name, cost, id))
@@ -79,7 +77,6 @@ def update(id: int):
                 error = f'Unit "{name}" already exists.'
             else:
                 return redirect(url_for('units.list'))
-        
         flash(error, 'error')
     
     elif request.method == 'GET':
@@ -91,15 +88,17 @@ def update(id: int):
                 record = db.execute(
                     'SELECT id, name, cost ' \
                     'FROM unit ' \
-                    f'WHERE id={id}'
+                    'WHERE id=?',
+                    (id,)
                     ).fetchone()
-                # unit = {'id':record['id'], record['name'], record['cost']}
             except db.DatabaseError:
                 error = f'Error reading unit with id "{id}"'
             else:
                 return render_template(f'unit/update.html', unit=record)
-
         flash(error, 'error')
+
+
+
 
 @bp.route('/delete/<int:id>', methods=['GET'])
 def delete(id: int):
@@ -110,7 +109,9 @@ def delete(id: int):
 
         if error is None:
             try:
-                db.execute(f'DELETE FROM unit WHERE id={id}')
+                # TODO: delete all records for assigned models
+                db.execute('DELETE FROM model WHERE unit=?', (id,))
+                db.execute('DELETE FROM unit WHERE id=?', (id,))
                 db.commit()
             except db.DatabaseError:
                 error = f'Error deleting unit with id "{id}"'
