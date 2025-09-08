@@ -34,10 +34,7 @@
             list = fetchUnits()
             .then(list => {
                 for (let i = 0; i < list.length; i++) {
-                    // TODO: add onClick handler to the div, style differently when selected using css classes (and aria roles for accessibility?)
-                        // On click: deselect all other divs in the list, select clicked div
                     newItem = `<div id=${list[i].id} role="option" onclick="selectUnit(${list[i].id})"> ${list[i].name} - ${list[i].cost} </div>`
-                    
                     document.getElementById('unit_listbox').innerHTML += newItem
                 }
             })

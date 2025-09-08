@@ -18,7 +18,7 @@
                 <!-- TODO: change styling for selection when list is unfocused (as suggested in https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/listbox_role#best_practices) -->
             </div>
             <div class="flex-item">
-                <a id="link_createModel" href="{{ url_for('models.create', unitId=id) }}">New Model</a>
+                <a id="link_createModel" href="{{ url_for('models.create', unitId=unit['id']) }}">New Model</a>
                 <div id="link_editModel" onclick="btnCmd_updateModel()">Edit Model</div>
                 <div id="link_deleteModel" onclick="btnCmd_deleteModel()">Delete Model</div>
             </div>
@@ -33,7 +33,13 @@
 
         // refresh list
         function refreshModelList() {
-
+            list = fetchModels()
+            .then(list => {
+                for (let i = 0; i < list.length; i++) {
+                    newItem = `<div id=${list[i].id} role="option" onclick="selectModel(${list[i].id})"> ${list[i].name} X ${list[i].quantity} - T:${list[i].toughness} Sv:${list[i].save} W:${list[i].health} Inv:${list[i].invuln} isLeader:${list[i].isLeader} enabled:${list[i].enabled} </div>`
+                    document.getElementById('unit_listbox').innerHTML += newItem
+                }
+            })
         }
 
         // Used as onclick event handler for models in the list
