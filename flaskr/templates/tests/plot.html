@@ -3,12 +3,100 @@
 {% block title %}Plot{% endblock %}
 {% block header %}Plot{% endblock %}
 
+{% block meta %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
 {% block content %}
-    <p>This is the plot page.</p>
+    <canvas id="resultPlot1" width="900" height="400"></canvas>
+    <canvas id="resultPlot2" width="900" height="400"></canvas>
 {% endblock %}
 
 {% block script %}
     <script>
-        console.log("plot page script");
+        const data1 = {
+            labels: ['1', '2', '3', '4', '5', '6', '7', '8'],
+            datasets: [{
+                label: 'probability of result = #',
+                type: 'bar',
+                data: [100/6, 100/6, 100/6, 100/6, 100/6, 100/6, 0, 0],
+                borderColor: 'rgba(75, 192, 192, 1)',
+                fill: false
+            },
+            {
+                label: 'probability of result >= #',
+                type: 'line',
+                data: [600/6, 500/6, 400/6, 300/6, 200/6, 100/6, 0, 0],
+                borderColor: 'rgba(255, 99, 132, 1)',
+                fill: false
+            }]
+        };
+
+        const data2 = {
+            labels: ['3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18'],
+            datasets: [{
+                label: 'probability of result = #',
+                type: 'bar',
+                data: [0.46, 1.39, 2.78, 4.63, 6.94, 9.72, 11.57, 12.50, 12.50, 11.57, 9.72, 6.94, 4.63, 2.78, 1.39, 0.46],
+                borderColor: 'rgba(75, 192, 192, 1)',
+                fill: false
+            },
+            {
+                label: 'probability of result >= #',
+                type: 'line',
+                data: [100, 99.54, 98.15, 95.37, 90.74, 83.80, 74.07, 62.50, 50.00, 37.50, 25.93, 16.20, 9.26, 4.63, 1.85, 0.46],
+                borderColor: 'rgba(255, 99, 132, 1)',
+                fill: false
+            }]
+        };
+
+        
+        var ctx = document.getElementById('resultPlot1').getContext('2d');
+        var plot1 = new Chart(ctx, {
+            data: data1,
+            options: {
+                responsive: false,
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Roll Result'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Probability (%)'
+                        },
+                        min: 0,
+                        max: 100
+                    }
+                }
+            }
+        });
+
+        ctx = document.getElementById('resultPlot2').getContext('2d');
+        var plot2 = new Chart(ctx, {
+            data: data2,
+            options: {
+                responsive: false,
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Roll Result'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Probability (%)'
+                        },
+                        min: 0,
+                        max: 100
+                    }
+                }
+            }
+        });
     </script>
 {% endblock %}

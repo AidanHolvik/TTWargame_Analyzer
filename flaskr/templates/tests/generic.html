@@ -1,12 +1,22 @@
 <!doctype html>
-<title>Test - {% block title %}{% endblock %}</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
-
-<section class="content">
-  <header>
-    <h1>Test - {% block header %}{% endblock %}</h1>
-  </header>
-  {% block content %}{% endblock %}
-</section>
-
-{% block script %}{% endblock %}
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test - {% block title %}{% endblock %}</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+    {% block meta %}{% endblock %}
+  </head>
+  <body>
+    <section class="content">
+      <header>
+        <h1>Test - {% block header %}{% endblock %}</h1>
+      </header>
+      {% block content %}{% endblock %}
+    </section>
+  </body>
+  {% block script %}{% endblock %}
+</html>
