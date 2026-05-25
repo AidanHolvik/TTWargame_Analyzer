@@ -5,7 +5,7 @@ Two Roles:
 """
 
 import os
-from flask import Flask, g, redirect, render_template, url_for
+from flask import Flask, g
 
 
 def create_app(test_config=None):
@@ -30,21 +30,14 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    # g.root_url = 'http://localhost:5000'
     # Initialize the database and register blueprints
-    from . import tests
-    app.register_blueprint(tests.bp)
+    from . import db
 
-    # set default route for testing and debug purposes
-    @app.route('/')
-    def default_page():
-        return redirect(
-            url_for('tests.plot')
-        )  # TODO: change this to something more useful for production
+    db.init_app(app)
 
-    # Add routes
-    @app.route('/home')
-    def home():
-        return render_template('home.html')
+    # g.root_url = 'http://127.0.0.1:5000'
+    from . import unit
+
+    app.register_blueprint(unit.bp)
 
     return app

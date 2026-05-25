@@ -3,22 +3,21 @@ from flaskr.db import get_db
 
 bp = Blueprint('units', __name__, url_prefix='/units')
 
+
 @bp.route('/')
 def list():
 
-
     return render_template('unit/list.html')
+
 
 @bp.route('/fetch')
 def fetch():
     # TODO: return each unit's id and name
     db = get_db()
-    units = db.execute(
-        'SELECT id, name, cost ' \
-        'FROM unit ' \
-        'ORDER BY name ASC'
-        ).fetchall()
-    
+    units = db.execute('SELECT id, name, cost '
+                       'FROM unit '
+                       'ORDER BY name ASC').fetchall()
+
     unitList = []
     for row in units:
         newRow = {}
@@ -28,7 +27,6 @@ def fetch():
         unitList.append(newRow)
 
     return jsonify(unitList)
-
 
 
 @bp.route('/create', methods=['GET', 'POST'])
@@ -43,19 +41,21 @@ def create():
 
         if not name:
             error = 'Unit name is required.'
-        
+
         if error is None:
             try:
-                db.execute('INSERT INTO unit (name, cost) VALUES (?,?)', (name, cost))
+                db.execute('INSERT INTO unit (name, cost) VALUES (?,?)',
+                           (name, cost))
                 db.commit()
             except db.IntegrityError:
                 error = f'Unit "{name}" already exists.'
             else:
                 return redirect(url_for('units.list'))
-        
+
         flash(error, 'error')
 
     return render_template('unit/create.html')
+
 
 @bp.route('/<int:id>', methods=['GET', 'POST'])
 def update(id: int):
@@ -71,14 +71,15 @@ def update(id: int):
             error = 'Unit name is required'
         if error is None:
             try:
-                db.execute('UPDATE unit SET name=?, cost=? WHERE id=?', (name, cost, id))
+                db.execute('UPDATE unit SET name=?, cost=? WHERE id=?',
+                           (name, cost, id))
                 db.commit()
             except db.IntegrityError:
                 error = f'Unit "{name}" already exists.'
             else:
                 return redirect(url_for('units.list'))
         flash(error, 'error')
-    
+
     elif request.method == 'GET':
         db = get_db()
         error = None
@@ -86,18 +87,14 @@ def update(id: int):
         if error is None:
             try:
                 record = db.execute(
-                    'SELECT id, name, cost ' \
-                    'FROM unit ' \
-                    'WHERE id=?',
-                    (id,)
-                    ).fetchone()
+                    'SELECT id, name, cost '
+                    'FROM unit '
+                    'WHERE id=?', (id,)).fetchone()
             except db.DatabaseError:
                 error = f'Error reading unit with id "{id}"'
             else:
                 return render_template(f'unit/update.html', unit=record)
         flash(error, 'error')
-
-
 
 
 @bp.route('/delete/<int:id>', methods=['GET'])
@@ -117,9 +114,5 @@ def delete(id: int):
                 error = f'Error deleting unit with id "{id}"'
             else:
                 return redirect(url_for('units.list'))
-    
+
         flash(error, 'error')
-
-    
-
-
