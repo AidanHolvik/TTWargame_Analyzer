@@ -4,7 +4,32 @@ A tool for visualizing and analyzing distributions of outcomes for tabletop warg
 
 ## Data Structures
 
-### Results
+### Weapon Stats
+
+#### Pre-Distribution
+
+```javascript
+wpnStats: {
+    attacks: STRING,    // '#' or '#D#'
+    hitRoll: NUMBER,    // 1-6, 1 represents automatic hits
+    strength: NUMBER,   // 1+
+    ap: NUMBER,         // 0+
+    damage: NUMBER      // 1+
+}
+```
+
+### Target Stats
+
+#### Pre-Distribution
+
+```javascript
+    targetStats: {
+        toughness: NUMBER,  // 1+
+        save: NUMBER        // 2-7, 7 represents automatically failed save / no save
+    }
+```
+
+### Results/Distributions
 
 #### Pre-Plotting
 
@@ -19,6 +44,7 @@ data: {
 - /
 - /home
 - /tests/plot
+- /tests/weaponStats
 
 ## Running the app
 
