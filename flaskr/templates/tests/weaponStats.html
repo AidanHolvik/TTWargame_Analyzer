@@ -5,7 +5,7 @@
 
 {% block meta %}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/mathjs/2.0.1/math.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fft.js@4.0.4"></script> <!-- https://github.com/indutny/fft.js/ : used for generating distributions -->
 {% endblock %}
 
 
@@ -16,6 +16,7 @@
 
 {% block script %}
   <script>
+    const FFT = require("fft.js");
     // TODO: calculate probabilities based on weapon stats (assume T6, SV3+ for now)
     const targetStats = {
       toughness: 6,
@@ -31,45 +32,73 @@
     }
 
     // Distribution Generation Code
-    // test input for fft()
-    function fft() {
-      // https://cp-algorithms.com/algebra/fft.html#implementation
-
-
-    }
+    // TODO: test input for fft()
+    
 
     function calcAttacks(wpnStats) {
+
       const attacksStat = wpnStats.attacks.toUpperCase()
-        .split("D")
+        .split(/D\+/) // split on 'D' or '+'
         .forEach((element, index, array) => {
           array[index] = element.trim();
         });
       
       // If the Attacks stat is a fixed number, return that number as the number of attacks
-      if (attacksStat.length === 1) {
+      if (attacksStat.length === 3) { // unmatched capturing groups are stored in the array as undefined
         return { [parseInt(attacksStat[0])]: 1 };
       }
 
+
       // Roll for number of attacks
       const numDice = parseInt(attacksStat[0]);
-      const dieSides = parseInt(attacksStat[1]);
+      const dieSides = parseInt(attacksStat[2]);  // captured group 'D' is stored at index 1
+      if (attacksStat.length === 5) {
+        const bonusAttacks = parseInt(attacksStat[4]); // captured group '+' is stored at index 3
+      }
+      else {
+        const bonusAttacks = 0; // distribution will need to be shifted by numDice since the minimum roll for a die is 1, not 0
+      }
 
-
+      // Calculate distribution of number of attacks based on the number of dice and sides on the die using FFT
       // https://cp-algorithms.com/algebra/fft.html#applications  (all possible sums)
 
-      // TODO: construct polynomials for each die and multiply them together using FFT to get the distribution of total attacks
-      // e.g. for 1d6 + 1d3, construct the polynomials (x^1 + x^2 + x^3 + x^4 + x^5 + x^6) and (x^1 + x^2 + x^3), multiply them together to get the distribution of total attacks
+      // Preparing data for FFT
 
-      // [1:1/6, 2:1/6, 3:1/6, 4:1/6, 5:1/6, 6:1/6] for 1d6
-      // [1:1/3, 2:1/3, 3:1/3] for 1d3
+      const fftLength = Math.pow(2, Math.ceil(Math.log2(dieSides * numDice + 1)));
+      const fft = new FFT(fftLength);
+      var distArr = Array(fftLength).fill(0);
+      for (let i = 0; i < dieSides; i++) {
+        distArr[i+1] = 1 / dieSides; // probability of rolling each possible result on the die
+      }
 
-      // index indicates power of the polynomial, value at that index indicates coefficient (probability) of that power (number of attacks)
+      var fftOutput = fft.createComplexArray(); // create an array to hold the FFT output
+      fft.realTransform(fftOutput, distArr); // transform the distribution array to the frequency domain
 
+      // Square each element of the transformed array
+      const fftIntermediate = fft.createComplexArray().fill(1); // create an array to hold the intermediate results of the FFT multiplication
+      fftIntermediate.forEach((value, index, self) => {
+        for (let i = 0; i < numDice; i++) {
+          self[index] = value * fftOutput[index]; // raise each element in fftOutput to the power of numDice to sum the dice
+        }
+      });
 
+      fft.inverseTransform(fftOutput, fftIntermediate); // transform back to get the distribution of the sum of the dice
+      fft.fromComplexArray(fftOutput, distArr); // convert the complex array back to a real array to get the final distribution
 
+      // trim leading zero
+      distArr.shift();
+      // trim trailing zeros
+      while (distArr[distArr.length - 1] === 0) {
+        distArr.pop();
+      }
 
+      // convert distribution array to object with keys as number of attacks and values as probabilities
+      const distribution = {};
+      for (let i = 0; i < distArr.length; i++) {
+        distribution[i + bonusAttacks] = distArr[i];
+      }
 
-
+      return distribution;
     }
 
 
@@ -182,6 +211,8 @@
     }
 
     // Generate Plot
+    const data = calcAttacks(wpnStats);
+
     generatePlot("RollResult", data);
   </script>
 {% endblock %}

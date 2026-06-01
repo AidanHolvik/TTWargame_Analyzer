@@ -10,7 +10,7 @@ A tool for visualizing and analyzing distributions of outcomes for tabletop warg
 
 ```javascript
 wpnStats: {
-    attacks: STRING,    // '#' or '#D#'
+    attacks: STRING,    // '#' or '#D#' or '#D#+#'
     hitRoll: NUMBER,    // 1-6, 1 represents automatic hits
     strength: NUMBER,   // 1+
     ap: NUMBER,         // 0+

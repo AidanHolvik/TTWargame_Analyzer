@@ -6,3 +6,7 @@ bp = Blueprint('tests', __name__, url_prefix='/tests')
 @bp.route('/plot')
 def plot():
     return render_template('tests/plot.html')
+
+@bp.route('/weaponStats')
+def weapon_stats():
+    return render_template('tests/weaponStats.html')
