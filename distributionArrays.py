@@ -29,6 +29,7 @@ def roll_dice(num_dice, num_sides):
     return pmf.tolist()
 
 
+
 def test():
 
     # Weapon Profile
@@ -42,7 +43,7 @@ def test():
     def_toughness = 3
     def_save = 4
 
-    # calculate hit chance (bernoulli distribution)
+    # calculate hit chance
     # TODO: add in modifiers, rerolls, etc.
     chance_to_hit = (7 - wpn_bs) / 6
     if chance_to_hit < 1/6:
@@ -50,7 +51,7 @@ def test():
     elif chance_to_hit > 5/6:
         chance_to_hit = 5/6
 
-    # # calculate wound chance (bernoulli distribution)
+    # # calculate wound chance
     # # TODO: add in modifiers, rerolls, etc.
     # if wpn_str >= 2 * def_toughness:
     #     chance_to_wound = 5 / 6
@@ -63,7 +64,7 @@ def test():
     # else:
     #     chance_to_wound = 3 / 6
 
-    # # calculate chance of failing save (bernoulli distribution)
+    # # calculate chance of failing save
     # # TODO: add in modifiers, rerolls, invuln, etc.
     # chance_to_fail_save = (def_save - wpn_ap - 1) / 6
     # if chance_to_fail_save < 0:
@@ -159,41 +160,3 @@ def test():
 
 test()
 
-
-# def generate_pmf(num_sides: int = 1) -> PMF:
-#     if num_sides < 1:
-#         raise ValueError("Number of sides must be at least 1.")
-
-#     return PMF([1] * num_sides, min_result=1)  # PMF for a single die
-
-# def roll_dice(die_pmf: PMF, num_dice: int = 1) -> PMF:
-#     if (num_dice < 1):
-#         raise ValueError("Number of dice must be at least 1.")
-
-#     output_size = num_dice * die_pmf.size() - (num_dice - 1)
-#     fft_size = next_fast_len(output_size, real=True)
-
-#     pmf = np.zeros(fft_size)
-#     for i in range(0, pmf.size()):
-#         pmf[i] = 1
-
-#     # Compute the PMF of the sum of the dice using FFT
-#     cf = rfft(pmf, n=fft_size, overwrite_x=True)
-#     cf = (
-#         cf**num_dice
-#     )  # Raise the characteristic function to the power of num_dice to model the sum of the dice
-#     pmf = irfft(cf, n=fft_size, overwrite_x=True)
-#     pmf = np.round(pmf)  # Round to avoid floating-point issues
-
-#     # normalize and format the PMF
-#     total_outcomes = num_sides**num_dice
-#     pmf = pmf[:output_size]  # Trim to valid range
-#     pmf = (pmf / total_outcomes) * 100  # Normalize to get probabilities
-
-#     return PMF(pmf.tolist(), min_result=num_dice)
-
-
-# TODO:
-#   - function 'pmf_to_cf' to generate the characteristic function for a PMF
-#   - function 'cf_to_pmf' to convert a characteristic function back to a PMF
-#   - functions for performing operations involving multiple CFs?
