@@ -1,7 +1,5 @@
 import numpy as np
 from scipy.fft import rfft, irfft, next_fast_len
-from scipy.special import comb as choose
-from scipy.stats import binom
 
 
 
