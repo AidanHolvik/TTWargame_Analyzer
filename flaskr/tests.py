@@ -1,19 +1,53 @@
-from flask import Blueprint, flash, g, redirect, render_template, request, session, url_for, jsonify
+from flask import (
+    Blueprint,
+    flash,
+    g,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+    jsonify,
+)
+from flaskr.db import get_db
 
 import numpy as np
 from scipy.fft import rfft, irfft, next_fast_len
 
-bp = Blueprint('tests', __name__, url_prefix='/tests')
+bp = Blueprint("tests", __name__, url_prefix="/tests")
 
 
-@bp.route('/plot', methods=['GET'])
+@bp.route("/plot", methods=["GET"])
 def plot():
-    return render_template('tests/plot.html')
+    return render_template("tests/plot.html")
 
-@bp.route('/weaponStats', methods=['GET'])
+
+@bp.route("/weaponStats", methods=["GET"])
 def weapon_stats():
-    return render_template('tests/weaponStats.html')
+    return render_template("tests/weaponStats.html")
 
+
+@bp.route("/addWeapon", methods=["GET", "POST"])
+def add_weapon():
+    if request.method == "POST":
+        name = request.form["wpn_name"]
+        attacks = request.form["attacks"]
+        skill = request.form["skill"]
+        strength = request.form["strength"]
+        ap = request.form["ap"]
+        damage = request.form["damage"]
+
+        db = get_db()
+        db.execute(
+            "INSERT INTO weapon (name, attacks, skill, strength, ap, damage)"
+            " VALUES (?,?,?,?,?,?)",
+            (name, attacks, skill, strength, ap, damage),
+        )
+        db.commit()
+        return redirect(url_for("tests.addWeapon"))
+
+    else:
+        return render_template("tests/addWeapon.html")
 
 
 # Utility Functions ()
@@ -21,26 +55,20 @@ def process_dice_notation(die_str):
     die_str = die_str.lower()
     values = []
 
-    die_str = die_str.partition('d')
+    die_str = die_str.partition("d")
     if die_str[0].isdecimal():
         values.append(int(die_str[0]))
     else:
         values.append(int(1))
 
-    die_str = die_str[2].partition('+')
+    die_str = die_str[2].partition("+")
     if die_str[0].isdecimal():
         values.append(int(die_str[0]))
-    
+
     if die_str[2].isdecimal():
         values.append(int(die_str[2]))
-    
+
     return values
-
-
-    
-
-            
-
 
 
 def roll_dice(num_dice, num_sides):
@@ -61,7 +89,7 @@ def roll_dice(num_dice, num_sides):
     total_outcomes = num_sides**num_dice
 
     pmf = pmf[:output_size]  # Trim to valid range
-    pmf = (pmf / total_outcomes)  # Normalize to get probabilities
+    pmf = pmf / total_outcomes  # Normalize to get probabilities
 
     return pmf.tolist()
 
@@ -82,10 +110,10 @@ def generate_distributions():
     # calculate hit chance
     # TODO: add in modifiers, rerolls, etc.
     chance_to_hit = (7 - wpn_bs) / 6
-    if chance_to_hit < 1/6:
-        chance_to_hit = 1/6
-    elif chance_to_hit > 5/6:
-        chance_to_hit = 5/6
+    if chance_to_hit < 1 / 6:
+        chance_to_hit = 1 / 6
+    elif chance_to_hit > 5 / 6:
+        chance_to_hit = 5 / 6
 
     # # calculate wound chance
     # # TODO: add in modifiers, rerolls, etc.

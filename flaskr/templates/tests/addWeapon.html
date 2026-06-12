@@ -1,0 +1,29 @@
+{% extends tests/generic.html %}
+
+{% block title %}Add Weapon{% endblock %}
+
+<!-- TODO: Add meta block? -->
+
+
+{% block header %}Add Weapon{% endblock %}
+
+{% block content %} 
+    <form method="post">
+        <label for="wpn_name">Name</label>
+        <input type="text" id="wpn_name" name="Weapon Name" required><br>
+        <label for="attacks">A</label>
+        <input type="text" id="attacks" name="Attacks" required value="1" pattern="^\d+(?i:D\d+)?(\+\d+)?$|^(?i:D\d+)(\+\d+)?$" maxlength="8"><br>
+        <label for="skill">WS/BS</label>
+        <input type="number" id="skill" name="Weapon Skill / Ballistic Skill" required value="4" min="1" max="6"><br>
+        <label for="strength">S</label>
+        <input type="number" id="strength" name="Strength" required value="1" min="1"><br>
+        <label for="ap">AP</label>
+        <input type="number" id="ap" name="AP" required value="0" min="0"><br>
+        <label for="damage">D</label>
+        <input type="text" id="damage" name="Damage" required value="1" pattern="^\d+(?i:D\d+)?(\+\d+)?$|^(?i:D\d+)(\+\d+)?$" maxlength="8"><br>
+        <input type="submit" value="Submit">
+    </form>
+{% endblock %}
+
+{% block script %}{% endblock %}
+

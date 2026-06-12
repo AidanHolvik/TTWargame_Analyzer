@@ -4,6 +4,13 @@ A tool for visualizing and analyzing distributions of outcomes for tabletop warg
 
 ## Data Structures
 
+### Regular Expressions
+
+#### Dice roll or flat int value
+```python
+"^\d+(?i:D\d+)?(\+\d+)?$|^(?i:D\d+)(\+\d+)?$"
+```
+
 ### Weapon Stats
 
 #### Pre-Distribution

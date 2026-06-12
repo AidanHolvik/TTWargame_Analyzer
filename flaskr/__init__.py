@@ -31,7 +31,11 @@ def create_app(test_config=None):
         pass
 
     # g.root_url = 'http://localhost:5000'
-    # Initialize the database and register blueprints
+    # Initialize the database
+    from . import db
+    db.init_app(app)
+
+    # Register blueprints
     from . import tests
     app.register_blueprint(tests.bp)
 
