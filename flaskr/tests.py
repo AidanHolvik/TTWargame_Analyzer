@@ -30,7 +30,7 @@ def weapon_stats():
 @bp.route("/addWeapon", methods=["GET", "POST"])
 def add_weapon():
     if request.method == "POST":
-        name = request.form["wpn_name"]
+        name = request.form["name"]
         attacks = request.form["attacks"]
         skill = request.form["skill"]
         strength = request.form["strength"]
@@ -38,16 +38,70 @@ def add_weapon():
         damage = request.form["damage"]
 
         db = get_db()
-        db.execute(
-            "INSERT INTO weapon (name, attacks, skill, strength, ap, damage)"
-            " VALUES (?,?,?,?,?,?)",
-            (name, attacks, skill, strength, ap, damage),
-        )
-        db.commit()
-        return redirect(url_for("tests.addWeapon"))
+        try:
+            db.execute(
+                "INSERT INTO weapon (name, attacks, skill, strength, ap, damage) VALUES (?,?,?,?,?,?)",
+                (name, attacks, skill, strength, ap, damage),
+            )
+            db.commit()
+        except db.IntegrityError:
+            error = f"IntegrityError"
+        else:
+            flash(f"Added new weapon: {name}")
+            return redirect(url_for("tests.add_weapon"))
+        
+        if error is not None:
+            flash(error)
 
+    return render_template("tests/addWeapon.html")
+
+
+@bp.route("/deleteWeapon", methods=["GET", "POST"])
+def delete_weapon():
+    names = None
+    error = None
+
+    if request.method == "POST":
+        name = request.form['name']
+        error = None
+
+        try:
+            db = get_db()
+            db.execute(
+                'DELETE FROM weapon'
+                ' WHERE name = ?',
+                (name,)
+            )
+            db.commit()
+        except db.IntegrityError:
+            error = f'could not delete weapon "{name}".'
+        else:
+            flash(f'Deleted weapon "{name}".')
+            return redirect(url_for('tests.delete_weapon'))
+        
     else:
-        return render_template("tests/addWeapon.html")
+        # TODO: put db access into a try-except statement
+        db = get_db()
+        names = db.execute(
+            'SELECT DISTINCT name'
+            ' FROM weapon'
+        ).fetchall()
+
+    if error is not None:
+        flash(error)
+    return render_template('tests/deleteWeapon.html', names=names)
+
+@bp.route("/indexWeapons")
+def index_weapons():
+    db = get_db()
+    weapons = db.execute(
+        'SELECT id, name, attacks, skill, strength, ap, damage'
+        ' FROM weapon'
+        ' ORDER BY name ASC'
+    ).fetchall()
+
+    return render_template("tests/indexWeapons.html", weapons=weapons)
+
 
 
 # Utility Functions ()

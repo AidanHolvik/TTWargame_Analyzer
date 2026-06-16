@@ -68,6 +68,8 @@ Hosted on <http://127.0.0.1:5000/>
 
 ## TODOs
 
+- To get damage distribution, model damage for 1 die with DFS on a Markov tree, then convolve with number of attacks using fft
+
 ## Ideas
 
 - Use strategy patterns to represent abilities, weapon keywords, etc.

@@ -1,0 +1,37 @@
+{% block meta %}{% endblock %}
+
+{% block header %}{% block title %}List Weapons{% endblock %}{% endblock %}
+
+
+{% block content %}
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Name</th>
+                <th scope="col">A</th>
+                <th scope="col">WS/BS</th>
+                <th scope="col">S</th>
+                <th scope="col">AP</th>
+                <th scope="col">D</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for weapon in weapons %}
+                <tr>
+                    <td>{{ weapon['id'] }}</td>
+                    <th scope="row">{{ weapon['name'] }}</th>
+                    <td>{{ weapon['attacks'] }}</td>
+                    <td>{{ weapon['skill'] }}</td>
+                    <td>{{ weapon['strength'] }}</td>
+                    <td>{{ weapon['ap'] }}</td>
+                    <td>{{ weapon['damage'] }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}
+
+
+{% block script %}{% endblock %}

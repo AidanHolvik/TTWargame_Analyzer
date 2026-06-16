@@ -1,0 +1,17 @@
+{% extends 'tests/generic.html' %}
+
+{% block title %}Delete Weapon{% endblock %}
+{% block header %}Delete Weapon{% endblock %}
+
+{% block content %}
+    <form method="post">
+        <select name="name" id="weapon_names" required>
+            {% for weapon in names %}
+                <option value={{ weapon['name'] }}>{{ weapon['name'] }}</option>
+            {% endfor %}
+        </select>
+        <input type="submit" value="Delete">
+    </form>
+{% endblock %}
+
+{% block script %}{% endblock %}
