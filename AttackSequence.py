@@ -15,7 +15,7 @@ class AbstractNode(ABC):
             self.max = damage[0] * damage[1] + damage[2]        # max = num_dice * num_sides + modifier
 
     @abstractmethod
-    def dfs(self, probability: float) -> array:
+    def dfs(self, probability: float) -> array:     # this class' implementation of dfs should only include debug statements
         pass
 
 
@@ -29,9 +29,12 @@ class Node(AbstractNode):
         self.children.append((new_child, probability))
 
     def dfs(self, probability: float) -> array:
+        super().dfs(probability)
         damage = np.zeros(self.max + 1)
-        for node, success_chance in self.children:
+        for (node, success_chance) in self.children:
             damage += node.dfs(probability * success_chance)
+        
+        return damage
 
 
 class FailureNode(AbstractNode):
@@ -40,16 +43,22 @@ class FailureNode(AbstractNode):
         self.child = None
 
     def dfs(self, probability:float) -> array:
-        return self.child.complement(probability)
+        super().dfs(probability)
+        damage = np.zeros(self.max + 1)
+        damage += self.child.complement(probability)
+        return damage
 
 
 class DamageNode(AbstractNode):
     def __init__(self, damage: int | tuple[int, int, int]):
         super().__init__(damage)
         if isinstance(damage, int):
-            self.raw_pmf = np.zeros(self.max + 1)
-            self.raw_pmf[damage] = 1
+            self.raw_pmf = np.zeros(self.max + 1, dtype=float)
+            self.raw_pmf[damage] = 1.0
         else:
+            num_dice = damage[0]
+            num_sides = damage[1]
+            modifier = damage[2]
             # Calculate distribution assuming all other rolls succeed
             fft_size = next_fast_len(self.max + 1, real=True)
             self.raw_pmf = np.zeros(fft_size)
@@ -65,6 +74,7 @@ class DamageNode(AbstractNode):
             self.raw_pmf /= num_sides**num_dice
 
     def dfs(self, probability: float) -> array:
+        super().dfs(probability)
         damage = np.zeros_like(self.raw_pmf)
         for i in range(self.min, self.max + 1):
             damage[i] = probability * self.raw_pmf[i]
@@ -72,18 +82,18 @@ class DamageNode(AbstractNode):
 
     def complement(self, probability) -> array:
         damage = np.zeros_like(self.raw_pmf)
-        damage[0] = probability * self.raw_pmf[0]
+        damage[0] = probability
         return damage
 
 
 
 """ Main """
 weapon = {
-    "attacks": 1,  # int | tuple[int,int,int]
+    "attacks": (1,3,0),  # int | tuple[int,int,int]
     "skill": 4,  # int
     "strength": 5,  # int
     "ap": 0,  # int
-    "damage": 1,  # int | tuple[int,int,int]
+    "damage": (2,3,0),  # int | tuple[int,int,int]
     "keywords": [("rapid fire", 1)],  # list[str | tuple[str,int]]
 }
 defender = {"toughness": 3, "save": 4}
@@ -158,12 +168,12 @@ wound_roll.add_child(fail_sequence, 1.0 - probability)
 
 probability = (defender["save"] + weapon["ap"] - 1) / 6
 if probability > 1.0:
-    probability = float(1.0)
+    probability = 1.0
 save_roll.add_child(damage_roll, probability)
 save_roll.add_child(fail_sequence, 1.0 - probability)
 # TODO: consider rerolls, keywords, etc.
 
-damage = hit_roll.dfs(float(1.0))
+damage = hit_roll.dfs(1.0)
 
 """ v   PMF (total damage)   v """
 # Determine size of the total damage distribution (for fft purposes)
