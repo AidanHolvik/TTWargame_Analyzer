@@ -89,11 +89,11 @@ class DamageNode(AbstractNode):
 
 """ Main """
 weapon = {
-    "attacks": (1,3,0),  # int | tuple[int,int,int]
+    "attacks": 1,  # int | tuple[int,int,int]
     "skill": 4,  # int
     "strength": 5,  # int
     "ap": 0,  # int
-    "damage": (2,3,0),  # int | tuple[int,int,int]
+    "damage": 1,  # int | tuple[int,int,int]
     "keywords": [("rapid fire", 1)],  # list[str | tuple[str,int]]
 }
 defender = {"toughness": 3, "save": 4}
@@ -179,20 +179,19 @@ damage = hit_roll.dfs(1.0)
 # Determine size of the total damage distribution (for fft purposes)
 if isinstance(weapon["attacks"], int):
     min_attacks = weapon["attacks"]
-    fft_size = weapon["attacks"]
+    max_total = weapon["attacks"]
 else:
     min_attacks = (
         weapon["attacks"][0] + weapon["attacks"][2]
     )  # min_attacks = num_dice + modifier
-    fft_size = weapon["attacks"][0] * weapon["attacks"][1] + weapon["attacks"][2]
+    max_total = weapon["attacks"][0] * weapon["attacks"][1] + weapon["attacks"][2]
 
 if isinstance(weapon["damage"], int):
-    fft_size *= weapon["damage"]
+    max_total *= weapon["damage"]
 else:
-    fft_size *= weapon["damage"][0] * weapon["damage"][1] + weapon["damage"][2]
+    max_total *= weapon["damage"][0] * weapon["damage"][1] + weapon["damage"][2]
 
-fft_size += 1
-fft_size = next_fast_len(fft_size, real=True)
+fft_size = next_fast_len(max_total + 1, real=True)
 
 # represent damage as its characteristic function, then use it to determine total damage
 """ v   CF (damage)   v """
@@ -221,6 +220,12 @@ for i in range(min_attacks, attacks.size):
 """ v   PMF (total damage)   v """
 # convert mixture distribution back to a PMF
 total_damage = irfft(total_damage, fft_size)
+total_damage = total_damage[0:max_total + 1]
+
+# repair extremely small values resulting from floating-point error
+for i in range(total_damage.size):
+    if total_damage[i] < 1.0e-17:
+        total_damage[i] = 0.0
 
 print(total_damage)
 
