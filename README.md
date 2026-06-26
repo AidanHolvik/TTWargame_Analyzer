@@ -52,6 +52,7 @@ data: {
 - /home
 - /tests/plot
 - /tests/weaponStats
+- /distribution/plot
 
 ## Running the app
 

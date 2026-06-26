@@ -39,6 +39,9 @@ def create_app(test_config=None):
     from . import tests
     app.register_blueprint(tests.bp)
 
+    from . import distribution
+    app.register_blueprint(distribution.bp)
+
     # set default route for testing and debug purposes
     @app.route('/')
     def default_page():

@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Damage Distribution</title>
+  </head>
+  <body>
+    <form method="post">
+      Weapon: <br />
+      <label for="attacks">A</label>
+      <input
+        type="text"
+        id="attacks"
+        name="attacks"
+        required
+        value="1"
+        pattern="^\d+(?i:D\d+)?(\+\d+)?$|^(?i:D\d+)(\+\d+)?$"
+        maxlength="8"
+      />
+      <br />
+      <label for="skill">WS/BS</label>
+      <input
+        type="number"
+        id="skill"
+        name="skill"
+        required
+        value="4"
+        min="1"
+        max="6"
+        step="1"
+      />
+      <br />
+      <label for="strength">S</label>
+      <input
+        type="number"
+        id="strength"
+        name="strength"
+        required
+        value="1"
+        min="1"
+        step="1"
+      />
+      <br />
+      <label for="ap">AP</label>
+      <input
+        type="number"
+        id="ap"
+        name="ap"
+        required
+        value="0"
+        min="0"
+        step="1"
+      />
+      <br />
+      <label for="damage">D</label>
+      <input
+        type="text"
+        id="damage"
+        name="damage"
+        required
+        value="1"
+        pattern="^\d+(?i:D\d+)?(\+\d+)?$|^(?i:D\d+)(\+\d+)?$"
+        maxlength="8"
+      />
+      <br />
+
+      <br />
+      Defender: <br />
+      <label for="toughness">T</label>
+      <input
+        type="number"
+        id="toughness"
+        name="toughness"
+        required
+        value="1"
+        min="1"
+        step="1"
+      />
+      <br />
+      <label for="save">Sv</label>
+      <input
+        type="number"
+        id="save"
+        name="save"
+        required
+        value="4"
+        min="2"
+        max="6"
+        step="1"
+      />
+      <br />
+
+      <br />
+      <input type="submit" value="Add" />
+    </form>
+
+    <!-- TODO: plot damage distribution -->
+    <canvas id="damage_plot" width="1200" height="600"></canvas>
+  </body>
+  <script>
+    function constructChartData(incomingData) {
+      var preparedData = {
+        labels: [], // possible outcomes
+        values: [], // probability of each outcome
+        cumulative: [], // probability of getting each outcome or greater
+      };
+
+      var sum = 100;
+      for (let i = 0; i < incomingData.length; i++) {
+        preparedData['labels'].push(i);
+        preparedData['values'].push(incomingData[i]);
+        preparedData['cumulative'].push(sum)
+        sum -= incomingData[i]
+      }
+
+      return {
+        labels: preparedData.labels,
+        datasets: [{
+          label: 'probability of result = #',
+          type: 'bar',
+          data: preparedData.values,
+          borderColor: 'rgba(75, 192, 192, 1)',
+          fill: false,
+          yAxisID: 'exact'
+        }, {
+          label: 'probability of result >= #',
+          type: 'line',
+          data: preparedData.cumulative,
+          borderColor: 'rgba(255, 99, 132, 1)',
+          fill: false,
+          yAxisID: 'cumulative'
+        }]
+      };
+    }
+
+    function configurePlotOptions() {
+      return {
+        responsive: false,
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: "Roll Result",
+            },
+          },
+          exact: {
+            // y-axis for result probability
+            title: {
+              display: true,
+              text: "% Probability of exactly # damage",
+            },
+            position: "left",
+            type: "linear",
+            min: 0,
+          },
+          cumulative: {
+            // y-axis for cumulative probability
+            title: {
+              display: true,
+              text: "% Probability of at least # damage",
+            },
+            position: "right",
+            type: "linear",
+            min: 0,
+            max: 100,
+            grid: {
+              drawOnChartArea: false, // only want the grid lines for one axis to show up
+            },
+          },
+        },
+      };
+    }
+
+    // TODO: retrieve distribution from backend
+    // TODO: if distribution not provided, provide empty distribution to chart so page can still render?
+
+
+    // TODO: make sure chart updates properly when form is submitted
+    var ctx = document.getElementById("damage_plot").getContext("2d");
+    var newPlot = new Chart(ctx, {
+      data: constructChartData({{distribution}}),
+      options: configurePlotOptions(),
+    });
+  </script>
+</html>
