@@ -1,18 +1,64 @@
-DROP TABLE IF EXISTS weapon;
-DROP TABLE IF EXISTS defense;
+DROP TABLE IF EXISTS model_loadouts;
+DROP TABLE IF EXISTS unit_models;
+DROP TABLE IF EXISTS weapons;
+DROP TABLE IF EXISTS models;
+DROP TABLE IF EXISTS units;
 
-CREATE TABLE weapon (
-    id INTEGER PRIMARY KEY,
-    name TEXT NOT NULL,
-    attacks TEXT NOT NULL,
-    skill INTEGER NOT NULL,
-    strength INTEGER NOT NULL,
-    ap INTEGER NOT NULL,
-    damage TEXT NOT NULL
+-- TODO: include abilities?
+CREATE TABLE units (
+  id INT PRIMARY KEY,
+  name TEXT UNIQUE
+  -- TODO: add field for faction so users can filter/sort?
 );
 
-CREATE TABLE defense (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    toughness INTEGER NOT NULL,
-    save INTEGER NOT NULL
+-- TODO: include keywords and abilities?
+CREATE TABLE models (
+  id INT PRIMARY KEY,
+  name TEXT,
+  movement INT,
+  toughness INT,
+  save INT,
+  invuln_save INT,
+  health INT
+);
+
+-- TODO: include keywords
+CREATE TABLE weapons (
+  id INT PRIMARY KEY,
+  name TEXT,
+  attacks TEXT,
+  skill INT,
+  strength INT,
+  ap INT,
+  damage TEXT
+);
+
+CREATE TABLE model_loadouts (
+  model_id INT,
+  weapon_id INT,
+
+  CONSTRAINT fk_model
+  FOREIGN KEY (model_id)
+  REFERENCES models.id,
+
+  CONSTRAINT fk_weapon
+  FOREIGN KEY (weapon_id)
+  REFERENCES weapons.id,
+
+  CONSTRAINT pk PRIMARY KEY (model_id, weapon_id)
+);
+
+CREATE TABLE unit_models (
+  unit_id INT,
+  model_id INT,
+
+  CONSTRAINT fk_unit
+  FOREIGN KEY (unit_id)
+  REFERENCES units.id,
+
+  CONSTRAINT fk_model
+  FOREIGN KEY (model_id)
+  REFERENCES models.id,
+
+  CONSTRAINT pk PRIMARY KEY (fk_unit, fk_model)
 );
