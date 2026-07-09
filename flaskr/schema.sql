@@ -4,7 +4,7 @@ DROP TABLE IF EXISTS weapons;
 DROP TABLE IF EXISTS models;
 DROP TABLE IF EXISTS units;
 
--- TODO: include abilities?
+-- TODO: include keywords and abilities?
 CREATE TABLE units (
   id INT PRIMARY KEY,
   name TEXT UNIQUE
@@ -35,7 +35,8 @@ CREATE TABLE weapons (
 
 CREATE TABLE model_loadouts (
   model_id INT,
-  weapon_id INT,
+  weapon_id INT UNIQUE,
+  quantity INT,   -- TODO: constrain quantity to >= 1 (or maybe >= 0)
 
   CONSTRAINT fk_model
   FOREIGN KEY (model_id)
@@ -50,7 +51,8 @@ CREATE TABLE model_loadouts (
 
 CREATE TABLE unit_models (
   unit_id INT,
-  model_id INT,
+  model_id INT UNIQUE,
+  quantity INT,   -- TODO: constrain quantity to >= 1 (or maybe >= 0)
 
   CONSTRAINT fk_unit
   FOREIGN KEY (unit_id)
