@@ -11,11 +11,28 @@ from flask import (
 )
 from flaskr.db import get_db
 
-bp = Blueprint('units', __name__)
+bp = Blueprint('units', __name__, url_prefix="/units")
 
-# TODO: page for browsing units
 
-# TODO: page for creating/editing new unit?
+bp.route("/", methods=["GET"])
+def index():
+    db = get_db()
+    units = db.execute(
+        'SELECT id, name'
+        ' FROM units'
+    ).fetchall()
+
+    return render_template("units/index.html", units=units)
+
+bp.route("/create", methods=["GET", "POST"])
+def create():
+    # TODO: page for creating a new unit record
+    pass
+
+bp.route("/<int:id>", methods=["GET", "PUT", "DELETE"])   # use put instead of post: we want to overwrite the existing record, not make a new one.
+def modify():
+    # TODO: page for editing/deleting existing unit
+    pass
 
 
 
