@@ -47,6 +47,49 @@ Hosted on <http://127.0.0.1:5000/>
 
 - Use PyQt6 for GUI (due to licensing)
 
+## Database Structure
+
+```mermaid
+erDiagram
+    units {
+        int id PK
+        text_unique name
+    }
+    models {
+        int id PK
+        text name
+        int movement
+        int toughness
+        int save
+        int invuln_save
+        int health
+    }
+    weapons {
+        int id PK
+        text name
+        text attacks
+        int skill
+        int strength
+        int ap
+        text damage
+    }
+    model_weapons {
+        int model_id PK,FK
+        int weapon_id PK,FK,UK
+        int quantity
+    }
+    unit_models {
+        int unit_id PK,FK
+        int model_id PK,FK,UK
+        int quantity
+    }
+    models ||--o{ model_weapons : "model_id"
+    weapons ||--o{ model_weapons : "weapon_id"
+    units ||--o{ unit_models : "unit_id"
+    models ||--o{ unit_models : "model_id"
+
+```
+
 ## Dependencies
 
 ```mermaid

@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS model_loadouts;
+DROP TABLE IF EXISTS model_weapons;
 DROP TABLE IF EXISTS unit_models;
 DROP TABLE IF EXISTS weapons;
 DROP TABLE IF EXISTS models;
@@ -7,14 +7,14 @@ DROP TABLE IF EXISTS units;
 -- TODO: include keywords and abilities?
 CREATE TABLE units (
   id INT PRIMARY KEY,
-  name TEXT UNIQUE
+  name TEXT UNIQUE NOT NULL
   -- TODO: add field for faction so users can filter/sort?
 );
 
 -- TODO: include keywords and abilities?
 CREATE TABLE models (
   id INT PRIMARY KEY,
-  name TEXT,
+  name TEXT NOT NULL,
   movement INT,
   toughness INT,
   save INT,
@@ -25,7 +25,7 @@ CREATE TABLE models (
 -- TODO: include keywords
 CREATE TABLE weapons (
   id INT PRIMARY KEY,
-  name TEXT,
+  name TEXT NOT NULL,
   attacks TEXT,
   skill INT,
   strength INT,
@@ -33,7 +33,7 @@ CREATE TABLE weapons (
   damage TEXT
 );
 
-CREATE TABLE model_loadouts (
+CREATE TABLE model_weapons (
   model_id INT,
   weapon_id INT UNIQUE,
   quantity INT,   -- TODO: constrain quantity to >= 1 (or maybe >= 0)
@@ -64,3 +64,5 @@ CREATE TABLE unit_models (
 
   CONSTRAINT pk PRIMARY KEY (fk_unit, fk_model)
 );
+
+-- TODO: create query (view) for viewing all weapons & their quantities in a unit
