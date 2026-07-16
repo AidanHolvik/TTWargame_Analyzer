@@ -17,7 +17,7 @@ bp = Blueprint("unit", __name__)
 @bp.route("/units", methods=["GET"])
 def index():
     db = get_db()
-    units = db.execute("SELECT id, name" " FROM units").fetchall()
+    units = db.execute("SELECT id, name FROM units").fetchall()
 
     return render_template("unit/index.html", units=units)
 
@@ -34,15 +34,41 @@ def create():
             "INSERT INTO units (name) VALUES (?) RETURNING id", (name,)
         ).fetchone()
 
-        return redirect(url_for("unit.update", unit_id=new_id))
+        return redirect(url_for("unit.modify", unit_id=new_id))
 
     return render_template("unit/create.html")
 
 
 @bp.route("/<int:unit_id>", methods=("GET", "POST"))
-def update(unit_id):
-    # TODO: page for editing/deleting existing unit
-    pass
+def modify(unit_id):
+    db = get_db()
+    # Get the unit's models and their quantities
+    models = db.execute(
+        'SELECT models.id AS id, unit_models.quantity AS quantity, models.name AS name, "quantity_" || models.id AS input_name'
+        ' FROM unit_models'
+        ' INNER JOIN models ON unit_models.model_id = models.id'
+        ' WHERE unit_models.unit_id = ?',
+        (unit_id,)
+    ).fetchall()
+
+    if request.method == "POST":
+        db = get_db()
+        # TODO: modify record for this unit and its assigned models
+        db.execute(
+            'UPDATE units'
+            ' SET name=?'
+            ' WHERE id=unit_id',
+            (request.form['name'],)
+        )
+        for model in models:
+            db.execute(
+                'UPDATE unit_models'
+                ' SET quantity=?'
+                ' WHERE unit_id=? AND model_id=?',
+                (request.form[model['input_name']], unit_id, model['id'])
+            )
+
+    return render_template("unit/modify.html", unit_id=unit_id, unit_models=models)
 
 
 @bp.route("/<int:unit_id>/delete", methods=("DELETE"))

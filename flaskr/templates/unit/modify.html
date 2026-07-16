@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Edit Unit{% endblock %}
+
+{% block content %}
+  <form method="post">
+    <label for="name">Name</label>
+    <input type="text" name="name" id="name">
+    <br>
+
+    <!-- TODO: area for model list -->
+    <table>
+      <colgroup>
+        <col>
+        <col>
+        <col span="2">
+      </colgroup>
+      <thead>
+        <tr>
+          <th scope="col">Quantity</th>
+          <th scope="col">Name</th>
+          <th scope="colgroup">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for model in unit_models %}
+          <tr id="tr_{{model['id']}}">
+            <td>
+              <!-- TODO: initialize this input to the current quantity from the DB -->
+              <input type="number" name="{{model['input_name']}}" id="{{model['input_name']}}" min="0" max="99" value="{{model['quantity']}}">
+            </td>
+            <td>{{model['name']}}</td>
+            <td>
+              <a href="{{url_for(model.modify, unit_id=unit_id, model_id=model['id'])}}">Modify</a>
+            </td>
+            <td>
+                            <!-- TODO: When deleting model, stage changes to DB, but don't commit until saving the unit -->
+              <a href="{{url_for(model.delete, unit_id=unit_id, model_id=model['id'])}}">Delete</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+                      <!-- TODO: when creating a new model, add to the unit with a quantity of 0 to uphold DB integrity -->
+    <a href="{{url_for(model.create, unit_id=unit_id)}}">New</a>
+    
+    <!-- TODO: area for viewing unit's weapons (but not editing)? -->
+  
+    <br>
+    <input type="submit" value="Cancel" formaction="{{url_for(unit.index)}}" formmethod="get">
+    <input type="submit" value="Save">
+    
+  </form>
+{% endblock content %}
+
+{% block script %}{% endblock script %}
