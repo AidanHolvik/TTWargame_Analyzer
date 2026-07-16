@@ -47,6 +47,8 @@ Hosted on <http://127.0.0.1:5000/>
 
 - Use PyQt6 for GUI (due to licensing)
 
+- Use Openhammer API for creating units, models, and weapons instead of (or as an optional alternative to) user-input stats
+
 ## Database Structure
 
 ```mermaid
