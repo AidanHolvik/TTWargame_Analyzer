@@ -41,6 +41,8 @@
           <td>{{weapon['name']}}</td>
           <td>
             <a href="{{url_for(weapon.modify, unit_id=unit_id, model_id=model['id'], weapon_id=weapon['id'])}}">Modify</a>
+          </td>
+          <td>
             <a href="{{url_for(weapon.delete, unit_id=unit_id, model_id=model['id'], weapon_id=weapon['id'])}}">Delete</a>
           </td>
         {% endfor %}
