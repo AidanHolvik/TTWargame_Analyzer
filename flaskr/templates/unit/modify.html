@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
-{% block title %}Edit Unit{% endblock %}
+{% block title %}Modify {{unit['name']}}{% endblock %}
 
 {% block content %}
   <form method="post">
     <label for="name">Name</label>
-    <input type="text" name="name" id="name">
+    <input type="text" name="name" id="name" value="{{unit['name']}}">
     <br>
 
-    <!-- TODO: area for model list -->
+    <!-- area for model list -->
     <table>
       <colgroup>
         <col>
@@ -25,7 +25,6 @@
         {% for model in unit_models %}
           <tr id="tr_{{model['id']}}">
             <td>
-              <!-- TODO: initialize this input to the current quantity from the DB -->
               <input type="number" name="{{model['input_name']}}" id="{{model['input_name']}}" min="0" max="99" value="{{model['quantity']}}">
             </td>
             <td>{{model['name']}}</td>
@@ -33,7 +32,6 @@
               <a href="{{url_for(model.modify, unit_id=unit_id, model_id=model['id'])}}">Modify</a>
             </td>
             <td>
-                            <!-- TODO: When deleting model, stage changes to DB, but don't commit until saving the unit -->
               <a href="{{url_for(model.delete, unit_id=unit_id, model_id=model['id'])}}">Delete</a>
             </td>
           </tr>

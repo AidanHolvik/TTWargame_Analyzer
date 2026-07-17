@@ -33,6 +33,7 @@ def create():
         new_id = db.execute(
             "INSERT INTO units (name) VALUES (?) RETURNING id", (name,)
         ).fetchone()
+        db.commit()
 
         return redirect(url_for("unit.modify", unit_id=new_id))
 
@@ -43,6 +44,12 @@ def create():
 def modify(unit_id):
     db = get_db()
     # Get the unit's models and their quantities
+    unit = db.execute(
+        'SELECT *'
+        ' FROM units'
+        ' WHERE id=?',
+        (unit_id,)
+    ).fetchone()
     models = db.execute(
         'SELECT models.id AS id, unit_models.quantity AS quantity, models.name AS name, "quantity_" || models.id AS input_name'
         ' FROM unit_models'
@@ -52,14 +59,14 @@ def modify(unit_id):
     ).fetchall()
 
     if request.method == "POST":
-        db = get_db()
-        # TODO: modify record for this unit and its assigned models
+        # modify record for this unit
         db.execute(
             'UPDATE units'
             ' SET name=?'
-            ' WHERE id=unit_id',
-            (request.form['name'],)
+            ' WHERE id=?',
+            (request.form['name'], unit_id)
         )
+        # modify records for this unit's models
         for model in models:
             db.execute(
                 'UPDATE unit_models'
@@ -67,8 +74,9 @@ def modify(unit_id):
                 ' WHERE unit_id=? AND model_id=?',
                 (request.form[model['input_name']], unit_id, model['id'])
             )
+        db.commit()
 
-    return render_template("unit/modify.html", unit_id=unit_id, unit_models=models)
+    return render_template("unit/modify.html", unit=unit, unit_models=models)
 
 
 @bp.route("/<int:unit_id>/delete", methods=("DELETE"))

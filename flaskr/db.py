@@ -39,3 +39,31 @@ def init_db_command():
 def init_app(app):
     app.teardown_appcontext(close_db)
     app.cli.add_command(init_db_command)
+
+
+def get_unit(id):
+    db = get_db()
+    unit = db.execute("SELECT name" " FROM units" " WHERE id=?", (id,)).fetchone()
+    return unit
+
+
+def get_model(id):
+    db = get_db()
+    model = db.execute(
+        "SELECT name, movement, toughness, save, invuln_save, health"
+        " FROM models"
+        " WHERE id=?",
+        (id,),
+    ).fetchone()
+    return model
+
+
+def get_weapon(id):
+    db = get_db()
+    weapon = db.execute(
+        "SELECT name, attacks, skill, strength, ap, damage"
+        " FROM weapons"
+        " WHERE id=?",
+        (id,),
+    )
+    return weapon
