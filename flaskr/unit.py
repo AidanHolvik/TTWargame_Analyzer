@@ -47,27 +47,24 @@ def modify(unit_id):
     # Get the unit's models and their quantities
     models = db.execute(
         'SELECT models.id AS id, unit_models.quantity AS quantity, models.name AS name, "quantity_" || models.id AS input_name'
-        ' FROM unit_models'
-        ' INNER JOIN models ON unit_models.model_id = models.id'
-        ' WHERE unit_models.unit_id = ?',
-        (unit_id,)
+        " FROM unit_models"
+        " INNER JOIN models ON unit_models.model_id = models.id"
+        " WHERE unit_models.unit_id = ?",
+        (unit_id,),
     ).fetchall()
 
     if request.method == "POST":
         # modify record for this unit
         db.execute(
-            'UPDATE units'
-            ' SET name=?'
-            ' WHERE id=?',
-            (request.form['name'], unit_id)
+            "UPDATE units" " SET name=?" " WHERE id=?", (request.form["name"], unit_id)
         )
         # modify records for this unit's models
         for model in models:
             db.execute(
-                'UPDATE unit_models'
-                ' SET quantity=?'
-                ' WHERE unit_id=? AND model_id=?',
-                (request.form[model['input_name']], unit_id, model['id'])
+                "UPDATE unit_models"
+                " SET quantity=?"
+                " WHERE unit_id=? AND model_id=?",
+                (request.form[model["input_name"]], unit_id, model["id"]),
             )
         db.commit()
 
