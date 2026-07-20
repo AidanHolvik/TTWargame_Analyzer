@@ -8,9 +8,11 @@ A tool for visualizing and analyzing distributions of outcomes for tabletop warg
 
 #### Dice roll or flat int value
 
-```python
-"^\d+(?i:D\d+)?(\+\d+)?$|^(?i:D\d+)(\+\d+)?$"
+```javascript
+^\d+(?i:D\d+)?(\+\d+)?$|^(?i:D\d+)(\+\d+)?$
 ```
+
+
 
 ## Endpoints
 
@@ -37,6 +39,8 @@ Hosted on <http://127.0.0.1:5000/>
 - handle model/unit abilities which affect weapon stats and offensive rolls
 - record model/unit keywords in the DB
 - handle weapon keywords affecting offensive rolls (blocked by model/unit keywords)
+
+- rework record deletion via frontend to use DELETE requests instead of GET
 
 ## Ideas
 

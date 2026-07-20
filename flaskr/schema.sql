@@ -36,7 +36,7 @@ CREATE TABLE weapons (
 CREATE TABLE model_weapons (
   model_id INT,
   weapon_id INT UNIQUE,
-  quantity INT,   -- TODO: constrain quantity to >= 1 (or maybe >= 0)
+  quantity INT,   -- TODO: constrain quantity to >= 0
 
   CONSTRAINT fk_model
   FOREIGN KEY (model_id)
@@ -52,7 +52,7 @@ CREATE TABLE model_weapons (
 CREATE TABLE unit_models (
   unit_id INT,
   model_id INT UNIQUE,
-  quantity INT,   -- TODO: constrain quantity to >= 1 (or maybe >= 0)
+  quantity INT,   -- TODO: constrain quantity to >= 0
 
   CONSTRAINT fk_unit
   FOREIGN KEY (unit_id)
