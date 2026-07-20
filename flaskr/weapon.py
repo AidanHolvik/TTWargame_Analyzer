@@ -54,18 +54,32 @@ def create(unit_id, model_id):
 def modify(unit_id, model_id, weapon_id):
     weapon = get_weapon(weapon_id)
     db = get_db()
-    
+
     if request.method == "POST":
         # Modify the record for this weapon
         db.execute(
-            'UPDATE weapons'
-            ' SET name=?, attacks=?, skill=?, strength=?, ap=?, damage=?'
-            ' WHERE id=?',
-            (NAME, ATTACKS, SKILL, STRENGTH, AP, DAMAGE, weapon_id)
+            "UPDATE weapons"
+            " SET name=?, attacks=?, skill=?, strength=?, ap=?, damage=?"
+            " WHERE id=?",
+            (
+                request.form["name"],
+                request.form["attacks"],
+                request.form["skill"],
+                request.form["strength"],
+                request.form["ap"],
+                request.form["damage"],
+                weapon_id,
+            ),
         )
         db.commit()
-    
-    return render_template("weapon/modify.html", unit_id=unit_id, model_id=model_id, weapon=weapon, roll_pattern=roll_pattern())
+
+    return render_template(
+        "weapon/modify.html",
+        unit_id=unit_id,
+        model_id=model_id,
+        weapon=weapon,
+        roll_pattern=roll_pattern(),
+    )
 
 
 @bp.route("/<int:weapon_id>/delete", methods=("GET"))
