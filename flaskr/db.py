@@ -67,3 +67,6 @@ def get_weapon(id:int):
         (id,),
     )
     return weapon
+
+def roll_pattern() -> str:
+    return "^\d+(?i:D\d+)?(\+\d+)?$|^(?i:D\d+)(\+\d+)?$"
