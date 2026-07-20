@@ -9,7 +9,7 @@ from flask import (
     url_for,
     jsonify,
 )
-from flaskr.db import get_db
+from flaskr.db import get_db, get_unit
 
 bp = Blueprint("unit", __name__)
 
@@ -42,14 +42,9 @@ def create():
 
 @bp.route("/<int:unit_id>", methods=("GET", "POST"))
 def modify(unit_id):
+    unit = get_unit(unit_id)
     db = get_db()
     # Get the unit's models and their quantities
-    unit = db.execute(
-        'SELECT *'
-        ' FROM units'
-        ' WHERE id=?',
-        (unit_id,)
-    ).fetchone()
     models = db.execute(
         'SELECT models.id AS id, unit_models.quantity AS quantity, models.name AS name, "quantity_" || models.id AS input_name'
         ' FROM unit_models'
