@@ -40,11 +40,11 @@ CREATE TABLE model_weapons (
 
   CONSTRAINT fk_model
   FOREIGN KEY (model_id)
-  REFERENCES models.id,
+  REFERENCES models (id),
 
   CONSTRAINT fk_weapon
   FOREIGN KEY (weapon_id)
-  REFERENCES weapons.id,
+  REFERENCES weapons (id),
 
   CONSTRAINT pk PRIMARY KEY (model_id, weapon_id)
 );
@@ -54,15 +54,13 @@ CREATE TABLE unit_models (
   model_id INT UNIQUE,
   quantity INT,   -- TODO: constrain quantity to >= 0
 
-  CONSTRAINT fk_unit
   FOREIGN KEY (unit_id)
-  REFERENCES units.id,
+  REFERENCES units (id),
 
-  CONSTRAINT fk_model
   FOREIGN KEY (model_id)
-  REFERENCES models.id,
+  REFERENCES models (id),
 
-  CONSTRAINT pk PRIMARY KEY (fk_unit, fk_model)
+  CONSTRAINT pk PRIMARY KEY (unit_id, model_id)
 );
 
 -- TODO: create query (view) for viewing all weapons & their quantities in a unit

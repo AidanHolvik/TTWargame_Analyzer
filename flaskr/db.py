@@ -26,7 +26,9 @@ def init_db():
     db = get_db()
 
     with current_app.open_resource("schema.sql") as file:
-        db.executescript(file.read().decode("utf8"))
+        db.executescript(file.read().decode("utf-8"))
+
+
 
 
 @click.command("init-db")
@@ -69,4 +71,4 @@ def get_weapon(id:int):
     return weapon
 
 def roll_pattern() -> str:
-    return "^\d+(?i:D\d+)?(\+\d+)?$|^(?i:D\d+)(\+\d+)?$"
+    return "^\\d+(?i:D\\d+)?(\\+\\d+)?$|^(?i:D\\d+)(\\+\\d+)?$"
