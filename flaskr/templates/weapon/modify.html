@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Modify {{weapon['name']}}{% endblock title %}
+
+{% block content %}
+  <h2>Modify {{weapon['name']}}</h2>
+  <form method="post">
+    <label for="name">Name</label>
+    <input type="text" name="name" id="name" value="{{weapon['name']}}">
+
+    <br>
+    <label for="attacks">A</label>
+    <input type="text" name="attacks" id="attacks" pattern="{{roll_pattern}}" value="{{weapon['attacks']}}">
+
+    <br>
+    <label for="skill">BS/WS</label>
+    <input type="number" name="skill" id="skill" min="1" max="6" value="{{weapon['skill']}}">
+
+    <br>
+    <label for="strength">S</label>
+    <input type="number" name="strength" id="strength" min="1" max="99" value="{{weapon['strength']}}">
+
+    <br>
+    <label for="ap">AP</label>
+    <input type="number" name="ap" id="ap" min="0" max="99" value="{{weapon['ap']}}">
+
+    <br>
+    <label for="damage">D</label>
+    <input type="text" name="damage" id="damage" pattern="{{roll_pattern}}" value="{{weapon['damage']}}">
+
+    <br>
+    <a href="{{url_for('model.modify', unit_id=unit_id, model_id=model_id)}}">Cancel</a>
+    <input type="submit" value="Save">
+
+  </form>
+{% endblock content %}

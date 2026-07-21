@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Modify {{model['name']}}{% endblock title %}
+
+{% block content %}
+  <h2>Modify {{model['name']}}</h2>
+  <form method="post">
+    <label for="name">Name</label>
+    <input type="text" name="name" id="name" value="{{model['name']}}">
+    <br>
+    <label for="movement">M</label>
+    <input type="number" name="movement" id="movement" min="0" value="{{model['movement']}}">
+    <br>
+    <label for="toughness">T</label>
+    <input type="number" name="toughness" id="toughness" min="1" value="{{model['toughness']}}">
+    <br>
+    <label for="save">Sv</label>
+    <input type="number" name="save" id="save" min="2" max="6" value="{{model['save']}}">
+    <!-- TODO: include control for optionally setting invuln save -->
+    <br>
+    <label for="health">W</label>
+    <input type="number" name="health" id="health" min="1" value="{{model['health']}}">
+
+    <!-- Area for weapon list -->
+    <table>
+      <colgroup>
+        <col>
+        <col>
+        <col span="2">
+      </colgroup>
+      <thead>
+        <tr>
+          <th scope="col">Quantity</th>
+          <th scope="col">Name</th>
+          <th scope="colgroup">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for weapon in model_weapons %}
+          <tr>
+            <td>
+              <input type="number" name="{{weapon['input_name']}}" id="{{weapon['input_name']}}" min="0" max="99" value="{{weapon['quantity']}}">
+            </td>
+            <td>{{weapon['name']}}</td>
+            <td>
+              <a href="{{url_for('weapon.modify', unit_id=unit_id, model_id=model['id'], weapon_id=weapon['id'])}}">Modify</a>
+            </td>
+            <td>
+              <a href="{{url_for('weapon.delete', unit_id=unit_id, model_id=model['id'], weapon_id=weapon['id'])}}">Delete</a>
+            </td>
+          </tr>
+        {% endfor %}
+        
+      </tbody>
+    </table>
+    <a href="{{url_for('weapon.create', unit_id=unit_id, model_id=model['id'])}}">Add Weapon</a>
+
+    <br>
+    <a href="{{url_for('unit.modify', unit_id=unit_id)}}">Cancel</a>
+    <input type="submit" value="Save">
+  </form>
+{% endblock content %}

@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}New Unit{% endblock %}
+
+{% block content %}
+  <h2>New Unit</h2>
+  <form method="post">
+    <label for="name">Name</label>
+    <input type="text" name="name" id="name">
+    <br>
+    <input type="submit" value="Cancel" formaction="{{url_for('unit.index')}}" formmethod="get">
+    <input type="submit" value="Create">
+    
+  </form>
+{% endblock content %}
+
+{% block script %}{% endblock script %}

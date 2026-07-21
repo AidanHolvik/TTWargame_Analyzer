@@ -1,0 +1,4 @@
+# pip is automatically included
+numpy
+scipy
+Flask

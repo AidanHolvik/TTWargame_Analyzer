@@ -36,8 +36,13 @@ def create_app(test_config=None):
     db.init_app(app)
 
     # Register blueprints
-    from . import tests
-    app.register_blueprint(tests.bp)
+    from . import unit
+    from . import model
+    from . import weapon
+    app.register_blueprint(unit.bp)
+    app.register_blueprint(model.bp)
+    app.register_blueprint(weapon.bp)
+
 
     from . import distribution
     app.register_blueprint(distribution.bp)

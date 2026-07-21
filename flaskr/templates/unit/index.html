@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Unit List{% endblock title %}
+
+{% block content %}
+  <table>
+    <thead>
+      <!-- TODO: Remove column label? -->
+      <tr>
+        <th scope="col">Name</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for unit in units %}
+        <tr id="tr_{{unit['id']}}">
+          <td>{{ unit['name'] }}</td>
+          <td>
+            <a href="{{url_for('unit.modify', unit_id=unit['id'])}}">Modify</a>
+          </td>
+        </tr>
+        <br>
+      {% endfor %}
+    </tbody>
+  </table>
+  <br>
+  <a href="{{url_for('unit.create')}}">Create</a>
+{% endblock content %}
+
+
+{% block script %}{% endblock script %}

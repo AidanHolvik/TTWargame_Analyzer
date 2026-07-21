@@ -1,18 +1,66 @@
-DROP TABLE IF EXISTS weapon;
-DROP TABLE IF EXISTS defense;
+DROP TABLE IF EXISTS model_weapons;
+DROP TABLE IF EXISTS unit_models;
+DROP TABLE IF EXISTS weapons;
+DROP TABLE IF EXISTS models;
+DROP TABLE IF EXISTS units;
 
-CREATE TABLE weapon (
-    id INTEGER PRIMARY KEY,
-    name TEXT NOT NULL,
-    attacks TEXT NOT NULL,
-    skill INTEGER NOT NULL,
-    strength INTEGER NOT NULL,
-    ap INTEGER NOT NULL,
-    damage TEXT NOT NULL
+-- TODO: include keywords and abilities?
+CREATE TABLE units (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT UNIQUE NOT NULL
+  -- TODO: add field for faction so users can filter/sort?
 );
 
-CREATE TABLE defense (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    toughness INTEGER NOT NULL,
-    save INTEGER NOT NULL
+-- TODO: include keywords and abilities?
+CREATE TABLE models (
+  id INTEGER PRIMARY KEY,
+  name TEXT NOT NULL,
+  movement INTEGER,
+  toughness INTEGER,
+  save INTEGER,
+  invuln_save INTEGER,
+  health INTEGER
 );
+
+-- TODO: include keywords
+CREATE TABLE weapons (
+  id INTEGER PRIMARY KEY,
+  name TEXT NOT NULL,
+  attacks TEXT,
+  skill INTEGER,
+  strength INTEGER,
+  ap INTEGER,
+  damage TEXT
+);
+
+CREATE TABLE model_weapons (
+  model_id INTEGER,
+  weapon_id INTEGER UNIQUE,
+  quantity INTEGER,   -- TODO: constrain quantity to >= 0
+
+  CONSTRAINT fk_model
+  FOREIGN KEY (model_id)
+  REFERENCES models (id),
+
+  CONSTRAINT fk_weapon
+  FOREIGN KEY (weapon_id)
+  REFERENCES weapons (id),
+
+  CONSTRAINT pk PRIMARY KEY (model_id, weapon_id)
+);
+
+CREATE TABLE unit_models (
+  unit_id INTEGER,
+  model_id INTEGER UNIQUE,
+  quantity INTEGER,   -- TODO: constrain quantity to >= 0
+
+  FOREIGN KEY (unit_id)
+  REFERENCES units (id),
+
+  FOREIGN KEY (model_id)
+  REFERENCES models (id),
+
+  CONSTRAINT pk PRIMARY KEY (unit_id, model_id)
+);
+
+-- TODO: create query (view) for viewing all weapons & their quantities in a unit
