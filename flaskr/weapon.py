@@ -14,7 +14,7 @@ from flaskr.db import get_db, get_weapon, roll_pattern
 bp = Blueprint("weapon", __name__, url_prefix="/<int:unit_id>/<int:model_id>")
 
 
-@bp.route("/create", methods=("GET", "POST"))
+@bp.route("/create", methods=["GET", "POST"])
 def create(unit_id, model_id):
     if request.method == "POST":
         db = get_db()
@@ -50,7 +50,7 @@ def create(unit_id, model_id):
     return render_template("weapon/create.html", roll_pattern=roll_pattern())
 
 
-@bp.route("/<int:weapon_id>", methods=("GET", "POST"))
+@bp.route("/<int:weapon_id>", methods=["GET", "POST"])
 def modify(unit_id, model_id, weapon_id):
     weapon = get_weapon(weapon_id)
     db = get_db()
@@ -82,7 +82,7 @@ def modify(unit_id, model_id, weapon_id):
     )
 
 
-@bp.route("/<int:weapon_id>/delete", methods=("GET"))
+@bp.route("/<int:weapon_id>/delete", methods=["GET"])
 def delete(unit_id, model_id, weapon_id):
     db = get_db()
     db.execute(

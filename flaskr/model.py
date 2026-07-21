@@ -14,7 +14,7 @@ from flaskr.db import get_db, get_model
 bp = Blueprint("model", __name__, url_prefix="/<int:unit_id>")
 
 
-@bp.route("/create", methods=("GET", "POST"))
+@bp.route("/create", methods=["GET", "POST"])
 def create(unit_id):
     if request.method == "POST":
         db = get_db()
@@ -45,7 +45,7 @@ def create(unit_id):
     return render_template("model/create.html")
 
 
-@bp.route("/<int:model_id>", methods=("GET", "POST"))
+@bp.route("/<int:model_id>", methods=["GET", "POST"])
 def modify(unit_id, model_id):
     model = get_model(model_id)
     db = get_db()
@@ -89,7 +89,7 @@ def modify(unit_id, model_id):
     )
 
 
-@bp.route("/<int:model_id>/delete", methods=("GET"))
+@bp.route("/<int:model_id>/delete", methods=["GET"])
 def delete(unit_id, model_id):
     db = get_db()
     db.execute(

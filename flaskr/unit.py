@@ -22,7 +22,7 @@ def index():
     return render_template("unit/index.html", units=units)
 
 
-@bp.route("/create", methods=("GET", "POST"))
+@bp.route("/create", methods=["GET", "POST"])
 def create():
     if request.method == "POST":
         db = get_db()
@@ -40,7 +40,7 @@ def create():
     return render_template("unit/create.html")
 
 
-@bp.route("/<int:unit_id>", methods=("GET", "POST"))
+@bp.route("/<int:unit_id>", methods=["GET", "POST"])
 def modify(unit_id):
     unit = get_unit(unit_id)
     db = get_db()
@@ -71,7 +71,7 @@ def modify(unit_id):
     return render_template("unit/modify.html", unit=unit, unit_models=models)
 
 
-@bp.route("/<int:unit_id>/delete", methods=("DELETE"))
+@bp.route("/<int:unit_id>/delete", methods=["DELETE"])
 def delete(unit_id):
     db = get_db()
     db.execute(
