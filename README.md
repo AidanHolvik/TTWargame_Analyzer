@@ -12,8 +12,6 @@ A tool for visualizing and analyzing distributions of outcomes for tabletop warg
 ^\d+(?i:D\d+)?(\+\d+)?$|^(?i:D\d+)(\+\d+)?$
 ```
 
-
-
 ## Endpoints
 
 - /
