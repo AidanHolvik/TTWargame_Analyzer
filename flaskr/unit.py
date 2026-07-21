@@ -17,7 +17,7 @@ bp = Blueprint("unit", __name__)
 @bp.route("/units", methods=["GET"])
 def index():
     db = get_db()
-    units = db.execute("SELECT id, name FROM units").fetchall()
+    units = db.execute("SELECT id, name FROM units ORDER BY name ASC").fetchall()
 
     return render_template("unit/index.html", units=units)
 
@@ -32,7 +32,7 @@ def create():
         # TODO: put into a try..except statement
         new_id = db.execute(
             "INSERT INTO units (name) VALUES (?) RETURNING id", (name,)
-        ).fetchone()
+        ).fetchone()["id"]
         db.commit()
 
         return redirect(url_for("unit.modify", unit_id=new_id))
@@ -42,14 +42,14 @@ def create():
 
 @bp.route("/<int:unit_id>", methods=["GET", "POST"])
 def modify(unit_id):
-    unit = get_unit(unit_id)
     db = get_db()
     # Get the unit's models and their quantities
     models = db.execute(
         'SELECT models.id AS id, unit_models.quantity AS quantity, models.name AS name, "quantity_" || models.id AS input_name'
         " FROM unit_models"
         " INNER JOIN models ON unit_models.model_id = models.id"
-        " WHERE unit_models.unit_id = ?",
+        " WHERE unit_models.unit_id = ?"
+        " ORDER BY models.name ASC",
         (unit_id,),
     ).fetchall()
 
@@ -68,6 +68,7 @@ def modify(unit_id):
             )
         db.commit()
 
+    unit = get_unit(unit_id)
     return render_template("unit/modify.html", unit=unit, unit_models=models)
 
 

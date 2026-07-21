@@ -2,6 +2,7 @@
 {% block title %}New Model{% endblock title %}
 
 {% block content %}
+  <h2>New Model</h2>
   <form method="post">
     <label for="name">Name</label>
     <input type="text" name="name" id="name">
@@ -20,7 +21,7 @@
     <input type="number" name="health" id="health" min="1" value="1">
 
     <br>
-    <input type="submit" value="Cancel" formaction="{{url_for(unit.modify, unit_id=unit_id)}}" formmethod="get">
+    <input type="submit" value="Cancel" formaction="{{url_for('unit.modify', unit_id=unit_id)}}" formmethod="get">
     <input type="submit" value="Create">
   </form>
 {% endblock content %}

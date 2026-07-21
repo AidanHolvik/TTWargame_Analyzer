@@ -14,12 +14,15 @@
         <tr id="tr_{{unit['id']}}">
           <td>{{ unit['name'] }}</td>
           <td>
-            <a href="{{url_for(unit.modify, id=unit['id'])}}">Modify</a>
+            <a href="{{url_for('unit.modify', unit_id=unit['id'])}}">Modify</a>
           </td>
         </tr>
+        <br>
       {% endfor %}
     </tbody>
   </table>
+  <br>
+  <a href="{{url_for('unit.create')}}">Create</a>
 {% endblock content %}
 
 

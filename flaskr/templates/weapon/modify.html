@@ -2,6 +2,7 @@
 {% block title %}Modify {{weapon['name']}}{% endblock title %}
 
 {% block content %}
+  <h2>Modify {{weapon['name']}}</h2>
   <form method="post">
     <label for="name">Name</label>
     <input type="text" name="name" id="name" value="{{weapon['name']}}">
@@ -12,7 +13,7 @@
 
     <br>
     <label for="skill">BS/WS</label>
-    <input type="number" name="skill" id="skill" min="2" max="6" value="{{weapon['skill']}}">
+    <input type="number" name="skill" id="skill" min="1" max="6" value="{{weapon['skill']}}">
 
     <br>
     <label for="strength">S</label>
@@ -27,7 +28,7 @@
     <input type="text" name="damage" id="damage" pattern="{{roll_pattern}}" value="{{weapon['damage']}}">
 
     <br>
-    <input type="submit" value="Cancel" formaction="{{url_for(model.modify, unit_id=unit_id, model_id=model_id)}}" formmethod="get">
+    <a href="{{url_for('model.modify', unit_id=unit_id, model_id=model_id)}}">Cancel</a>
     <input type="submit" value="Save">
 
   </form>

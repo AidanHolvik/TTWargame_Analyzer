@@ -6,37 +6,37 @@ DROP TABLE IF EXISTS units;
 
 -- TODO: include keywords and abilities?
 CREATE TABLE units (
-  id INT PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT UNIQUE NOT NULL
   -- TODO: add field for faction so users can filter/sort?
 );
 
 -- TODO: include keywords and abilities?
 CREATE TABLE models (
-  id INT PRIMARY KEY,
+  id INTEGER PRIMARY KEY,
   name TEXT NOT NULL,
-  movement INT,
-  toughness INT,
-  save INT,
-  invuln_save INT,
-  health INT
+  movement INTEGER,
+  toughness INTEGER,
+  save INTEGER,
+  invuln_save INTEGER,
+  health INTEGER
 );
 
 -- TODO: include keywords
 CREATE TABLE weapons (
-  id INT PRIMARY KEY,
+  id INTEGER PRIMARY KEY,
   name TEXT NOT NULL,
   attacks TEXT,
-  skill INT,
-  strength INT,
-  ap INT,
+  skill INTEGER,
+  strength INTEGER,
+  ap INTEGER,
   damage TEXT
 );
 
 CREATE TABLE model_weapons (
-  model_id INT,
-  weapon_id INT UNIQUE,
-  quantity INT,   -- TODO: constrain quantity to >= 0
+  model_id INTEGER,
+  weapon_id INTEGER UNIQUE,
+  quantity INTEGER,   -- TODO: constrain quantity to >= 0
 
   CONSTRAINT fk_model
   FOREIGN KEY (model_id)
@@ -50,9 +50,9 @@ CREATE TABLE model_weapons (
 );
 
 CREATE TABLE unit_models (
-  unit_id INT,
-  model_id INT UNIQUE,
-  quantity INT,   -- TODO: constrain quantity to >= 0
+  unit_id INTEGER,
+  model_id INTEGER UNIQUE,
+  quantity INTEGER,   -- TODO: constrain quantity to >= 0
 
   FOREIGN KEY (unit_id)
   REFERENCES units (id),

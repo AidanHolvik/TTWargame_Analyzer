@@ -2,6 +2,7 @@
 {% block title %}Modify {{unit['name']}}{% endblock %}
 
 {% block content %}
+  <h2>Modify {{unit['name']}}</h2>
   <form method="post">
     <label for="name">Name</label>
     <input type="text" name="name" id="name" value="{{unit['name']}}">
@@ -29,22 +30,22 @@
             </td>
             <td>{{model['name']}}</td>
             <td>
-              <a href="{{url_for(model.modify, unit_id=unit_id, model_id=model['id'])}}">Modify</a>
+              <a href="{{url_for('model.modify', unit_id=unit['id'], model_id=model['id'])}}">Modify</a>
             </td>
             <td>
-              <a href="{{url_for(model.delete, unit_id=unit_id, model_id=model['id'])}}">Delete</a>
+              <a href="{{url_for('model.delete', unit_id=unit['id'], model_id=model['id'])}}">Delete</a>
             </td>
           </tr>
+          <br>
         {% endfor %}
       </tbody>
     </table>
-                      <!-- TODO: when creating a new model, add to the unit with a quantity of 0 to uphold DB integrity -->
-    <a href="{{url_for(model.create, unit_id=unit_id)}}">New</a>
+    <a href="{{url_for('model.create', unit_id=unit['id'])}}">Add Model</a>
     
     <!-- TODO: area for viewing unit's weapons (but not editing)? -->
   
     <br>
-    <input type="submit" value="Cancel" formaction="{{url_for(unit.index)}}" formmethod="get">
+    <a href="{{url_for('unit.index')}}">Cancel</a>
     <input type="submit" value="Save">
     
   </form>
