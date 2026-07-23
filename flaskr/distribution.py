@@ -36,5 +36,5 @@ def plot():
     for unit in units:
         models[unit["id"]] = list_unit_models(unit["id"])
     return render_template(
-        "distribution/plot.html", units=units, models=models, distribution=damage
+        "distribution/plot.html", units=units, models=models, distribution=damage, attacker=attacker_id, defender=defender_id
     )

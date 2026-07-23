@@ -9,7 +9,7 @@
     <label for="attacker">Attacking Unit:</label>
     <select name="attacker" id="attacker">
       {% for unit in units %}
-        <option value="{{unit['id']}}">{{unit['name']}}</option>
+        <option value="{{unit['id']}}" {% if unit['id'] == (attacker | int) %}selected{% endif %}>{{unit['name']}}</option>
       {% endfor %}
     </select>
     <br>
@@ -18,7 +18,7 @@
       {% for unit in units %}
         <optgroup label="{{unit['name']}}">
           {% for model in models[unit['id']] %}
-            <option value="{{model['id']}}">{{model['name']}}</option>
+            <option value="{{model['id']}}" {% if model['id'] == (defender | int) %}selected{% endif %}>{{model['name']}}</option>
           {% endfor %}
         </optgroup>
       {% endfor %}
