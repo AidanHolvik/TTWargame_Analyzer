@@ -2,24 +2,68 @@ import numpy as np
 from numpy import ndarray
 from scipy.fft import rfft, irfft, next_fast_len
 from .markov import Node, DamageNode, FailureNode
+from .roll_notation import RollNotation as Roll
+from copy import deepcopy
 
 
-class AttackSequence:
-    def __init__(self, weapon: dict, defender: dict):
-        self.weapon = weapon
+class UnitAttackSequence:
+    def __init__(self, weapons: dict, defender: dict):
+        self.sequences = {}
+        self.max_damage = 0
+        for weapon in weapons:
+            self.sequences[weapon["id"]] = WeaponAttackSequence(
+                weapon, defender, weapon["quantity"]
+            )
+            self.max_damage += self.sequences[weapon["id"]].max_damage
+            # print(f"{weapon['quantity']}x {weapon['name']} : {self.max_damage}")          # DEBUG
+
+    def damage(self):
+        results = {}
+        fft_size = next_fast_len(self.max_damage + 1, real=True)
+        for id in self.sequences.keys():
+            results[id] = self.sequences[id].damage()
+
+        # use fft to sum damages as random variables
+        cf = rfft(np.ones(1), fft_size)
+        for dist in results:
+            temp = rfft(results[dist], fft_size)
+            cf *= temp
+
+        total = irfft(cf, fft_size)[0 : self.max_damage + 1]
+        total *= 100  # convert probabilities to percentages
+
+        # restore zeroes which were converted to extremely small values due to floating point error
+        for i in range(total.size):
+            if total[i] < 1.0e-17:
+                total[i] = 0.0
+
+        return deepcopy(total.tolist())
+
+
+class WeaponAttackSequence:
+    def __init__(self, weapon: dict, defender: dict, quantity: int = 1):
+        self.weapon = {}
+        for key in weapon.keys():
+            self.weapon[key] = weapon[key]
+        self.weapon["attacks"] = Roll.applyQuantity(
+            Roll.toValue(self.weapon["attacks"]), quantity
+        )
+        self.weapon["damage"] = Roll.toValue(self.weapon["damage"])
         self.defender = defender
+        self.max_damage = Roll.max(self.weapon["attacks"]) * Roll.max(
+            self.weapon["damage"]
+        )
 
     # returns the PMF of the number of dice going into the attack sequence
     def __num_attacks(self) -> ndarray:
-        if isinstance(self.weapon["attacks"], int):
-            output_size = self.weapon["attacks"] + 1
+        output_size = Roll.max(self.weapon["attacks"]) + 1
+        if Roll.isStatic(self.weapon["attacks"]):
             pmf = np.zeros(output_size)
-            pmf[self.weapon["attacks"]] = 1
+            pmf[Roll.max(self.weapon["attacks"])] = 1
         else:
             num_dice = self.weapon["attacks"][0]
             num_sides = self.weapon["attacks"][1]
             modifier = self.weapon["attacks"][2]
-            output_size = (num_dice * num_sides) + modifier + 1
             fft_size = next_fast_len(output_size, real=True)
 
             # Generate pmf for one die
@@ -93,27 +137,8 @@ class AttackSequence:
         single_damage = self.__damage_per_attack()
 
         # calculate maxima and minima, and ideal size for the fft's inputs
-        if isinstance(self.weapon["attacks"], int):
-            min_attacks = self.weapon["attacks"]
-            max_damage = self.weapon["attacks"]
-        else:
-            min_attacks = (
-                self.weapon["attacks"][0] + self.weapon["attacks"][2]
-            )  # min_attacks = num_dice + modifier
-            max_damage = (
-                self.weapon["attacks"][0] * self.weapon["attacks"][1]
-                + self.weapon["attacks"][2]
-            )
-
-        if isinstance(self.weapon["damage"], int):
-            max_damage *= self.weapon["damage"]
-        else:
-            max_damage *= (
-                self.weapon["damage"][0] * self.weapon["damage"][1]
-                + self.weapon["damage"][2]
-            )
-
-        fft_size = next_fast_len(max_damage + 1, real=True)
+        min_attacks = Roll.min(self.weapon["attacks"])
+        fft_size = next_fast_len(self.max_damage + 1, real=True)
 
         # represent damage per attack as its characteristic function, then use it to calculate the total damage distribution
         total_damage = np.zeros_like(single_damage)
@@ -140,12 +165,12 @@ class AttackSequence:
 
         # Convert the resulting mixture distribution back into its PMF
         total_damage = irfft(total_damage, fft_size)
-        total_damage = total_damage[0 : max_damage + 1]
-        total_damage *= 100 # convert probabilities to percentages
+        total_damage = total_damage[0 : self.max_damage + 1]
+        # total_damage *= 100  # convert probabilities to percentages
 
         # restore zeroes which were converted to extremely small values due to floating point error
         for i in range(total_damage.size):
             if total_damage[i] < 1.0e-17:
                 total_damage[i] = 0.0
 
-        return total_damage.tolist()
+        return deepcopy(total_damage)

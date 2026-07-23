@@ -1,104 +1,40 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <title>Damage Distribution</title>
-  </head>
-  <body>
-    <form method="post">
-      Weapon: <br />
-      <label for="attacks">A</label>
-      <input
-        type="text"
-        id="attacks"
-        name="attacks"
-        required
-        value="1"
-        pattern="^\d+(?i:D\d+)?(\+\d+)?$|^(?i:D\d+)(\+\d+)?$"
-        maxlength="8"
-      />
-      <br />
-      <label for="skill">WS/BS</label>
-      <input
-        type="number"
-        id="skill"
-        name="skill"
-        required
-        value="4"
-        min="1"
-        max="6"
-        step="1"
-      />
-      <br />
-      <label for="strength">S</label>
-      <input
-        type="number"
-        id="strength"
-        name="strength"
-        required
-        value="1"
-        min="1"
-        step="1"
-      />
-      <br />
-      <label for="ap">AP</label>
-      <input
-        type="number"
-        id="ap"
-        name="ap"
-        required
-        value="0"
-        min="0"
-        step="1"
-      />
-      <br />
-      <label for="damage">D</label>
-      <input
-        type="text"
-        id="damage"
-        name="damage"
-        required
-        value="1"
-        pattern="^\d+(?i:D\d+)?(\+\d+)?$|^(?i:D\d+)(\+\d+)?$"
-        maxlength="8"
-      />
-      <br />
+{% extends 'base.html' %}
+{% block resources %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock resources %}
+{% block title %}Damage Distribution{% endblock title %}
 
-      <br />
-      Defender: <br />
-      <label for="toughness">T</label>
-      <input
-        type="number"
-        id="toughness"
-        name="toughness"
-        required
-        value="1"
-        min="1"
-        step="1"
-      />
-      <br />
-      <label for="save">Sv</label>
-      <input
-        type="number"
-        id="save"
-        name="save"
-        required
-        value="4"
-        min="2"
-        max="6"
-        step="1"
-      />
-      <br />
+{% block content %}
+  <form method="get">
+    <label for="attacker">Attacking Unit:</label>
+    <select name="attacker" id="attacker">
+      {% for unit in units %}
+        <option value="{{unit['id']}}">{{unit['name']}}</option>
+      {% endfor %}
+    </select>
+    <br>
+    <label for="defender">Defending Unit:</label>
+    <select name="defender" id="defender">
+      {% for unit in units %}
+        <optgroup label="{{unit['name']}}">
+          {% for model in models[unit['id']] %}
+            <option value="{{model['id']}}">{{model['name']}}</option>
+          {% endfor %}
+        </optgroup>
+      {% endfor %}
+    </select>
+    <br />
+    <input type="submit" value="Visualize" />
+  </form>
+  <a href="{{url_for('home')}}">Back</a>
 
-      <br />
-      <input type="submit" value="Add" />
-    </form>
+  <!-- TODO: plot damage distribution -->
+  <canvas id="damage_plot" width="1200" height="600"></canvas>
+  <br>
+  <a href="{{url_for('home')}}"></a>
+{% endblock content %}
 
-    <!-- TODO: plot damage distribution -->
-    <canvas id="damage_plot" width="1200" height="600"></canvas>
-  </body>
+{% block script %}
   <script>
     function constructChartData(incomingData) {
       var preparedData = {
@@ -118,14 +54,14 @@
       return {
         labels: preparedData.labels,
         datasets: [{
-          label: 'probability of result = #',
+          label: '% probability of result = #',
           type: 'bar',
           data: preparedData.values,
           borderColor: 'rgba(75, 192, 192, 1)',
           fill: false,
           yAxisID: 'exact'
         }, {
-          label: 'probability of result >= #',
+          label: '% probability of result >= #',
           type: 'line',
           data: preparedData.cumulative,
           borderColor: 'rgba(255, 99, 132, 1)',
@@ -184,4 +120,4 @@
       options: configurePlotOptions(),
     });
   </script>
-</html>
+{% endblock script %}

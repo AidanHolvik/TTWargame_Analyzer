@@ -29,8 +29,6 @@ def init_db():
         db.executescript(file.read().decode("utf-8"))
 
 
-
-
 @click.command("init-db")
 def init_db_command():
     """Clear the existing data and create new tables."""
@@ -43,32 +41,62 @@ def init_app(app):
     app.cli.add_command(init_db_command)
 
 
-def get_unit(id:int):
+def get_units():
+    db = get_db()
+    units = db.execute("SELECT * FROM units").fetchall()
+    return units
+
+
+def get_unit(id: int):
     db = get_db()
     unit = db.execute("SELECT * FROM units WHERE id=?", (id,)).fetchone()
     return unit
 
 
-def get_model(id:int):
+def get_model(id: int):
     db = get_db()
     model = db.execute(
-        "SELECT *"
-        " FROM models"
-        " WHERE id=?",
+        "SELECT *" " FROM models" " WHERE id=?",
         (id,),
     ).fetchone()
     return model
 
 
-def get_weapon(id:int):
+def get_weapon(id: int):
     db = get_db()
     weapon = db.execute(
-        "SELECT *"
-        " FROM weapons"
-        " WHERE id=?",
+        "SELECT *" " FROM weapons" " WHERE id=?",
         (id,),
     ).fetchone()
     return weapon
+
+def list_unit_models(unit_id: int):
+    db = get_db()
+    models = db.execute(
+        'SELECT models.id AS id, models.name AS name'
+        ' FROM unit_models'
+        ' INNER JOIN models ON models.id = unit_models.model_id'
+        ' WHERE unit_models.unit_id = ?'
+        ' ORDER BY name',
+        (unit_id,)
+    ).fetchall()
+    return models
+
+def get_unit_weapons(unit_id: int):
+    db = get_db()
+    weapons = db.execute(
+        "SELECT weapons.id AS id, unit_models.quantity * model_weapons.quantity AS quantity, weapons.name AS name, weapons.attacks AS attacks,"
+        " weapons.skill AS skill, weapons.strength AS strength, weapons.ap AS ap, weapons.damage AS damage"
+        " FROM unit_models"
+        " INNER JOIN models ON models.id = unit_models.model_id"
+        " INNER JOIN model_weapons ON model_weapons.model_id = models.id"
+        " INNER JOIN weapons ON weapons.id = model_weapons.weapon_id"
+        " WHERE unit_models.unit_id = ?",
+        (unit_id,),
+    ).fetchall()
+
+    return weapons
+
 
 def roll_pattern() -> str:
     return "^\\d+(?i:D\\d+)?(\\+\\d+)?$|^(?i:D\\d+)(\\+\\d+)?$"

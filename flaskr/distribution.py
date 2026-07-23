@@ -8,32 +8,33 @@ from flask import (
     session,
     url_for,
 )
-from flaskr.db import get_db
-from .util.attack_sequence import AttackSequence as Atk
+from flaskr.db import get_db, get_model, get_units, get_unit_weapons, list_unit_models
+from .util.attack_sequence import UnitAttackSequence as Atk
 from .util.roll_notation import RollNotation as Roll
 
-bp = Blueprint("distribution", __name__, url_prefix='/dist')
+bp = Blueprint("distribution", __name__, url_prefix="/dist")
 
 
-
-@bp.route("/plot", methods=("GET", "POST"))
+@bp.route("/plot", methods=["GET"])
 def plot():
-    if request.method == "POST":
-        weapon = {
-            "attacks": Roll.toValue(request.form["attacks"]),
-            "skill": int(request.form["skill"]),
-            "strength": int(request.form["strength"]),
-            "ap": int(request.form["ap"]),
-            "damage": Roll.toValue(request.form["damage"]),
-        }
+    db = get_db()
+    attacker_id = request.args.get("attacker")
+    defender_id = request.args.get("defender")
 
-        defender = {
-            "toughness": int(request.form["toughness"]),
-            "save": int(request.form["save"]),
-        }
+    if attacker_id and defender_id:
+        weapons = get_unit_weapons(attacker_id)
+        defender = get_model(defender_id)
 
-        damage = Atk(weapon, defender).damage()
+        # TODO: allow user to select which weapons to consider/ignore
+        attacks = Atk(weapons, defender)
+        damage = attacks.damage()
     else:
         damage = [0.0]
 
-    return render_template("distribution/plot.html", distribution=damage)
+    units = get_units()
+    models = {}
+    for unit in units:
+        models[unit["id"]] = list_unit_models(unit["id"])
+    return render_template(
+        "distribution/plot.html", units=units, models=models, distribution=damage
+    )
