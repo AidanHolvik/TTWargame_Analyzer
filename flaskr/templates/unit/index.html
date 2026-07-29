@@ -7,6 +7,8 @@
       <!-- TODO: Remove column label? -->
       <tr>
         <th scope="col">Name</th>
+        <th scope="col">Damage</th>
+        <th scope="colgroup">Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -14,7 +16,13 @@
         <tr id="tr_{{unit['id']}}">
           <td>{{ unit['name'] }}</td>
           <td>
+            <a href="{{url_for('distribution.plot', attacker_id=unit['id'])}}">Plot</a>
+          </td>
+          <td>
             <a href="{{url_for('unit.modify', unit_id=unit['id'])}}">Modify</a>
+          </td>
+          <td>
+            <a href="{{url_for('unit.delete', unit_id=unit['id'])}}">Delete</a>
           </td>
         </tr>
         <br>

@@ -10,14 +10,16 @@ class UnitAttackSequence:
     def __init__(self, weapons: dict, defender: dict):
         self.sequences = {}
         self.max_damage = 0
-        for weapon in weapons:
-            self.sequences[weapon["id"]] = WeaponAttackSequence(
-                weapon, defender, weapon["quantity"]
+        
+        for id in weapons:
+            self.sequences[id] = WeaponAttackSequence(
+                weapons[id], defender, weapons[id]["quantity"]
             )
-            self.max_damage += self.sequences[weapon["id"]].max_damage
-            # print(f"{weapon['quantity']}x {weapon['name']} : {self.max_damage}")          # DEBUG
+            self.max_damage += self.sequences[id].max_damage
 
     def damage(self):
+        if self.max_damage == 0.0:
+            return [0.0]
         results = {}
         fft_size = next_fast_len(self.max_damage + 1, real=True)
         for id in self.sequences.keys():

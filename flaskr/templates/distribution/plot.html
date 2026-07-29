@@ -6,30 +6,38 @@
 
 {% block content %}
   <form method="get">
-    <label for="attacker">Attacking Unit:</label>
-    <select name="attacker" id="attacker">
-      {% for unit in units %}
-        <option value="{{unit['id']}}" {% if unit['id'] == (attacker | int) %}selected{% endif %}>{{unit['name']}}</option>
+    <div>
+      <label for="attacker">Attacking Unit:</label>
+      <input type="text" id="attacker_name" form="" readonly value="{{attacker['name']}}">
+      </select>
+      
+    </div>
+    <div>
+      <label for="defender">Defending Unit:</label>
+      <select name="defender" id="defender" required>
+        {% for unit in units %}
+          <optgroup label="{{unit['name']}}">
+            {% for model in models[unit['id']] %}
+              <option value="{{model['id']}}" {% if model['id'] == (defender | int) %}selected{% endif %}>{{model['name']}}</option>
+            {% endfor %}
+          </optgroup>
+        {% endfor %}
+      </select>
+    </div>
+    <fieldset>
+      {% for id in weapons.keys() %}
+        <div>
+          <input type="checkbox" name="selected_weapons" id="wpn_{{id}}" value="{{id}}" {% if selected_weapons[id] %}checked{% endif %}>
+          <label for="wpn_{{id}}">{{weapons[id]['quantity']}}x {{weapons[id]['name']}}</label>
+        </div>
       {% endfor %}
-    </select>
-    <br>
-    <label for="defender">Defending Unit:</label>
-    <select name="defender" id="defender">
-      {% for unit in units %}
-        <optgroup label="{{unit['name']}}">
-          {% for model in models[unit['id']] %}
-            <option value="{{model['id']}}" {% if model['id'] == (defender | int) %}selected{% endif %}>{{model['name']}}</option>
-          {% endfor %}
-        </optgroup>
-      {% endfor %}
-    </select>
-    <br />
-    <input type="submit" value="Visualize" />
+    </fieldset>
+    <input type="submit" value="Generate Distribution" />
   </form>
-  <a href="{{url_for('home')}}">Back</a>
+  <a href="{{url_for('unit.index')}}">Back</a>
 
   <!-- TODO: plot damage distribution -->
-  <canvas id="damage_plot" width="1200" height="600"></canvas>
+  <canvas id="damage_plot" width="960" height="600"></canvas>
   <br>
   <a href="{{url_for('home')}}"></a>
 {% endblock content %}

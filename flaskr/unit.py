@@ -72,7 +72,7 @@ def modify(unit_id):
     return render_template("unit/modify.html", unit=unit, unit_models=models)
 
 
-@bp.route("/<int:unit_id>/delete", methods=["DELETE"])
+@bp.route("/<int:unit_id>/delete", methods=["GET"])
 def delete(unit_id):
     db = get_db()
     db.execute(

@@ -1,6 +1,7 @@
 import sqlite3
 import click
 from flask import current_app, g
+from copy import deepcopy
 
 # Code borrowed from https://flask.palletsprojects.com/en/stable/tutorial/database/
 
@@ -100,3 +101,21 @@ def get_unit_weapons(unit_id: int):
 
 def roll_pattern() -> str:
     return "^\\d+(?i:D\\d+)?(\\+\\d+)?$|^(?i:D\\d+)(\\+\\d+)?$"
+
+# Converts a query result to a dictionary, using key_column as the primary key
+def query_to_dict(record, key_column: str = 'id') -> dict:
+    
+    result = {}
+    if isinstance(record, sqlite3.Row):
+        for key in record.keys():
+            result[key] = deepcopy(record[key])
+    else:
+        for row in record:
+            id = row[key_column]
+            result[id] = query_to_dict(row, key_column)
+
+    return result
+
+    
+
+

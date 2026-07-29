@@ -39,13 +39,13 @@ def create_app(test_config=None):
     from . import unit
     from . import model
     from . import weapon
+    from . import distribution
     app.register_blueprint(unit.bp)
     app.register_blueprint(model.bp)
     app.register_blueprint(weapon.bp)
-
-
-    from . import distribution
     app.register_blueprint(distribution.bp)
+
+
 
     # set default route for testing and debug purposes
     @app.route('/')
