@@ -75,15 +75,40 @@ def modify(unit_id):
 @bp.route("/<int:unit_id>/delete", methods=["GET"])
 def delete(unit_id):
     db = get_db()
+    
     db.execute(
-        "DELETE FROM units"
-        " INNER JOIN unit_models ON units.id = unit_models.unit_id"
-        " INNER JOIN models ON unit_models.model_id = models.id"
-        " INNER JOIN model_weapons ON models.id = model_weapons.model_id"
-        " INNER JOIN weapons ON model_weapons.weapon_id = weapons.id"
-        " WHERE units.id = ?",
-        (id,),
+        "DELETE FROM weapons"
+        " WHERE id IN ("
+        "  SELECT weapon_id"
+        "  FROM model_weapons"
+        "  WHERE model_id IN ("
+        "   SELECT model_id"
+        "   FROM unit_models"
+        "   WHERE unit_id=?"
+        "  )"
+        " )",
+        (unit_id,),
     )
+    db.execute(
+        "DELETE FROM model_weapons"
+        " WHERE model_id IN ("
+        "  SELECT model_id"
+        "  FROM unit_models"
+        "  WHERE unit_id=?"
+        " )",
+        (unit_id,),
+    )
+    db.execute(
+        'DELETE FROM models'
+        ' WHERE id IN ('
+        '  SELECT model_id'
+        '  FROM unit_models'
+        '  WHERE unit_id=?'
+        ' )',
+        (unit_id,)
+    )
+    db.execute('DELETE FROM unit_models WHERE unit_id=?', (unit_id,))
+    db.execute('DELETE FROM units WHERE id=?', (unit_id,))
     db.commit()
 
     return redirect(url_for("unit.index"))

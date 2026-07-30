@@ -21,12 +21,12 @@ def create(unit_id, model_id):
         new_id = None
 
         # TODO: get new record's values from form
-        name = request.form['name']
-        attacks = request.form['attacks']
-        skill = request.form['skill']
-        strength = request.form['strength']
-        ap = request.form['ap']
-        damage = request.form['damage']
+        name = request.form["name"]
+        attacks = request.form["attacks"]
+        skill = request.form["skill"]
+        strength = request.form["strength"]
+        ap = request.form["ap"]
+        damage = request.form["damage"]
 
         # TODO: put into a try..except statement
         new_id = db.execute(
@@ -34,21 +34,21 @@ def create(unit_id, model_id):
             " VALUES (?,?,?,?,?,?)"
             " RETURNING id",
             (name, attacks, skill, strength, ap, damage),
-        ).fetchone()['id']
-        print(new_id)
+        ).fetchone()["id"]
         db.execute(
             "INSERT INTO model_weapons (model_id, weapon_id, quantity) VALUES (?,?,?)",
             (model_id, new_id, 1),
         )
         db.commit()
 
-        return redirect(
-            url_for(
-                "model.modify", unit_id=unit_id, model_id=model_id
-            )
-        )
+        return redirect(url_for("model.modify", unit_id=unit_id, model_id=model_id))
 
-    return render_template("weapon/create.html", unit_id=unit_id, model_id=model_id, roll_pattern=roll_pattern())
+    return render_template(
+        "weapon/create.html",
+        unit_id=unit_id,
+        model_id=model_id,
+        roll_pattern=roll_pattern(),
+    )
 
 
 @bp.route("/<int:weapon_id>", methods=["GET", "POST"])
@@ -73,7 +73,6 @@ def modify(unit_id, model_id, weapon_id):
         )
         db.commit()
 
-    
     weapon = get_weapon(weapon_id)
     return render_template(
         "weapon/modify.html",
@@ -87,11 +86,9 @@ def modify(unit_id, model_id, weapon_id):
 @bp.route("/<int:weapon_id>/delete", methods=["GET"])
 def delete(unit_id, model_id, weapon_id):
     db = get_db()
-    db.execute(
-        "DELETE FROM weapons"
-        " INNER JOIN model_weapons ON weapons.id = model_weapons.weapon_id"
-        " WHERE weapons.id = ?",
-        (weapon_id,),
-    )
+    
+    db.execute("DELETE FROM model_weapons WHERE weapon_id=?", (weapon_id,))
+    db.execute("DELETE FROM weapons WHERE id = ?", (weapon_id,))
     db.commit()
+
     return redirect(url_for("model.modify", unit_id=unit_id, model_id=model_id))

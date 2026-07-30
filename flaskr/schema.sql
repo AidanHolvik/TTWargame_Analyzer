@@ -34,33 +34,35 @@ CREATE TABLE weapons (
 );
 
 CREATE TABLE model_weapons (
-  model_id INTEGER,
-  weapon_id INTEGER,
+  model_id INTEGER NOT NULL,
+  weapon_id INTEGER NOT NULL,
   quantity INTEGER,   -- TODO: constrain quantity to >= 0
 
-  CONSTRAINT fk_model
   FOREIGN KEY (model_id)
-  REFERENCES models (id),
+  REFERENCES models (id)
+  ON DELETE CASCADE,
 
-  CONSTRAINT fk_weapon
   FOREIGN KEY (weapon_id)
-  REFERENCES weapons (id),
+  REFERENCES weapons (id)
+  ON DELETE CASCADE,
 
-  CONSTRAINT pk PRIMARY KEY (model_id, weapon_id)
+  PRIMARY KEY (model_id, weapon_id)
 );
 
 CREATE TABLE unit_models (
-  unit_id INTEGER,
-  model_id INTEGER,
+  unit_id INTEGER NOT NULL,
+  model_id INTEGER NOT NULL,
   quantity INTEGER,   -- TODO: constrain quantity to >= 0
 
   FOREIGN KEY (unit_id)
-  REFERENCES units (id),
+  REFERENCES units (id)
+  ON DELETE CASCADE,
 
   FOREIGN KEY (model_id)
-  REFERENCES models (id),
+  REFERENCES models (id)
+  ON DELETE CASCADE,
 
-  CONSTRAINT pk PRIMARY KEY (unit_id, model_id)
+  PRIMARY KEY (unit_id, model_id)
 );
 
 -- TODO: create query (view) for viewing all weapons & their quantities in a unit
