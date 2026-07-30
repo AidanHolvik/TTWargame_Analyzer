@@ -36,7 +36,6 @@
   </form>
   <a href="{{url_for('unit.index')}}">Back</a>
 
-  <!-- TODO: plot damage distribution -->
   <canvas id="damage_plot" width="960" height="600"></canvas>
   <br>
   <a href="{{url_for('home')}}"></a>
@@ -117,11 +116,6 @@
       };
     }
 
-    // TODO: retrieve distribution from backend
-    // TODO: if distribution not provided, provide empty distribution to chart so page can still render?
-
-
-    // TODO: make sure chart updates properly when form is submitted
     var ctx = document.getElementById("damage_plot").getContext("2d");
     var newPlot = new Chart(ctx, {
       data: constructChartData({{distribution}}),
