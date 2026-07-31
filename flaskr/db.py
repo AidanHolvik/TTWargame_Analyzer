@@ -57,7 +57,7 @@ def get_unit(id: int):
 def get_model(id: int):
     db = get_db()
     model = db.execute(
-        "SELECT *" " FROM models" " WHERE id=?",
+        "SELECT * FROM models WHERE id=?",
         (id,),
     ).fetchone()
     return model
@@ -66,22 +66,24 @@ def get_model(id: int):
 def get_weapon(id: int):
     db = get_db()
     weapon = db.execute(
-        "SELECT *" " FROM weapons" " WHERE id=?",
+        "SELECT * FROM weapons WHERE id=?",
         (id,),
     ).fetchone()
     return weapon
 
+
 def list_unit_models(unit_id: int):
     db = get_db()
     models = db.execute(
-        'SELECT models.id AS id, models.name AS name'
-        ' FROM unit_models'
-        ' INNER JOIN models ON models.id = unit_models.model_id'
-        ' WHERE unit_models.unit_id = ?'
-        ' ORDER BY name',
-        (unit_id,)
+        "SELECT models.id AS id, models.name AS name"
+        " FROM unit_models"
+        " INNER JOIN models ON models.id = unit_models.model_id"
+        " WHERE unit_models.unit_id = ?"
+        " ORDER BY name",
+        (unit_id,),
     ).fetchall()
     return models
+
 
 def get_unit_weapons(unit_id: int):
     db = get_db()
@@ -102,9 +104,10 @@ def get_unit_weapons(unit_id: int):
 def roll_pattern() -> str:
     return "^\\d+(?i:D\\d+)?(\\+\\d+)?$|^(?i:D\\d+)(\\+\\d+)?$"
 
+
 # Converts a query result to a dictionary, using key_column as the primary key
-def query_to_dict(record, key_column: str = 'id') -> dict:
-    
+def query_to_dict(record, key_column: str = "id") -> dict:
+
     result = {}
     if isinstance(record, sqlite3.Row):
         for key in record.keys():
@@ -115,7 +118,3 @@ def query_to_dict(record, key_column: str = 'id') -> dict:
             result[id] = query_to_dict(row, key_column)
 
     return result
-
-    
-
-

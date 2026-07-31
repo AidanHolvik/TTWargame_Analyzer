@@ -51,12 +51,7 @@ def create_app(test_config=None):
     @app.route('/')
     def default_page():
         return redirect(
-            url_for('home')
+            url_for('unit.index')
         )  # TODO: change this to something more useful for production
-
-    # Add routes
-    @app.route('/home')
-    def home():
-        return render_template('home.html')
 
     return app

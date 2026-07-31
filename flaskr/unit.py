@@ -14,7 +14,7 @@ from flaskr.db import get_db, get_unit
 bp = Blueprint("unit", __name__)
 
 
-@bp.route("/units", methods=["GET"])
+@bp.route("/", methods=["GET"])
 def index():
     db = get_db()
     units = db.execute("SELECT id, name FROM units ORDER BY name ASC").fetchall()
@@ -43,20 +43,13 @@ def create():
 @bp.route("/<int:unit_id>", methods=["GET", "POST"])
 def modify(unit_id):
     db = get_db()
-    # Get the unit's models and their quantities
-    models = db.execute(
-        'SELECT models.id AS id, unit_models.quantity AS quantity, models.name AS name, "quantity_" || models.id AS input_name'
-        " FROM unit_models"
-        " INNER JOIN models ON unit_models.model_id = models.id"
-        " WHERE unit_models.unit_id = ?"
-        " ORDER BY models.name ASC",
-        (unit_id,),
-    ).fetchall()
 
     if request.method == "POST":
+        # Get the unit's models and their quantities
+        models = get_unit_models_for_inputs(unit_id)
         # modify record for this unit
         db.execute(
-            "UPDATE units" " SET name=?" " WHERE id=?", (request.form["name"], unit_id)
+            "UPDATE units SET name=? WHERE id=?", (request.form["name"], unit_id)
         )
         # modify records for this unit's models
         for model in models:
@@ -69,7 +62,9 @@ def modify(unit_id):
         db.commit()
 
     unit = get_unit(unit_id)
+    models = get_unit_models_for_inputs(unit_id)
     return render_template("unit/modify.html", unit=unit, unit_models=models)
+
 
 
 @bp.route("/<int:unit_id>/delete", methods=["GET"])
@@ -112,3 +107,18 @@ def delete(unit_id):
     db.commit()
 
     return redirect(url_for("unit.index"))
+
+
+# Helper method for modify()
+def get_unit_models_for_inputs(unit_id: int):
+    db = get_db()
+    # Get the unit's models and their quantities
+    models = db.execute(
+        'SELECT models.id AS id, unit_models.quantity AS quantity, models.name AS name, "quantity_" || models.id AS input_name'
+        " FROM unit_models"
+        " INNER JOIN models ON unit_models.model_id = models.id"
+        " WHERE unit_models.unit_id = ?"
+        " ORDER BY models.name ASC",
+        (unit_id,),
+    ).fetchall()
+    return models

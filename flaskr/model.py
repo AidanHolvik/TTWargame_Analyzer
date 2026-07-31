@@ -48,18 +48,10 @@ def create(unit_id):
 @bp.route("/<int:model_id>", methods=["GET", "POST"])
 def modify(unit_id, model_id):
     db = get_db()
-    # Get the model's weapons and their quantities
-    weapons = db.execute(
-        'SELECT weapons.id AS id, model_weapons.quantity AS quantity, weapons.name AS name, "quantity_" || weapons.id AS input_name'
-        " FROM model_weapons"
-        " INNER JOIN weapons ON model_weapons.weapon_id = weapons.id"
-        " WHERE model_weapons.model_id = ?"
-        " ORDER BY weapons.name ASC",
-        (model_id,),
-    ).fetchall()
 
     if request.method == "POST":
         # modify record for this model
+        weapons = get_model_weapons_for_inputs(model_id)
         db.execute(
             "UPDATE models"
             " SET name=?, movement=?, toughness=?, save=?, invuln_save=?, health=?"
@@ -83,9 +75,9 @@ def modify(unit_id, model_id):
                 (request.form[weapon["input_name"]], model_id, weapon["id"]),
             )
         db.commit()
-        return redirect(url_for("model.modify", unit_id=unit_id, model_id=model_id))
 
     model = get_model(model_id)
+    weapons = get_model_weapons_for_inputs(model_id)
     return render_template(
         "model/modify.html", unit_id=unit_id, model=model, model_weapons=weapons
     )
@@ -109,3 +101,18 @@ def delete(unit_id, model_id):
     db.commit()
 
     return redirect(url_for("unit.modify", unit_id=unit_id))
+
+
+# Helper function for modify()
+def get_model_weapons_for_inputs(model_id: int):
+    db = get_db()
+    # Get the model's weapons and their quantities
+    weapons = db.execute(
+        'SELECT weapons.id AS id, model_weapons.quantity AS quantity, weapons.name AS name, "quantity_" || weapons.id AS input_name'
+        " FROM model_weapons"
+        " INNER JOIN weapons ON model_weapons.weapon_id = weapons.id"
+        " WHERE model_weapons.model_id = ?"
+        " ORDER BY weapons.name ASC",
+        (model_id,),
+    ).fetchall()
+    return weapons

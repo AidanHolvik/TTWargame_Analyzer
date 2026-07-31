@@ -25,20 +25,25 @@
       </select>
     </div>
     <fieldset>
-      {% for id in weapons.keys() %}
-        <div>
-          <input type="checkbox" name="selected_weapons" id="wpn_{{id}}" value="{{id}}" {% if selected_weapons[id] %}checked{% endif %}>
-          <label for="wpn_{{id}}">{{weapons[id]['quantity']}}x {{weapons[id]['name']}}</label>
-        </div>
+      {% for model in attacker_models.values() %}
+
+        <label for="{{model['name']}}">{{model['name']}}</label>
+        <fieldset id="{{model['name']}}">
+          {% for weapon in model['weapons'] %}
+            <div>
+              <input type="checkbox" name="selected_weapons" id="wpn_{{weapon['id']}}" value="{{weapon['id']}}" {% if selected_weapons[weapon['id']] %}checked{% endif %}>
+              <label for="wpn_{{weapon['id']}}">{{weapon['quantity']}}x {{weapon['name']}}</label>
+            </div>
+          {% endfor %}
+        </fieldset>
+        
       {% endfor %}
     </fieldset>
     <input type="submit" value="Generate Distribution" />
   </form>
-  <a href="{{url_for('unit.index')}}">Back</a>
 
   <canvas id="damage_plot" width="960" height="600"></canvas>
-  <br>
-  <a href="{{url_for('home')}}"></a>
+  <a href="{{url_for('unit.index')}}">Back</a>
 {% endblock content %}
 
 {% block script %}
