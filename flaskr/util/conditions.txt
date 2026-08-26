@@ -1,0 +1,7 @@
+within half range
+defender has cover
+in engagement range
+moved this turn
+no LOS (indirect)
+charged this turn
+defender battleshocked

@@ -1,10 +1,14 @@
+# {num_dice}D{num_sides}+{modifier}
+# (num_dice, num_sides, modifier)
+
+
 class RollNotation:
     def isStatic(roll: str | tuple[int, int, int]) -> bool:
         if isinstance(roll, str):
             roll = __class__.toValue(roll)
         return roll[1] == 1
 
-    def min(roll: str | tuple[int,int,int]) -> int:
+    def min(roll: str | tuple[int, int, int]) -> int:
         if isinstance(roll, str):
             roll = __class__.toValue(roll)
         return roll[0] + roll[2]
@@ -13,8 +17,24 @@ class RollNotation:
         if isinstance(roll, str):
             roll = __class__.toValue(roll)
         return roll[0] * roll[1] + roll[2]
+    
+    def avg(roll: str | tuple[int, int, int] | int) -> float:
+        if isinstance(roll, str):
+            roll = __class__.toValue(roll)
+        if isinstance(roll, int):
+            return roll
+        else:
+            return roll[0] * (roll[1] / 2) + roll[2]
 
-    def applyQuantity(roll: tuple[int,int,int], quantity:int) -> tuple[int,int,int]:
+    def addDice(roll: tuple[int, int, int], num_dice: int) -> tuple[int, int, int]:
+        return (roll[0] + num_dice, roll[1], roll[2])
+
+    def addModifier(roll: tuple[int, int, int], modifier: int) -> tuple[int, int, int]:
+        return (roll[0], roll[1], roll[2] + modifier)
+
+    def applyQuantity(
+        roll: tuple[int, int, int], quantity: int
+    ) -> tuple[int, int, int]:
         return (roll[0] * quantity, roll[1], roll[2] * quantity)
 
     def toValue(roll: str) -> tuple[int, int, int]:
@@ -50,3 +70,11 @@ class RollNotation:
         if value[2] != 0:
             output += f"+{value[2]}"
         return output
+
+    def choose_greater(
+        roll1: tuple[int, int, int] | int, roll2: tuple[int, int, int] | int
+    ) -> tuple[int, int, int] | int:
+        if __class__.avg(roll1) >= __class__.avg(roll2):
+            return roll1
+        else:
+            return roll2

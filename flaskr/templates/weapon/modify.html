@@ -27,6 +27,9 @@
     <label for="damage">D</label>
     <input type="text" name="damage" id="damage" pattern="{{roll_pattern}}" value="{{weapon['damage']}}">
 
+    
+    <!-- TODO: control for assigning abilities -->
+
     <br>
     <a href="{{url_for('model.modify', unit_id=unit_id, model_id=model_id)}}">Back</a>
     <input type="submit" value="Save">

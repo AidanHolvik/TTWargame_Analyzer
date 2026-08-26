@@ -89,3 +89,7 @@ class DamageNode(AbstractNode):
         damage = np.zeros_like(self.raw_pmf)
         damage[0] = probability
         return damage
+
+class MarkovTree:
+    def __init__(self, weapon: dict, defender: dict):
+        self.core_attacks = weapon["attacks"]
