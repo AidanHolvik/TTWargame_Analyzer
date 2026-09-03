@@ -9,43 +9,53 @@
     <br>
 
     <!-- area for model list -->
-    <table>
-      <colgroup>
-        <col>
-        <col>
-        <col span="2">
-      </colgroup>
-      <thead>
-        <tr>
-          <th scope="col">Quantity</th>
-          <th scope="col">Name</th>
-          <th scope="colgroup">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for model in unit_models %}
-          <tr id="tr_{{model['id']}}">
-            <td>
-              <input type="number" name="{{model['input_name']}}" id="{{model['input_name']}}" min="0" max="99" value="{{model['quantity']}}">
-            </td>
-            <td>{{model['name']}}</td>
-            <td>
-              <a href="{{url_for('model.modify', unit_id=unit['id'], model_id=model['id'])}}">Modify</a>
-            </td>
-            <td>
-              <a href="{{url_for('model.delete', unit_id=unit['id'], model_id=model['id'])}}">Delete</a>
-            </td>
+    <div id="models_frame">
+      <table>
+        <colgroup>
+          <col>
+          <col>
+          <col span="2">
+        </colgroup>
+        <thead>
+          <tr>
+            <th scope="col">Quantity</th>
+            <th scope="col">Name</th>
+            <th scope="colgroup">Actions</th>
           </tr>
-          <br>
-        {% endfor %}
-      </tbody>
-    </table>
-    <a href="{{url_for('model.create', unit_id=unit['id'])}}">Add Model</a>
+        </thead>
+        <tbody>
+          {% for model in unit_models %}
+            <tr id="tr_{{model['id']}}">
+              <td>
+                <input type="number" name="{{model['input_name']}}" id="{{model['input_name']}}" min="0" max="99" value="{{model['quantity']}}">
+              </td>
+              <td>{{model['name']}}</td>
+              <td>
+                <a href="{{url_for('model.modify', unit_id=unit['id'], model_id=model['id'])}}">Modify</a>
+              </td>
+              <td>
+                <a href="{{url_for('model.delete', unit_id=unit['id'], model_id=model['id'])}}">Delete</a>
+              </td>
+            </tr>
+            <br>
+          {% endfor %}
+        </tbody>
+      </table>
+      <a href="{{url_for('model.create', unit_id=unit['id'])}}">Add Model</a>
+    </div>
     
     
     <!-- TODO: control for assigning abilities -->
-    <!-- TODO: Control for assigning keywords -->
-  
+
+    <div id="keywords_frame">
+      Keywords
+      {% for keyword in keywords %}
+        <br>
+        <input type="checkbox" name="keyword_{{keyword['id']}}" id="keyword_{{keyword['id']}}" value="{{keyword['id']}}" {% if keyword['id'] in unit['keywords']|map(attribute='id') %}checked{% endif %}>
+        <label for="keyword_{{keyword['id']}}">{{keyword['name']}}</label>
+      {% endfor %}
+    </div>
+
     <br>
     <a href="{{url_for('unit.index')}}">Back</a>
     <input type="submit" value="Save">

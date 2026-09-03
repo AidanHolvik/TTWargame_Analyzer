@@ -9,7 +9,7 @@ from flask import (
     url_for,
     jsonify,
 )
-from flaskr.db import get_db, get_unit
+from flaskr.db import get_db, get_unit, get_keywords
 
 bp = Blueprint("unit", __name__)
 
@@ -43,6 +43,7 @@ def create():
 @bp.route("/<int:unit_id>", methods=["GET", "POST"])
 def modify(unit_id):
     db = get_db()
+    keywords = get_keywords()
 
     if request.method == "POST":
         # Get the unit's models and their quantities
@@ -51,6 +52,17 @@ def modify(unit_id):
         db.execute(
             "UPDATE units SET name=? WHERE id=?", (request.form["name"], unit_id)
         )
+        for keyword in keywords:
+            if (f"keyword_{keyword['id']}" in request.form) and not (keyword['id'] in unit['keywords']|map(attribute='id')):
+                db.execute(
+                    "INSERT INTO unit_keywords (unit_id, keyword_id) VALUES (?, ?)",
+                    (unit_id, keyword['id']),
+                )
+            elif not (f"keyword_{keyword['id']}" in request.form) and (keyword['id'] in unit['keywords']|map(attribute='id')):
+                db.execute(
+                    "DELETE FROM unit_keywords WHERE unit_id=? AND keyword_id=?",
+                    (unit_id, keyword['id']),
+                )
         # modify records for this unit's models
         for model in models:
             db.execute(
@@ -63,7 +75,7 @@ def modify(unit_id):
 
     unit = get_unit(unit_id)
     models = get_unit_models_for_inputs(unit_id)
-    return render_template("unit/modify.html", unit=unit, unit_models=models)
+    return render_template("unit/modify.html", unit=unit, unit_models=models, keywords=keywords)
 
 
 

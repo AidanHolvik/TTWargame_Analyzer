@@ -2,6 +2,7 @@ import sqlite3
 import click
 from flask import current_app, g
 from copy import deepcopy
+from flaskr.util.keywords import Keywords
 
 # Code borrowed from https://flask.palletsprojects.com/en/stable/tutorial/database/
 
@@ -29,6 +30,12 @@ def init_db():
     with current_app.open_resource("schema.sql") as file:
         db.executescript(file.read().decode("utf-8"))
 
+    # Initialize keywords from the Keyword enum (flaskr/util/keywords.py)
+    for keyword in Keywords:
+        db.execute("INSERT INTO keywords (id, name) VALUES (?, ?)", (keyword.value, str(keyword)))
+    db.commit()
+    
+
 
 @click.command("init-db")
 def init_db_command():
@@ -51,6 +58,12 @@ def get_units():
 def get_unit(id: int):
     db = get_db()
     unit = db.execute("SELECT * FROM units WHERE id=?", (id,)).fetchone()
+    unit["keywords"] = db.execute(
+        "SELECT keyword_id"
+        " FROM unit_keywords"
+        " WHERE unit_id = ?",
+        (id,),
+    ).fetchall()
     return unit
 
 
@@ -118,3 +131,8 @@ def query_to_dict(record, key_column: str = "id") -> dict:
             result[id] = query_to_dict(row, key_column)
 
     return result
+
+def get_keywords():
+    db = get_db()
+    keywords = db.execute("SELECT * FROM keywords").fetchall()
+    return keywords

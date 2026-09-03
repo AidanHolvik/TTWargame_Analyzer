@@ -1,12 +1,14 @@
-DROP TABLE IF EXISTS model_weapons;
-DROP TABLE IF EXISTS unit_models;
-DROP TABLE IF EXISTS weapons;
-DROP TABLE IF EXISTS models;
 DROP TABLE IF EXISTS units;
+DROP TABLE IF EXISTS models;
+DROP TABLE IF EXISTS weapons;
+DROP TABLE IF EXISTS unit_models;
+DROP TABLE IF EXISTS model_weapons;
 DROP TABLE IF EXISTS abilities;
 DROP TABLE IF EXISTS unit_abilities;
 DROP TABLE IF EXISTS model_abilities;
 DROP TABLE IF EXISTS weapon_abilities;
+DROP TABLE IF EXISTS keywords;
+DROP TABLE IF EXISTS unit_keywords;
 
 -- TODO: include keywords and abilities?
 CREATE TABLE units (
@@ -135,36 +137,29 @@ CREATE TABLE weapon_abilities (
   PRIMARY KEY (weapon_id, ability_id)
 );
 
-INSERT INTO keywords (name) VALUES
-('BATTLELINE'),
-('SWARM'),
-('INFANTRY'),
-('BEAST'),
-('MOUNTED'),
-('MONSTER'),
-('VEHICLE'),
-('AIRCRAFT'),
-('FRAME'),
-('CHARACTER'),
-('EPIC HERO'),
-('WALKER'),
-('TITANIC'),
-('TOWERING'),
-('FORTIFICATION'),
-('PSYKER'),
-('ARTILLERY'),
-('GRENADES'),
-('SMOKE'),
-('FLY'),
-('TRANSPORT'),
-('DEDICATED TRANSPORT'),
-('IMPERIUM'),
-('CHAOS'),
-('DAEMON');
+CREATE TABLE unit_keywords (
+  unit_id INTEGER NOT NULL,
+  keyword_id INTEGER NOT NULL,
+
+  FOREIGN KEY (unit_id)
+  REFERENCES units (id)
+  ON DELETE CASCADE,
+
+  FOREIGN KEY (keyword_id)
+  REFERENCES keywords (id)
+  ON DELETE CASCADE,
+
+  PRIMARY KEY (unit_id, keyword_id)
+);
+
+-- Keywords will be initialized using the Keyword enum in flaskr/util/keywords.py
 
 INSERT INTO abilities (effect) VALUES
 ('Feel No Pain'),
 ('AP on crit wound'),
+('FNP on psychic'),
+('FNP on mortal wounds'),
+('-1 to wound on strong attacks'),
 ('ANTI-'),
 ('BLAST/CLEAVE'),
 ('CLOSE QUARTERS'),

@@ -4,6 +4,7 @@ from math import ceil
 from scipy.fft import rfft, irfft, next_fast_len
 from .markov import Node, DamageNode, FailureNode
 from .roll_notation import RollNotation as Roll, addModifier, addDice
+from .abilities import WeaponAbilityType, ModelAbilityType
 from copy import deepcopy
 
 
@@ -51,88 +52,107 @@ class WeaponAttackSequence:
         for key in weapon.keys():
             self.weapon[key] = weapon[key]
 
-        attacks = []
+        # attacks = Roll.toValue(self.weapon["attacks"])
+        attacks = [] # base attacks at index 0, bonus attacks at subsequent indices (sustained hits not included)
         attacks.append(Roll.toValue(self.weapon["attacks"]))
-        damage = []
-        damage.append(Roll.toValue(self.weapon["damage"]))
+        self.sustained_hits = None
+        bonus_damage = []
+        damage = Roll.toValue(self.weapon["damage"])
         
         self.weapon["attacks"] = Roll.toValue(self.weapon["attacks"])
-        if weapon['abilities'] and AbilityType.RAPID_FIRE in weapon['abilities']:       # Modify number of attack dice if RAPID_FIRE ability is present and active
-            value = self.weapon["abilities"][self.weapon["abilities"].index(AbilityType.RAPID_FIRE)].value
+        if weapon['abilities'] and WeaponAbilityType.RAPID_FIRE in weapon['abilities']:       # Modify number of attack dice if RAPID_FIRE ability is present and active
+            value = self.weapon["abilities"][self.weapon["abilities"].index(WeaponAbilityType.RAPID_FIRE)].value
             if isinstance(value, int):
                 self.weapon["attacks"] = addModifier(self.weapon["attacks"], value)
             else:
                 attacks.append(value)
-        if weapon['abilities'] and AbilityType.BLAST in weapon['abilities']:            # Modify number of attack dice if BLAST ability is present and active
-            value = self.weapon["abilities"][self.weapon["abilities"].index(AbilityType.BLAST)].value
+        if weapon['abilities'] and WeaponAbilityType.BLAST in weapon['abilities']:            # Modify number of attack dice if BLAST ability is present and active
+            value = self.weapon["abilities"][self.weapon["abilities"].index(WeaponAbilityType.BLAST)].value
             if isinstance(value, int):
-                self.weapon["attacks"] = addDice(self.weapon["attacks"], value * (defender_quantity // 5))
+                self.weapon["attacks"] = addModifier(self.weapon["attacks"], value)
             else:
                 attacks.append(value)
-        if weapon['abilities'] and AbilityType.CLEAVE in weapon['abilities']:           # Modify number of attack dice if CLEAVE ability is present and active
-            value = self.weapon["abilities"][self.weapon["abilities"].index(AbilityType.CLEAVE)].value
+        if weapon['abilities'] and WeaponAbilityType.CLEAVE in weapon['abilities']:           # Modify number of attack dice if CLEAVE ability is present and active
+            value = self.weapon["abilities"][self.weapon["abilities"].index(WeaponAbilityType.CLEAVE)].value
             if isinstance(value, int):
-                self.weapon["attacks"] = addDice(self.weapon["attacks"], value * (defender_quantity // 5))
+                self.weapon["attacks"] = addModifier(self.weapon["attacks"], value)
             else:
                 attacks.append(value)
         self.weapon["attacks"] = Roll.applyQuantity(self.weapon['attacks'], weapon_quantity)
+        for i in range(attacks.__len__()):
+            attacks[i] = Roll.applyQuantity(attacks[i], weapon_quantity)
+        
+        if weapon['abilities'] and WeaponAbilityType.SUSTAINED_HITS in weapon['abilities']:
+            self.sustained_hits = self.weapon["abilities"][self.weapon["abilities"].index(WeaponAbilityType.SUSTAINED_HITS)].value
+            self.sustained_hits = Roll.applyQuantity(self.sustained_hits, weapon_quantity)
         
         self.weapon["damage"] = Roll.toValue(self.weapon["damage"])
-        if weapon['abilities'] and AbilityType.MELTA in weapon['abilities']:            # Modify damage if MELTA ability is present and active
-                value = self.weapon["abilities"][self.weapon["abilities"].index(AbilityType.MELTA)].value
+        if weapon['abilities'] and WeaponAbilityType.MELTA in weapon['abilities']:            # Modify damage if MELTA ability is present and active
+                value = self.weapon["abilities"][self.weapon["abilities"].index(WeaponAbilityType.MELTA)].value
                 if isinstance(value, int):
                     self.weapon["damage"] = addModifier(self.weapon["damage"], value)
                 else:
                     damage.append(value)
 
-            
+        # Calculate max attacks, max damage
+        attacks[0] = self.weapon["attacks"]
         self.defender = defender
-        self.max_damage = Roll.max(self.weapon["attacks"]) * Roll.max(
-            self.weapon["damage"]
-        )
-        if weapon['abilities'] and AbilityType.SUSTAINED_HITS in weapon['abilities']:
-            value = self.weapon["abilities"][self.weapon["abilities"].index(AbilityType.SUSTAINED_HITS)].value
-            self.max_damage *= value
+        self.max_attacks = 0
+        for attack in attacks:
+            self.max_attacks += Roll.max(attack)
+        if weapon['abilities'] and WeaponAbilityType.SUSTAINED_HITS in weapon['abilities']:
+            value = self.weapon["abilities"][self.weapon["abilities"].index(WeaponAbilityType.SUSTAINED_HITS)].value + 1
+            self.max_attacks *= value
+        self.max_damage = Roll.max(self.weapon['damage'])
+        for roll in bonus_damage:
+            self.max_damage += Roll.max(roll)
+        self.max_damage *= self.max_attacks
 
     # returns the PMF of the number of dice going into the attack sequence
     def __num_attacks(self) -> ndarray:
-        output_size = Roll.max(self.weapon["attacks"]) + 1
-        if Roll.isStatic(self.weapon["attacks"]):
-            pmf = np.zeros(output_size)
-            pmf[Roll.max(self.weapon["attacks"])] = 1
-        else:
-            num_dice = self.weapon["attacks"][0]
-            num_sides = self.weapon["attacks"][1]
-            modifier = self.weapon["attacks"][2]
-            fft_size = next_fast_len(output_size, real=True)
-
-            # Generate pmf for one die
+        output_size = self.max_attacks + 1
+        modifier = 0
+        fft_size = next_fast_len(output_size, real=True)
+        net_cf = None
+        for attack in self.attacks:
             pmf = np.zeros(fft_size)
-            for i in range(1, num_sides + 1):
-                pmf[i] = 1
-
-            # Convolve pmf for one die to get the distribution of the sum of random variables
+            if Roll.isStatic(attack):
+                pmf[Roll.max(attack)] = 1
+            else:
+                num_dice = attack[0]
+                num_sides = attack[1]
+                modifier += attack[2]
+                for i in range(1, num_sides + 1):
+                    pmf[i] = 1
+            
             cf = rfft(pmf, n=fft_size)
             cf **= num_dice
-            pmf = irfft(cf, n=fft_size)
-            pmf = np.round(pmf)  # round to mitigate floating point error
 
-            # shift values over by modifier indices
-            if modifier > 0:
-                for i in range(num_sides * num_dice, 0, -1):
-                    pmf[i + modifier] = pmf[i]
-                    pmf[i] = 0
-            elif modifier < 0:
-                for i in range(num_dice, num_sides * num_dice + 1):
-                    pmf[i + modifier] = pmf[i]
-                    pmf[i] = 0
+            if net_cf is None:
+                net_cf = cf
+            else:
+                net_cf *= cf
+            
+        pmf = irfft(net_cf, n=fft_size)
+        pmf = np.round(pmf)  # round to mitigate floating point error
 
-            pmf = pmf[:output_size]  # trim trailing zeroes
-            pmf /= num_sides**num_dice  # normalize to a total probability of 1
+        # Shift values over by the accumulated modifier
+        if modifier > 0:
+            for i in range(num_sides * num_dice, 0, -1):
+                pmf[i + modifier] = pmf[i]
+                pmf[i] = 0
+        elif modifier < 0:
+            for i in range(num_dice, num_sides * num_dice + 1):
+                pmf[i + modifier] = pmf[i]
+                pmf[i] = 0
+
+        pmf = pmf[:output_size]  # trim trailing zeroes
+        pmf /= num_sides**num_dice  # normalize to a total probability of 1
+
         return pmf
 
     # Returns the PMF of the damage dealt by an individual die after going through the entire attack sequence
-    def __damage_per_attack(self) -> ndarray:
+    def __damage_per_attack(self, skip_hit_roll: bool = True) -> ndarray:
         hit_roll = Node(self.weapon["damage"])
         wound_roll = Node(self.weapon["damage"])
         save_roll = Node(self.weapon["damage"])
@@ -144,7 +164,7 @@ class WeaponAttackSequence:
         crit_chance = 1
         # TODO: modify crit chance if abilities demand it
 
-        if self.weapon['abilities'] and AbilityType.TORRENT in self.weapon['abilities']:
+        if self.weapon['abilities'] and WeaponAbilityType.TORRENT in self.weapon['abilities']:
             probability = 6
             crit_chance = 0
         else:
@@ -152,7 +172,7 @@ class WeaponAttackSequence:
         
         fail_chance = 6 - probability
         
-        if self.weapon['abilities'] and AbilityType.LETHAL_HITS in self.weapon['abilities']:
+        if self.weapon['abilities'] and WeaponAbilityType.LETHAL_HITS in self.weapon['abilities']:
             probability -= crit_chance
             crit_chance /= 6
         
@@ -180,7 +200,7 @@ class WeaponAttackSequence:
             probability = 3
         fail_chance = 6 - probability
         
-        if self.weapon['abilities'] and AbilityType.DEVASTATING_WOUNDS in self.weapon['abilities']:
+        if self.weapon['abilities'] and WeaponAbilityType.DEVASTATING_WOUNDS in self.weapon['abilities']:
             probability -= crit_chance
             crit_chance /= 6
         
@@ -190,11 +210,11 @@ class WeaponAttackSequence:
         fail_chance /= 6
 
         wound_roll.add_child(save_roll, probability)
-        if self.weapon['abilities'] and AbilityType.TWIN_LINKED in self.weapon['abilities']:
+        if self.weapon['abilities'] and WeaponAbilityType.TWIN_LINKED in self.weapon['abilities']:
             wound_reroll = Node(self.weapon["damage"])
             wound_roll.add_child(wound_reroll, fail_chance)
             
-            if self.weapon['abilities'] and AbilityType.DEVASTATING_WOUNDS in self.weapon['abilities']:
+            if self.weapon['abilities'] and WeaponAbilityType.DEVASTATING_WOUNDS in self.weapon['abilities']:
                 wound_reroll.add_child(damage_roll, crit_chance)
             wound_reroll.add_child(save_roll, probability)
             wound_reroll.add_child(failed_roll, fail_chance)
@@ -240,6 +260,14 @@ class WeaponAttackSequence:
         for num_attacks in range(min_attacks, attacks.size):
             accumulator *= single_damage
             total_damage += accumulator * attacks[num_attacks]
+        
+        # Apply feel-no-pain ability if present
+        if self.defender['abilities'] and ModelAbilityType.FEEL_NO_PAIN in self.defender['abilities']:
+            # TODO: handle feel-no-pain logic here
+            # TODO: create fnp distribution
+            # TODO: convert fnp to cf
+            # TODO: apply fnp to total_damage cf
+            pass
 
         # Convert the resulting mixture distribution back into its PMF
         total_damage = irfft(total_damage, fft_size)

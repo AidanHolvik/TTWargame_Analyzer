@@ -5,26 +5,11 @@ from .roll_notation import RollNotation as Roll
 
 class ModelAbilityType(Enum):
     ERROR = 0
-    FEEL_NO_PAIN = auto()  #
-    # PLUNGING_FIRE = auto()                          #
-    # REROLL_ATTACKS = auto()                         #
-    # REROLL_HITS = auto()                            #
-    # REROLL_HITS_ON = auto()                         #
-    # REROLL_ONE_HIT = auto()                         #
-    # REROLL_WOUNDS = auto()                          #
-    # REROLL_WOUNDS_ON = auto()                       #
-    # REROLL_ONE_WOUND = auto()                       #
-    # REROLL_SAVES = auto()                           #
-    # REROLL_SAVES_ON = auto()                        #
-    # REROLL_DAMAGE = auto()                          #
-    # REROLL_DAMAGE_ON = auto()                       #
-    # IGNORE_MOD_HIT = auto()                         #
-    # IGNORE_MOD_WOUND = auto()                       #
-    # REPLACE_INCOMING_DAMAGE = auto()                #
-    # MOD_INCOMING_DAMAGE = auto()                    #
-    # MOD_OUTGOING_DAMAGE = auto()                    #
-    # ADD_ATTACKS = auto()                            #
-    AP_ON_CRIT_WOUND = auto()  #
+    FEEL_NO_PAIN = auto()  # o
+    AP_ON_CRIT_WOUND = auto()  # o
+    FNP_ON_PSYCHIC = auto()  # o
+    FNP_ON_MORTAL_WOUNDS = auto()  # o
+    RESIST_STRONG_ATTACKS = auto()  # o
 
     def is_offensive(self) -> bool:
         match self:
@@ -36,23 +21,20 @@ class ModelAbilityType(Enum):
 
 class WeaponAbilityType(Enum):
     ERROR = 0
-    ANTI = auto()  #
+    ANTI = auto()  # o
     BLAST = auto()  # x
     CLEAVE = auto()  # x
-    CLOSE_QUARTERS = auto()  #
+    CLOSE_QUARTERS = auto()  # o
     DEVASTATING_WOUNDS = auto()  # x
-    # HEAVY = auto()                      #
-    # IGNORES_COVER = auto()              #
-    INDIRECT_FIRE = auto()  #
-    # LANCE = auto()                      #
+    INDIRECT_FIRE = auto()  # o
     LETHAL_HITS = auto()  # x
     MELTA = auto()  # x
-    PSYCHIC = auto()  #
+    PSYCHIC = auto()  # o
     RAPID_FIRE = auto()  # x
-    SUSTAINED_HITS = auto()  #
+    SUSTAINED_HITS = auto()  # o
     TORRENT = auto()  # x
     TWIN_LINKED = auto()  # x
-    CONVERSION = auto()  #
+    CONVERSION = auto()  # o
 
     def __str__(self):
         match self:

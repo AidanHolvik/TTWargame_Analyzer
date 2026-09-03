@@ -1,34 +1,34 @@
-from enum import Enum, auto
+from enum import Enum
 
 class Keyword(Enum):
-    BATTLELINE = auto()
-    SWARM = auto()
-    INFANTRY = auto()
-    BEAST = auto()
-    MOUNTED = auto()
-    MONSTER = auto()
-    VEHICLE = auto()
-    AIRCRAFT = auto()
-    FRAME = auto()
+    BATTLELINE = 1
+    SWARM = 2
+    INFANTRY = 3
+    BEAST = 4
+    MOUNTED = 5
+    MONSTER = 6
+    VEHICLE = 7
+    AIRCRAFT = 8
+    FRAME = 9
 
-    CHARACTER = auto()
-    EPIC_HERO = auto()
-    WALKER = auto()
-    TITANIC = auto()
-    TOWERING = auto()
-    FORTIFICATION = auto()
-    PSYKER = auto()
-    ARTILLERY = auto()
+    CHARACTER = 10
+    EPIC_HERO = 11
+    WALKER = 12
+    TITANIC = 13
+    TOWERING = 14
+    FORTIFICATION = 15
+    PSYKER = 16
+    ARTILLERY = 17
 
-    GRENADES = auto()
-    SMOKE = auto()
-    FLY = auto()
-    TRANSPORT = auto()
-    DEDICATED_TRANSPORT = auto()
+    GRENADES = 18
+    SMOKE = 19
+    FLY = 20
+    TRANSPORT = 21
+    DEDICATED_TRANSPORT = 22
 
-    IMPERIUM = auto()
-    CHAOS = auto()
-    DAEMON = auto()
+    IMPERIUM = 23
+    CHAOS = 24
+    DAEMON = 25
 
     def __str__(self):
         match self:
