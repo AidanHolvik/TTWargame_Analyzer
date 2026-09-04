@@ -4,7 +4,7 @@ from math import ceil
 from scipy.fft import rfft, irfft, next_fast_len
 from .markov import Node, DamageNode, FailureNode
 from .roll_notation import RollNotation as Roll
-from .abilities import WeaponAbilityType, ModelAbilityType
+from .abilities import WeaponAbilityKeyworded, WeaponAbilityType, ModelAbilityType
 from copy import deepcopy
 
 
@@ -160,6 +160,7 @@ class WeaponAttackSequence:
         failed_roll = FailureNode(self.weapon["damage"])
         failed_roll.child = damage_roll
 
+
         # model chance to hit with an attack
         crit_chance = 1
         # TODO: modify crit chance if abilities demand it
@@ -180,13 +181,22 @@ class WeaponAttackSequence:
         
         probability /= 6
 
-        hit_roll.add_child(wound_roll, probability)
+        if probability > 0:
+            hit_roll.add_child(wound_roll, probability)
         if fail_chance > 0:
             hit_roll.add_child(failed_roll, fail_chance / 6)
 
+
         # model chance to wound with a successful hit
         crit_chance = 1
-        # TODO: if ANTI-X against defender, modify crit_chance accordingly
+        # ANTI-KEYWORD ability
+        for keyword in self.defender['keywords']:
+            target_ability = WeaponAbilityKeyworded(WeaponAbilityType.ANTI, 1, keyword)
+            if target_ability in self.weapon['abilities']:
+                value = 7 - self.weapon["abilities"][self.weapon["abilities"].index(target_ability)].value
+                if value > crit_chance:
+                    crit_chance = value
+
 
         if self.weapon["strength"] >= 2 * self.defender["toughness"]:
             probability = 5
@@ -198,6 +208,9 @@ class WeaponAttackSequence:
             probability = 2
         else:
             probability = 3
+
+        if probability < crit_chance:
+            probability = crit_chance
         fail_chance = 6 - probability
         
         if self.weapon['abilities'] and WeaponAbilityType.DEVASTATING_WOUNDS in self.weapon['abilities']:
@@ -209,22 +222,27 @@ class WeaponAttackSequence:
         probability /= 6
         fail_chance /= 6
 
-        wound_roll.add_child(save_roll, probability)
+        if (probability > 0):
+            wound_roll.add_child(save_roll, probability)
         if self.weapon['abilities'] and WeaponAbilityType.TWIN_LINKED in self.weapon['abilities']:
             wound_reroll = Node(self.weapon["damage"])
             wound_roll.add_child(wound_reroll, fail_chance)
             
             if self.weapon['abilities'] and WeaponAbilityType.DEVASTATING_WOUNDS in self.weapon['abilities']:
                 wound_reroll.add_child(damage_roll, crit_chance)
-            wound_reroll.add_child(save_roll, probability)
+            if probability > 0:
+                wound_reroll.add_child(save_roll, probability)
             wound_reroll.add_child(failed_roll, fail_chance)
         else:
             wound_roll.add_child(failed_roll, fail_chance)
 
+
         # model chance for a successful wound to survive the defender's save roll
         probability = (self.defender["save"] + self.weapon["ap"] - 1) / 6
         if probability > 1:
-            probability = 1.0
+            probability = 1
+        elif probability < 0:
+            probability = 0
         save_roll.add_child(damage_roll, probability)
         save_roll.add_child(failed_roll, 1.0 - probability)
 

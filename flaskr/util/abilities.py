@@ -193,3 +193,9 @@ def choose_greater(ab1: Valued, ab2: Valued) -> Valued:
         return ab1
     else:
         return ab2
+
+def choose_lesser(ab1: Valued, ab2: Valued) -> Valued:
+    if ab1.value <= ab2.value:
+        return ab1
+    else:
+        return ab2

@@ -45,6 +45,9 @@ def create_app(test_config=None):
     app.register_blueprint(weapon.bp)
     app.register_blueprint(distribution.bp)
 
+    # from . import tests
+    # app.register_blueprint(tests.bp)
+
 
 
     # set default route for testing and debug purposes
