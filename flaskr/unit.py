@@ -44,6 +44,7 @@ def create():
 def modify(unit_id):
     db = get_db()
     keywords = get_keywords()
+    unit = get_unit(unit_id)
 
     if request.method == "POST":
         # Get the unit's models and their quantities
@@ -53,16 +54,18 @@ def modify(unit_id):
             "UPDATE units SET name=? WHERE id=?", (request.form["name"], unit_id)
         )
         for keyword in keywords:
-            if (f"keyword_{keyword['id']}" in request.form) and not (keyword['id'] in unit['keywords']|map(attribute='id')):
+            if (str(keyword['id']) in request.form.getlist('keywords')) and not (keyword['id'] in unit['keywords']):
                 db.execute(
                     "INSERT INTO unit_keywords (unit_id, keyword_id) VALUES (?, ?)",
                     (unit_id, keyword['id']),
                 )
-            elif not (f"keyword_{keyword['id']}" in request.form) and (keyword['id'] in unit['keywords']|map(attribute='id')):
+                unit['keywords'].append(keyword['id'])
+            elif not (str(keyword['id']) in request.form.getlist('keywords')) and (keyword['id'] in unit['keywords']):
                 db.execute(
                     "DELETE FROM unit_keywords WHERE unit_id=? AND keyword_id=?",
                     (unit_id, keyword['id']),
                 )
+                unit['keywords'].remove(keyword['id'])
         # modify records for this unit's models
         for model in models:
             db.execute(
@@ -73,7 +76,6 @@ def modify(unit_id):
             )
         db.commit()
 
-    unit = get_unit(unit_id)
     models = get_unit_models_for_inputs(unit_id)
     return render_template("unit/modify.html", unit=unit, unit_models=models, keywords=keywords)
 

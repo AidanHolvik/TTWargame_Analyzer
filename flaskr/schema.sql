@@ -9,6 +9,7 @@ DROP TABLE IF EXISTS model_abilities;
 DROP TABLE IF EXISTS weapon_abilities;
 DROP TABLE IF EXISTS keywords;
 DROP TABLE IF EXISTS unit_keywords;
+DROP VIEW IF EXISTS propagated_abilities;
 
 -- TODO: include keywords and abilities?
 CREATE TABLE units (
@@ -153,26 +154,6 @@ CREATE TABLE unit_keywords (
 );
 
 -- Keywords will be initialized using the Keyword enum in flaskr/util/keywords.py
-
-INSERT INTO abilities (effect) VALUES
-('Feel No Pain'),
-('AP on crit wound'),
-('FNP on psychic'),
-('FNP on mortal wounds'),
-('-1 to wound on strong attacks'),
-('ANTI-'),
-('BLAST/CLEAVE'),
-('CLOSE QUARTERS'),
-('DEVASTATING WOUNDS'),
-('INDIRECT FIRE'),
-('LETHAL HITS'),
-('MELTA'),
-('PSYCHIC'),
-('RAPID FIRE'),
-('SUSTAINED HITS'),
-('TORRENT'),
-('TWIN-LINKED'),
-('CONVERSION');
 
 CREATE VIEW propagated_abilities AS
 SELECT

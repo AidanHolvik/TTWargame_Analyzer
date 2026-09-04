@@ -49,11 +49,13 @@
 
     <div id="keywords_frame">
       Keywords
-      {% for keyword in keywords %}
-        <br>
-        <input type="checkbox" name="keyword_{{keyword['id']}}" id="keyword_{{keyword['id']}}" value="{{keyword['id']}}" {% if keyword['id'] in unit['keywords']|map(attribute='id') %}checked{% endif %}>
-        <label for="keyword_{{keyword['id']}}">{{keyword['name']}}</label>
-      {% endfor %}
+      <fieldset>
+        {% for keyword in keywords %}
+          <br>
+          <input type="checkbox" name="keywords" id="keyword_{{keyword['id']}}" value="{{keyword['id']}}" {% if keyword['id'] in unit['keywords'] %}checked{% endif %}>
+          <label for="keyword_{{keyword['id']}}">{{keyword['name']}}</label>
+        {% endfor %}
+      </fieldset>
     </div>
 
     <br>

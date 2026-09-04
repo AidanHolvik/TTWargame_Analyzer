@@ -10,11 +10,11 @@ from flask import (
 )
 from flaskr.db import (
     get_db,
+    query_to_dict,
     get_model,
     get_units,
     get_unit_weapons,
     list_unit_models,
-    query_to_dict,
     get_unit,
 )
 from copy import deepcopy

@@ -14,7 +14,7 @@ from flaskr.db import get_db
 import numpy as np
 from scipy.fft import rfft, irfft, next_fast_len
 
-bp = Blueprint("tests", __name__, url_prefix="/tests")
+bp = Blueprint("tests", __name__, url_prefix="/test")
 
 
 @bp.route("/plot", methods=["GET"])
@@ -101,6 +101,14 @@ def index_weapons():
     ).fetchall()
 
     return render_template("tests/indexWeapons.html", weapons=weapons)
+
+@bp.route("/abilities", methods=["GET"])
+def abilities():
+    db = get_db()
+    unit_keywords = db.execute("SELECT * FROM unit_keywords").fetchall()
+    print(unit_keywords)
+
+    return redirect("/")
 
 
 

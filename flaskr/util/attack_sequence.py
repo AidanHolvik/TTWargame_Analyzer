@@ -3,7 +3,7 @@ from numpy import ndarray
 from math import ceil
 from scipy.fft import rfft, irfft, next_fast_len
 from .markov import Node, DamageNode, FailureNode
-from .roll_notation import RollNotation as Roll, addModifier, addDice
+from .roll_notation import RollNotation as Roll
 from .abilities import WeaponAbilityType, ModelAbilityType
 from copy import deepcopy
 
@@ -63,19 +63,19 @@ class WeaponAttackSequence:
         if weapon['abilities'] and WeaponAbilityType.RAPID_FIRE in weapon['abilities']:       # Modify number of attack dice if RAPID_FIRE ability is present and active
             value = self.weapon["abilities"][self.weapon["abilities"].index(WeaponAbilityType.RAPID_FIRE)].value
             if isinstance(value, int):
-                self.weapon["attacks"] = addModifier(self.weapon["attacks"], value)
+                self.weapon["attacks"] = Roll.addModifier(self.weapon["attacks"], value)
             else:
                 attacks.append(value)
         if weapon['abilities'] and WeaponAbilityType.BLAST in weapon['abilities']:            # Modify number of attack dice if BLAST ability is present and active
             value = self.weapon["abilities"][self.weapon["abilities"].index(WeaponAbilityType.BLAST)].value
             if isinstance(value, int):
-                self.weapon["attacks"] = addModifier(self.weapon["attacks"], value)
+                self.weapon["attacks"] = Roll.addModifier(self.weapon["attacks"], value)
             else:
                 attacks.append(value)
         if weapon['abilities'] and WeaponAbilityType.CLEAVE in weapon['abilities']:           # Modify number of attack dice if CLEAVE ability is present and active
             value = self.weapon["abilities"][self.weapon["abilities"].index(WeaponAbilityType.CLEAVE)].value
             if isinstance(value, int):
-                self.weapon["attacks"] = addModifier(self.weapon["attacks"], value)
+                self.weapon["attacks"] = Roll.addModifier(self.weapon["attacks"], value)
             else:
                 attacks.append(value)
         self.weapon["attacks"] = Roll.applyQuantity(self.weapon['attacks'], weapon_quantity)
@@ -90,7 +90,7 @@ class WeaponAttackSequence:
         if weapon['abilities'] and WeaponAbilityType.MELTA in weapon['abilities']:            # Modify damage if MELTA ability is present and active
                 value = self.weapon["abilities"][self.weapon["abilities"].index(WeaponAbilityType.MELTA)].value
                 if isinstance(value, int):
-                    self.weapon["damage"] = addModifier(self.weapon["damage"], value)
+                    self.weapon["damage"] = Roll.addModifier(self.weapon["damage"], value)
                 else:
                     damage.append(value)
 
