@@ -1,54 +1,71 @@
 {% extends 'base.html' %}
-{% block title %}Modify {{unit['name']}}{% endblock %}
+{% block title %}Edit {{unit['name']}}{% endblock %}
 
 {% block content %}
-  <h2>Modify {{unit['name']}}</h2>
-  <form method="post">
-    <label for="name">Name</label>
-    <input type="text" name="name" id="name" value="{{unit['name']}}">
-    <br>
+  <section class="content">
+    <header>
+      <h1>Edit {{unit['name']}}</h1>
+    </header>
 
-    <!-- area for model list -->
-    <table>
-      <colgroup>
-        <col>
-        <col>
-        <col span="2">
-      </colgroup>
-      <thead>
-        <tr>
-          <th scope="col">Quantity</th>
-          <th scope="col">Name</th>
-          <th scope="colgroup">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for model in unit_models %}
-          <tr id="tr_{{model['id']}}">
-            <td>
-              <input type="number" name="{{model['input_name']}}" id="{{model['input_name']}}" min="0" max="99" value="{{model['quantity']}}">
-            </td>
-            <td>{{model['name']}}</td>
-            <td>
-              <a href="{{url_for('model.modify', unit_id=unit['id'], model_id=model['id'])}}">Modify</a>
-            </td>
-            <td>
-              <a href="{{url_for('model.delete', unit_id=unit['id'], model_id=model['id'])}}">Delete</a>
-            </td>
+    <!-- quantity inputs and the Save button join this form via form="unit-form",
+         so the per-model Edit/Delete forms below aren't nested inside it -->
+    <form id="unit-form" method="post">
+      <label for="name">Name</label>
+      <input type="text" name="name" id="name" value="{{unit['name']}}" required>
+    </form>
+
+    <h2>Models</h2>
+    {% if unit_models %}
+      <table class="item-list">
+        <colgroup>
+          <col>
+          <col>
+          <col span="2">
+        </colgroup>
+        <thead>
+          <tr>
+            <th scope="col">Quantity</th>
+            <th scope="col">Name</th>
+            <th scope="colgroup" colspan="2">Actions</th>
           </tr>
-          <br>
-        {% endfor %}
-      </tbody>
-    </table>
-    <a href="{{url_for('model.create', unit_id=unit['id'])}}">Add Model</a>
-    
+        </thead>
+        <tbody>
+          {% for model in unit_models %}
+            <tr id="tr_{{model['id']}}">
+              <td>
+                <input type="number" name="{{model['input_name']}}" id="{{model['input_name']}}" form="unit-form"
+                       min="0" max="99" value="{{model['quantity']}}">
+              </td>
+              <td>{{model['name']}}</td>
+              <td>
+                <form action="{{url_for('model.modify', unit_id=unit['id'], model_id=model['id'])}}" method="get">
+                  <button type="submit">Edit</button>
+                </form>
+              </td>
+              <td>
+                <!-- single-quoted attribute: tojson emits double quotes and escapes single quotes -->
+                <form action="{{url_for('model.delete', unit_id=unit['id'], model_id=model['id'])}}" method="get"
+                      onsubmit='return confirm("Delete " + {{model["name"]|tojson}} + " and its weapons?");'>
+                  <button type="submit" class="danger">Delete</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="about">No models yet.</p>
+    {% endif %}
+
+    <button type="button" onclick='location.href="{{url_for("model.create", unit_id=unit["id"])}}"'>Add Model</button>
+
     <!-- TODO: area for viewing unit's weapons (but not editing)? -->
-  
-    <br>
-    <a href="{{url_for('unit.index')}}">Back</a>
-    <input type="submit" value="Save">
-    
-  </form>
+
+    <div class="flex-container">
+      <input type="submit" value="Save" form="unit-form">
+      <button type="button" onclick='location.href="{{url_for("unit.index")}}"'>Cancel</button>
+    </div>
+  </section>
 {% endblock content %}
 
 {% block script %}{% endblock script %}

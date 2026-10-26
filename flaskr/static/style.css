@@ -127,7 +127,8 @@ header .action {
   resize: vertical;
 }
 
-input.danger {
+input.danger,
+button.danger {
   color: #cc2f2e;
 }
 
@@ -136,12 +137,44 @@ input[type="submit"] {
   min-width: 10em;
 }
 
+.content form > button {
+  align-self: start;
+}
+
+.item-list {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1em;
+}
+
+.item-list th,
+.item-list td {
+  padding: 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid lightgray;
+}
+
+.item-list td:not(:first-child) {
+  width: 1%;
+}
+
+.item-list form {
+  margin: 0;
+}
+
+.item-list input {
+  margin: 0;
+  width: 4em;
+}
+
 .selected {
   color: #cc2f2e;
 }
 
 .flex-container {
   display: flex;
+  align-items: flex-start;
+  gap: 0.5em;
 }
 
 .flex-item {
