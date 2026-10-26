@@ -1,61 +1,78 @@
 {% extends 'base.html' %}
-{% block title %}Modify {{model['name']}}{% endblock title %}
+{% block title %}Edit {{model['name']}}{% endblock title %}
 
 {% block content %}
-  <h2>Modify {{model['name']}}</h2>
-  <form method="post">
-    <label for="name">Name</label>
-    <input type="text" name="name" id="name" value="{{model['name']}}">
-    <br>
-    <label for="movement">M</label>
-    <input type="number" name="movement" id="movement" min="0" value="{{model['movement']}}">
-    <br>
-    <label for="toughness">T</label>
-    <input type="number" name="toughness" id="toughness" min="1" value="{{model['toughness']}}">
-    <br>
-    <label for="save">Sv</label>
-    <input type="number" name="save" id="save" min="2" max="6" value="{{model['save']}}">
-    <!-- TODO: include control for optionally setting invuln save -->
-    <br>
-    <label for="health">W</label>
-    <input type="number" name="health" id="health" min="1" value="{{model['health']}}">
+  <section class="content">
+    <header>
+      <h1>Edit {{model['name']}}</h1>
+    </header>
 
-    <!-- Area for weapon list -->
-    <table>
-      <colgroup>
-        <col>
-        <col>
-        <col span="2">
-      </colgroup>
-      <thead>
-        <tr>
-          <th scope="col">Quantity</th>
-          <th scope="col">Name</th>
-          <th scope="colgroup">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for weapon in model_weapons %}
+    <!-- quantity inputs and the Save button join this form via form="model-form",
+         so the per-weapon Edit/Delete forms below aren't nested inside it -->
+    <form id="model-form" method="post">
+      <label for="name">Name</label>
+      <input type="text" name="name" id="name" value="{{model['name']}}" required>
+      <label for="movement">M</label>
+      <input type="number" name="movement" id="movement" min="0" value="{{model['movement']}}">
+      <label for="toughness">T</label>
+      <input type="number" name="toughness" id="toughness" min="1" value="{{model['toughness']}}">
+      <label for="save">Sv</label>
+      <input type="number" name="save" id="save" min="2" max="6" value="{{model['save']}}">
+      <!-- TODO: include control for optionally setting invuln save -->
+      <label for="health">W</label>
+      <input type="number" name="health" id="health" min="1" value="{{model['health']}}">
+    </form>
+
+    <h2>Weapons</h2>
+    {% if model_weapons %}
+      <table class="item-list">
+        <colgroup>
+          <col>
+          <col>
+          <col span="2">
+        </colgroup>
+        <thead>
           <tr>
-            <td>
-              <input type="number" name="{{weapon['input_name']}}" id="{{weapon['input_name']}}" min="0" max="99" value="{{weapon['quantity']}}">
-            </td>
-            <td>{{weapon['name']}}</td>
-            <td>
-              <a href="{{url_for('weapon.modify', unit_id=unit_id, model_id=model['id'], weapon_id=weapon['id'])}}">Modify</a>
-            </td>
-            <td>
-              <a href="{{url_for('weapon.delete', unit_id=unit_id, model_id=model['id'], weapon_id=weapon['id'])}}">Delete</a>
-            </td>
+            <th scope="col">Quantity</th>
+            <th scope="col">Name</th>
+            <th scope="colgroup" colspan="2">Actions</th>
           </tr>
-        {% endfor %}
-        
-      </tbody>
-    </table>
-    <a href="{{url_for('weapon.create', unit_id=unit_id, model_id=model['id'])}}">Add Weapon</a>
+        </thead>
+        <tbody>
+          {% for weapon in model_weapons %}
+            <tr id="tr_{{weapon['id']}}">
+              <td>
+                <input type="number" name="{{weapon['input_name']}}" id="{{weapon['input_name']}}" form="model-form"
+                       min="0" max="99" value="{{weapon['quantity']}}">
+              </td>
+              <td>{{weapon['name']}}</td>
+              <td>
+                <form action="{{url_for('weapon.modify', unit_id=unit_id, model_id=model['id'], weapon_id=weapon['id'])}}" method="get">
+                  <button type="submit">Edit</button>
+                </form>
+              </td>
+              <td>
+                <!-- single-quoted attribute: tojson emits double quotes and escapes single quotes -->
+                <form action="{{url_for('weapon.delete', unit_id=unit_id, model_id=model['id'], weapon_id=weapon['id'])}}" method="get"
+                      onsubmit='return confirm("Delete " + {{weapon["name"]|tojson}} + "?");'>
+                  <button type="submit" class="danger">Delete</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="about">No weapons yet.</p>
+    {% endif %}
 
-    <br>
-    <a href="{{url_for('unit.modify', unit_id=unit_id)}}">Back</a>
-    <input type="submit" value="Save">
-  </form>
+    <button type="button" onclick='location.href="{{url_for("weapon.create", unit_id=unit_id, model_id=model["id"])}}"'>Add Weapon</button>
+
+    <div class="flex-container">
+      <input type="submit" value="Save" form="model-form">
+      <button type="button" onclick='location.href="{{url_for("unit.modify", unit_id=unit_id)}}"'>Cancel</button>
+    </div>
+  </section>
 {% endblock content %}
+
+{% block script %}{% endblock script %}

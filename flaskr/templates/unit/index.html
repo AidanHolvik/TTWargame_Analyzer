@@ -5,10 +5,9 @@
   <section class="content">
     <header>
       <h1>Units</h1>
-      <form class="action" action="{{url_for('unit.create')}}" method="get">
-        <button type="submit">Add Unit</button>
-      </form>
     </header>
+
+    <button type="button" onclick='location.href="{{url_for("unit.create")}}"'>Add Unit</button>
 
     {% if units %}
       <table class="item-list">

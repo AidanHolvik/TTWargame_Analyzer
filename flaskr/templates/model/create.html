@@ -2,26 +2,29 @@
 {% block title %}New Model{% endblock title %}
 
 {% block content %}
-  <h2>New Model</h2>
-  <form method="post">
-    <label for="name">Name</label>
-    <input type="text" name="name" id="name">
-    <br>
-    <label for="movement">M</label>
-    <input type="number" name="movement" id="movement" min="0" value="0">
-    <br>
-    <label for="toughness">T</label>
-    <input type="number" name="toughness" id="toughness" min="1" value="1">
-    <br>
-    <label for="save">Sv</label>
-    <input type="number" name="save" id="save" min="2" max="6" value="4">
-    <!-- TODO: include control for optionally setting invuln save -->
-    <br>
-    <label for="health">W</label>
-    <input type="number" name="health" id="health" min="1" value="1">
+  <section class="content">
+    <header>
+      <h1>New Model</h1>
+    </header>
 
-    <br>
-    <input type="submit" value="Cancel" formaction="{{url_for('unit.modify', unit_id=unit_id)}}" formmethod="get">
-    <input type="submit" value="Create">
-  </form>
+    <form method="post">
+      <label for="name">Name</label>
+      <input type="text" name="name" id="name" required autofocus>
+      <label for="movement">M</label>
+      <input type="number" name="movement" id="movement" min="0" value="0">
+      <label for="toughness">T</label>
+      <input type="number" name="toughness" id="toughness" min="1" value="1">
+      <label for="save">Sv</label>
+      <input type="number" name="save" id="save" min="2" max="6" value="4">
+      <!-- TODO: include control for optionally setting invuln save -->
+      <label for="health">W</label>
+      <input type="number" name="health" id="health" min="1" value="1">
+      <div class="flex-container">
+        <input type="submit" value="Create">
+        <button type="button" onclick='location.href="{{url_for("unit.modify", unit_id=unit_id)}}"'>Cancel</button>
+      </div>
+    </form>
+  </section>
 {% endblock content %}
+
+{% block script %}{% endblock script %}
