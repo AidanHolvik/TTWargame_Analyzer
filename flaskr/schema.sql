@@ -79,10 +79,12 @@ CREATE TABLE keywords (
 
 CREATE TABLE abilities (
   id INTEGER PRIMARY KEY,
-  effect TEXT UNIQUE NOT NULL
+  effect TEXT UNIQUE NOT NULL,
+  extra_values INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE unit_abilities (
+  id INTEGER PRIMARY KEY,
   unit_id INTEGER NOT NULL,
   ability_id INTEGER NOT NULL,
   name TEXT NOT NULL,   -- TODO: constrain name to be one of the abilities in the game
@@ -94,12 +96,11 @@ CREATE TABLE unit_abilities (
 
   FOREIGN KEY (ability_id)
   REFERENCES abilities (id)
-  ON DELETE CASCADE,
-
-  PRIMARY KEY (unit_id, ability_id)
+  ON DELETE CASCADE
 );
 
 CREATE TABLE model_abilities (
+  id INTEGER PRIMARY KEY,
   model_id INTEGER NOT NULL,
   ability_id INTEGER NOT NULL,
   name TEXT NOT NULL,   -- TODO: constrain name to be one of the abilities in the game
@@ -111,17 +112,16 @@ CREATE TABLE model_abilities (
 
   FOREIGN KEY (ability_id)
   REFERENCES abilities (id)
-  ON DELETE CASCADE,
-
-  PRIMARY KEY (model_id, ability_id)
+  ON DELETE CASCADE
 );
 
 CREATE TABLE weapon_abilities (
+  id INTEGER PRIMARY KEY,
   weapon_id INTEGER NOT NULL,
   ability_id INTEGER NOT NULL,
   name TEXT NOT NULL,   -- TODO: constrain name to be one of the abilities in the game
-  value INTEGER,   -- TODO: constrain value to >= 0
-  target_keyword TEXT,   -- TODO: constrain keyword to be one of the keywords in the game
+  value INTEGER DEFAULT NULL,   -- TODO: constrain value to >= 0
+  target_keyword TEXT DEFAULT NULL,   -- TODO: constrain keyword to be one of the keywords in the game
 
   FOREIGN KEY (weapon_id)
   REFERENCES weapons (id)
@@ -133,9 +133,7 @@ CREATE TABLE weapon_abilities (
 
   FOREIGN KEY (target_keyword)
   REFERENCES keywords (name)
-  ON DELETE CASCADE,
-
-  PRIMARY KEY (weapon_id, ability_id)
+  ON DELETE CASCADE
 );
 
 CREATE TABLE unit_keywords (

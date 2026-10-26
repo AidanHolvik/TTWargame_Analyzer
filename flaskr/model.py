@@ -9,9 +9,11 @@ from flask import (
     url_for,
     jsonify,
 )
+from flaskr import abilityUI
 from flaskr.db import get_db, get_model
 
 bp = Blueprint("model", __name__, url_prefix="/<int:unit_id>")
+bp.register_blueprint(abilityUI.bp)
 
 
 @bp.route("/create", methods=["GET", "POST"])

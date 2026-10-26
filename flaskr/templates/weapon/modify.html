@@ -28,7 +28,50 @@
     <input type="text" name="damage" id="damage" pattern="{{roll_pattern}}" value="{{weapon['damage']}}">
 
     
-    <!-- TODO: control for assigning abilities -->
+    <!-- Controls for managing abilities -->
+    <div id="abilities_frame">
+      Abilities
+      <div id="ability_creator">
+        <label for="new_ability_name">Ability Name</label>
+        <input type="text" name="new_ability_name" id="new_ability_name">
+        <!-- TODO: select element for effect -->
+        <select>
+          <option value="" disabled selected>Effect</option>
+          <hr>
+          <option value="1">test1</option>
+          <option value="2">test2</option>
+
+        </select>
+        <label for="new_ability_value">Value</label>
+        <input type="text" name="new_ability_value" id="new_ability_value">
+        <input type="text" name="new_ability_keyword" id="new_ability_keyword">
+        <!-- TODO: select element for keyword -->
+        <button type="button" id="add_ability_button">Add</button>
+        <!-- TODO: on button press, add ability to this weapon -->
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Ability</th>
+            <th>Value</th>
+            <th>Target Keyword</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ability in weapon['abilities'].values() %}
+            <tr id="abilities_{{ability['id']}}">
+              <td>{{ ability['name'] }}</td> 
+              <td>{{ ability['effect'] }}</td>
+              <td>
+                <a href="{{url_for('weapon.delete_ability', unit_id=unit_id, model_id=model_id, weapon_id=weapon['id'], weapon_ability_id=ability['id'])}}">Delete</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <!-- TODO: add controls to add new abilities -->
+    </div>
 
     <br>
     <a href="{{url_for('model.modify', unit_id=unit_id, model_id=model_id)}}">Back</a>
@@ -36,3 +79,7 @@
 
   </form>
 {% endblock content %}
+
+{% block script %}
+
+{% endblock script %}

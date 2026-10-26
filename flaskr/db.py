@@ -3,6 +3,7 @@ import click
 from flask import current_app, g
 from copy import deepcopy
 from enum import Enum
+from .util.abilities import ModelAbilityType, WeaponAbilityType
 
 # Code borrowed from https://flask.palletsprojects.com/en/stable/tutorial/database/
 
@@ -42,26 +43,10 @@ def init_db():
     for keyword in Keyword:
         db.execute("INSERT INTO keywords (id, name) VALUES (?, ?)", (keyword.value, str(keyword)))
     # Initialize abilities
-    db.execute("INSERT INTO abilities (effect) VALUES"
-               "('Feel No Pain'),"
-               "('AP on crit wound'),"
-               "('FNP on psychic'),"
-               "('FNP on mortal wounds'),"
-               "('-1 to wound on strong attacks'),"
-               "('ANTI-'),"
-               "('BLAST/CLEAVE'),"
-               "('CLOSE QUARTERS'),"
-               "('DEVASTATING WOUNDS'),"
-               "('INDIRECT FIRE'),"
-               "('LETHAL HITS'),"
-               "('MELTA'),"
-               "('PSYCHIC'),"
-               "('RAPID FIRE'),"
-               "('SUSTAINED HITS'),"
-               "('TORRENT'),"
-               "('TWIN-LINKED'),"
-               "('CONVERSION');")
-    db.commit()
+    for ability in ModelAbilityType:
+        db.execute("INSERT INTO abilities (id, effect) VALUES (?, ?)", (ability.value, str(ability)))
+    for ability in WeaponAbilityType:
+        db.execute("INSERT INTO abilities (id, effect) VALUES (?, ?)", (ability.value, str(ability)))
     
 
 
@@ -95,6 +80,7 @@ def get_unit(id: int):
         (id,),
     ).fetchall()
     cur.close()
+    unit["abilities"] = query_to_dict(get_unit_abilities(id), 'id')
     return unit
 
 
@@ -104,6 +90,7 @@ def get_model(id: int):
         "SELECT * FROM models WHERE id=?",
         (id,),
     ).fetchone()
+    model["abilities"] = query_to_dict(get_model_abilities(id), 'id')
     return model
 
 
@@ -113,6 +100,7 @@ def get_weapon(id: int):
         "SELECT * FROM weapons WHERE id=?",
         (id,),
     ).fetchone()
+    weapon["abilities"] = query_to_dict(get_weapon_abilities(id), 'id')
     return weapon
 
 
@@ -147,6 +135,41 @@ def get_unit_weapons(unit_id: int):
 
     return weapons
 
+# TODO
+def get_unit_abilities(unit_id: int):
+    db = get_db()
+    abilities = db.execute(
+        "SELECT id, ability_id, name, value"
+        " FROM unit_abilities"
+        " WHERE unit_id = ?",
+        (unit_id,),
+    ).fetchall()
+
+    return abilities
+
+# TODO
+def get_model_abilities(model_id: int):
+    db = get_db()
+    abilities = db.execute(
+        "SELECT id, ability_id, name, value"
+        " FROM model_abilities"
+        " WHERE model_id = ?",
+        (model_id,),
+    ).fetchall()
+
+    return abilities
+
+def get_weapon_abilities(weapon_id: int):
+    db = get_db()
+    abilities = db.execute(
+        "SELECT id, ability_id, name, value, target_keyword"
+        " FROM weapon_abilities"
+        " WHERE weapon_id = ?",
+        (weapon_id,),
+    ).fetchall()
+
+    return abilities
+
 
 def roll_pattern() -> str:
     return "^\\d+(?i:D\\d+)?(\\+\\d+)?$|^(?i:D\\d+)(\\+\\d+)?$"
@@ -157,6 +180,8 @@ def query_to_dict(record, key_column: str = "id") -> dict:
 
     result = {}
     if isinstance(record, dict):
+        # BUG: will currently always enter 'if' section due to current row_factory
+        # TODO: remove key column from record?
         result = record
     else:
         for row in record:
@@ -169,6 +194,14 @@ def get_keywords():
     db = get_db()
     keywords = db.execute("SELECT * FROM keywords").fetchall()
     return keywords
+
+def get_abilities():
+    db = get_db()
+    abilities = db.execute(
+        "SELECT * FROM abilities"
+    ).fetchall()
+
+    return abilities
 
 class Keyword(Enum):
     BATTLELINE = 1
@@ -255,3 +288,26 @@ class Keyword(Enum):
                 return "DAEMON"
             case _:
                 return "ERROR"
+
+    # Weapon abilities
+    ANTI = 1
+    BLAST = 2
+    CLEAVE = 3
+    CLOSE_QUARTERS = 4
+    DEVASTATING_WOUNDS = 5
+    INDIRECT_FIRE = 6
+    LETHAL_HITS = 7
+    MELTA = 8
+    PSYCHIC = 9
+    RAPID_FIRE = 10
+    SUSTAINED_HITS = 11
+    TORRENT = 12
+    TWIN_LINKED = 13
+    CONVERSION = 14
+
+    # Unit/Model abilities
+    FEEL_NO_PAIN = 15
+    AP_ON_CRIT_WOUND = 16
+    FNP_ON_PSYCHIC = 17
+    FNP_ON_MORTAL_WOUNDS = 18
+    RESIST_STRONG_ATTACKS = 19

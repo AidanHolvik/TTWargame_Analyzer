@@ -10,8 +10,10 @@ from flask import (
     jsonify,
 )
 from flaskr.db import get_db, get_unit, get_keywords
+from . import abilityUI
 
 bp = Blueprint("unit", __name__)
+bp.register_blueprint(abilityUI.bp)
 
 
 @bp.route("/", methods=["GET"])

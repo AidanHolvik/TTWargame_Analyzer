@@ -9,9 +9,12 @@ from flask import (
     url_for,
     jsonify,
 )
-from flaskr.db import get_db, get_weapon, roll_pattern
+from flaskr.db import get_db, get_weapon, roll_pattern, get_keywords, get_abilities
+from . import abilityUI
+from flaskr.util.abilities import WeaponAbilityKeyworded, WeaponAbilityValued, WeaponAbility
 
 bp = Blueprint("weapon", __name__, url_prefix="/<int:unit_id>/<int:model_id>")
+bp.register_blueprint(abilityUI.bp)
 
 
 @bp.route("/create", methods=["GET", "POST"])
@@ -54,6 +57,22 @@ def create(unit_id, model_id):
 @bp.route("/<int:weapon_id>", methods=["GET", "POST"])
 def modify(unit_id, model_id, weapon_id):
     db = get_db()
+    weapon = get_weapon(weapon_id)
+    abilities = {}
+
+    for key, ability in weapon["abilities"].items():
+        newAbility = {}
+        # newAbility["id"] = int(ability["id"])
+        newAbility['name'] = ability['name']
+        if ability['target_keyword']:
+            newAbility['effect'] = str(WeaponAbilityKeyworded(int(ability['ability_id']), int(ability['value']), ability['target_keyword']))
+        elif ability['value']:
+            newAbility['effect'] = str(WeaponAbilityValued(int(ability['ability_id']), int(ability['value'])))
+        else:
+            newAbility['effect'] = str(WeaponAbility(int(ability['ability_id'])))
+        abilities[key] = newAbility
+
+    weapon['abilities'] = abilities
 
     if request.method == "POST":
         # Modify the record for this weapon
@@ -71,6 +90,8 @@ def modify(unit_id, model_id, weapon_id):
                 weapon_id,
             ),
         )
+
+        # TODO: update the abilities for this weapon
         db.commit()
 
     weapon = get_weapon(weapon_id)
@@ -80,6 +101,8 @@ def modify(unit_id, model_id, weapon_id):
         model_id=model_id,
         weapon=weapon,
         roll_pattern=roll_pattern(),
+        keywords=get_keywords(),
+        abilities=get_abilities()
     )
 
 
@@ -87,8 +110,17 @@ def modify(unit_id, model_id, weapon_id):
 def delete(unit_id, model_id, weapon_id):
     db = get_db()
     
-    db.execute("DELETE FROM model_weapons WHERE weapon_id=?", (weapon_id,))
+    # db.execute("DELETE FROM model_weapons WHERE weapon_id=?", (weapon_id,))
     db.execute("DELETE FROM weapons WHERE id = ?", (weapon_id,))
     db.commit()
 
     return redirect(url_for("model.modify", unit_id=unit_id, model_id=model_id))
+
+@bp.route("/<int:weapon_id>/delete/<int:weapon_ability_id>", methods=["GET"])
+def delete_ability(unit_id, model_id, weapon_id, weapon_ability_id):
+    db = get_db()
+    
+    db.execute("DELETE FROM weapon_abilities WHERE id=?", (weapon_ability_id,))
+    db.commit()
+
+    return redirect(url_for("weapon.modify", unit_id=unit_id, model_id=model_id, weapon_id=weapon_id))

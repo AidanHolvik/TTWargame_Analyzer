@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Add Ability{% endblock title %}
+
+{% block content %}
+  <h2>Add Ability</h2>
+  <form method="post">
+    <label for="effect">Ability Effect</label>
+    <select name="effect" id="effect">
+      <!-- TODO: For each ability type, add an option here (depending on whether it's a unit/model or weapon) -->
+    </select>
+    <label for="name">Name</label>
+    <input type="text" id="name" name="name">
+    <br>
+    <label for="value">Value</label>
+    <input type="number" id="value" name="value" min="0" value="0">
+    <br>
+    <select id="keyword" name="keyword">
+      {% for keyword in keywords %}
+        <option value="{{ keyword.id }}">{{ keyword.name }}</option>
+      {% endfor %}
+    </select>
+    <br>
+    <a href="{{return_url}}">Cancel</a>
+    <input type="submit" value="Add Ability">
+  </form>
+{% endblock content %}
+
+{% block script %}
+{% endblock script %}
