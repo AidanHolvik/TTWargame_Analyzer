@@ -265,18 +265,23 @@ class WeaponAbilityKeyworded(WeaponAbilityValued):
         self,
         ability: WeaponAbilityType,
         value: int | str | tuple[int, int, int],
-        target_keyword: str,
+        target_keywords: str|list[str],
+        invert_keywords: bool = False,
         name: str = None,
     ):
         super().__init__(ability, value, name)
-        self.keyword = target_keyword
+        if isinstance(target_keywords, str):
+            self.keywords = [target_keywords]
+        else:
+            self.keywords = sorted(target_keywords)
+        self.invert_keywords = invert_keywords
 
     def __str__(self):
-        return f"{str(self.ab)}-{self.keyword} {self.value}"
+        return f"{str(self.ab)} {'Non-' if self.invert_keywords else ''}{'/'.join(self.keywords)} {self.value}"
 
     def __eq__(self, other):
         if isinstance(other, WeaponAbilityKeyworded):
-            return super().__eq__(other) and self.keyword == other.keyword
+            return super().__eq__(other) and self.invert_keywords == other.invert_keywords and self.keywords == other.keywords
         return False
 
 
